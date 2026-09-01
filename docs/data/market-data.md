@@ -28,6 +28,8 @@ NQ is contract-based. Implement `ContinuousContractResolver`; track product, act
 
 Start with minute bars; avoid every-tick storage. `market_bars` contains `id`, `symbol`, `timestamp`, `timeframe`, OHLC, `volume`, `provider`, and `ingested_at`, with uniqueness across `(symbol, timestamp, timeframe, provider)`. Build U.S. trading sessions from bars, including overnight open/high/low/close and regular-session OHLC. See [ARCHITECTURE.md](../ARCHITECTURE.md) for storage ownership.
 
+The 1-minute series is the canonical historical input. Once it is complete and validated, derive deterministic 1-hour, 4-hour, and daily candles from stored minute bars rather than requesting duplicate provider series. Weekly analysis should include an explicitly defined opening gap for each trading week, using point-in-time bars and preserving the relevant raw contract.
+
 ## Required session fields
 
 `MarketSession` includes session date, NQ OHLC, overnight OHLC, prior-day high/low/close, gap points/percent, overnight return/range, ATR(14), and optional regime ID. Detailed calculations are defined in [features.md](../ml/features.md).
@@ -35,6 +37,7 @@ Start with minute bars; avoid every-tick storage. `market_bars` contains `id`, `
 ## Ingestion jobs
 
 - Daily historical backfill.
+- Resumable weekly backfill batches for long historical ranges.
 - Latest minute bars.
 - Contract rollover check.
 - Session construction.
@@ -44,4 +47,3 @@ Free-tier development may run manually or by cron. Do not treat the free provide
 ## Point-in-time requirements
 
 Every bar has an availability/ingestion timestamp sufficient to determine whether it was known at prediction time. Training and backtests may use only data with `available_at <= T`; reject future timestamps and duplicate bars. Preserve the provider and contract used for each prediction.
-

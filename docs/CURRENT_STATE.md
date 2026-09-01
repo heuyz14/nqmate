@@ -22,6 +22,7 @@ Phase 1 — Historical Market Engine
 - Contract metadata lookup, bounded backfill command, and chart-ready bars/levels endpoints added.
 - One historical NQ session (`2026-08-28`) ingested from Massive into Supabase and verified through the API.
 - Contract rollover transition persistence added in migration `002_contract_rollovers.sql`; ingestion records raw-contract changes.
+- Backfill is rate-limited to Massive’s five requests per minute; the job reuses contracts until expiration and is safe to resume by date range.
 
 ## In Progress
 
@@ -29,9 +30,9 @@ Phase 1 historical market engine implementation, persistence, and ingestion inte
 
 ## Next
 
-1. Apply migration `002_contract_rollovers.sql` in Supabase
-2. Run the full 1–2 year historical minute-bar backfill within provider limits
-3. Validate session values and rollover dates against a trusted chart
+1. Resume the 2026 minute-bar backfill in manageable weekly date ranges
+2. Validate session values and rollover dates against a trusted chart
+3. Derive and validate 1-hour, 4-hour, daily, and weekly-opening-gap series from stored minute bars
 
 ## Important Decisions
 

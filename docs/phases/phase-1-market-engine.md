@@ -15,7 +15,8 @@ Ingest historical minute bars and produce correct NQ contract-aware sessions and
 - Implement `MassiveMarketDataProvider`, `ContinuousContractResolver`, market bar ingestion, deduplication, and rollover tracking.
 - Build session segmentation and `MarketSession` persistence.
 - Calculate PDH, PDL, PDC, ONH, ONL, midpoint, overnight return/range, opening gap, ATR(14), and initial technical features.
-- Backfill 1–2 years where available; expose `GET /market/nq/session/{date}` and chart-level data.
+- Backfill 1–2 years where available in resumable weekly batches; expose `GET /market/nq/session/{date}` and chart-level data.
+- Plan deterministic derived 1-hour, 4-hour, and daily candles from canonical minute bars, plus weekly opening-gap calculations.
 
 # Acceptance Criteria
 
@@ -32,4 +33,3 @@ News, macro, LLM bias, graph, ML, order flow without a suitable feed, and automa
 # Next Phase
 
 [Phase 2 — News pipeline](phase-2-news.md).
-
