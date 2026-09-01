@@ -1,13 +1,18 @@
 from datetime import date
+from functools import lru_cache
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 
 from nqmate_api.config import Settings
 from nqmate_api.health import check_neo4j, check_supabase, health_payload
-from nqmate_api.market.store import MarketBarStore
+from nqmate_api.market.repository import MarketRepository, SupabaseMarketRepository
 
 app = FastAPI(title="NQmate API", version="0.1.0")
-market_store = MarketBarStore()
+
+
+@lru_cache(maxsize=1)
+def get_market_repository() -> MarketRepository:
+    return SupabaseMarketRepository.from_settings(Settings())
 
 
 @app.get("/health", tags=["health"])
@@ -20,8 +25,8 @@ async def health() -> dict[str, object]:
 
 
 @app.get("/api/v1/market/nq/session/{session_date}", tags=["market"])
-async def get_nq_session(session_date: date) -> dict[str, object]:
-    session = market_store.get_session(session_date)
+async def get_nq_session(session_date: date, repository: MarketRepository = Depends(get_market_repository)) -> dict[str, object]:
+    session = repository.get_session(session_date)
     if session is None:
         raise HTTPException(status_code=404, detail="Market session not found")
     return {

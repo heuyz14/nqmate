@@ -31,5 +31,14 @@ class MarketBarStore:
     def save_session(self, session: MarketSession) -> None:
         self._sessions[session.session_date] = session
 
+    def upsert_bars(self, bars: Iterable[MarketBar]) -> int:
+        return self.add_bars(bars)
+
+    def upsert_contract(self, contract: MarketContract) -> None:
+        return None
+
+    def upsert_session(self, session: MarketSession) -> None:
+        self.save_session(session)
+
     def get_session(self, session_date: date) -> MarketSession | None:
         return self._sessions.get(session_date)

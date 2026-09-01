@@ -61,19 +61,23 @@ class MassiveProviderTests(unittest.IsolatedAsyncioTestCase):
 class MarketEndpointTests(unittest.TestCase):
     def test_session_endpoint_returns_session_contract_and_levels(self) -> None:
         from fastapi.testclient import TestClient
-        from nqmate_api.main import app, market_store
+        from nqmate_api.main import app, get_market_repository
         from nqmate_api.market.models import MarketSession
 
         session_date = date(2026, 9, 1)
         contract = MarketContract("NQ", "NQU6", "NQ_CONT", date(2026, 9, 18))
-        market_store.save_session(
-            MarketSession(
-                session_date, 100, 110, 90, 105, 98, 108, 96, 104,
-                109, 89, 99, 1, 0.01, 0.02, 12, 3, contract,
-            )
+        session = MarketSession(
+            session_date, 100, 110, 90, 105, 98, 108, 96, 104,
+            109, 89, 99, 1, 0.01, 0.02, 12, 3, contract,
         )
+        fake_repository = MarketBarStore()
+        fake_repository.save_session(session)
+        app.dependency_overrides[get_market_repository] = lambda: fake_repository
 
-        response = TestClient(app).get(f"/api/v1/market/nq/session/{session_date.isoformat()}")
+        try:
+            response = TestClient(app).get(f"/api/v1/market/nq/session/{session_date.isoformat()}")
+        finally:
+            app.dependency_overrides.clear()
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["overnight_high"], 108)
