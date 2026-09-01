@@ -7,7 +7,7 @@ from typing import Any, Protocol, Sequence
 from supabase import Client, create_client
 
 from nqmate_api.config import Settings
-from nqmate_api.market.models import MarketBar, MarketContract, MarketSession
+from nqmate_api.market.models import ContractRollover, MarketBar, MarketContract, MarketSession
 
 
 class MarketRepository(Protocol):
@@ -15,9 +15,13 @@ class MarketRepository(Protocol):
 
     def upsert_contract(self, contract: MarketContract) -> None: ...
 
+    def upsert_rollover(self, rollover: ContractRollover) -> None: ...
+
     def upsert_session(self, session: MarketSession) -> None: ...
 
     def get_session(self, session_date: date) -> MarketSession | None: ...
+
+    def get_bars(self, start: datetime, end: datetime, symbol: str | None = None) -> Sequence[MarketBar]: ...
 
 
 def _iso(value: datetime | date | None) -> str | None:
@@ -67,6 +71,15 @@ class SupabaseMarketRepository:
             "roll_date": _iso(contract.roll_date),
         }, on_conflict="product,raw_contract_symbol").execute()
 
+    def upsert_rollover(self, rollover: ContractRollover) -> None:
+        self.client.table("market_contract_rollovers").upsert({
+            "product": rollover.product,
+            "from_contract": rollover.from_contract,
+            "to_contract": rollover.to_contract,
+            "roll_date": _iso(rollover.roll_date),
+            "provider": rollover.provider,
+        }, on_conflict="product,from_contract,to_contract").execute()
+
     def upsert_session(self, session: MarketSession) -> None:
         self.upsert_contract(session.contract)
         contract = self.client.table("market_contracts").select("id").eq(
@@ -98,3 +111,20 @@ class SupabaseMarketRepository:
             contract_row["roll_date"] = date.fromisoformat(contract_row["roll_date"])
         row["contract"] = MarketContract(**contract_row)
         return MarketSession(**row)
+
+    def get_bars(self, start: datetime, end: datetime, symbol: str | None = None) -> Sequence[MarketBar]:
+        query = self.client.table("market_bars").select("*").gte(
+            "timestamp", _iso(start)
+        ).lt("timestamp", _iso(end)).order("timestamp")
+        if symbol:
+            query = query.eq("symbol", symbol)
+        response = query.execute()
+        return [MarketBar(
+            symbol=row["symbol"],
+            timestamp=datetime.fromisoformat(row["timestamp"].replace("Z", "+00:00")),
+            timeframe=row["timeframe"],
+            open=float(row["open"]), high=float(row["high"]), low=float(row["low"]), close=float(row["close"]),
+            volume=float(row["volume"]), provider=row["provider"],
+            ingested_at=datetime.fromisoformat(row["ingested_at"].replace("Z", "+00:00")),
+            available_at=datetime.fromisoformat(row["available_at"].replace("Z", "+00:00")),
+        ) for row in (response.data or [])]

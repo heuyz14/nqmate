@@ -57,6 +57,21 @@ class MassiveProviderTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(bars[0].provider, "massive")
         client.get.assert_awaited_once()
 
+    async def test_provider_maps_contract_metadata(self) -> None:
+        response = httpx.Response(
+            200,
+            json={"results": [{"ticker": "NQU6", "last_trade_date": "2026-09-18"}]},
+            request=httpx.Request("GET", "https://example.test"),
+        )
+        client = AsyncMock(spec=httpx.AsyncClient)
+        client.get.return_value = response
+        provider = MassiveMarketDataProvider("test-key", base_url="https://example.test", client=client)
+
+        contract = await provider.get_contract("NQ", date(2026, 9, 1))
+
+        self.assertEqual(contract.raw_contract_symbol, "NQU6")
+        self.assertEqual(contract.expiration, date(2026, 9, 18))
+
 
 class MarketEndpointTests(unittest.TestCase):
     def test_session_endpoint_returns_session_contract_and_levels(self) -> None:

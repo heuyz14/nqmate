@@ -8,6 +8,7 @@ from nqmate_api.config import Settings
 from nqmate_api.market.providers import MassiveMarketDataProvider
 from nqmate_api.market.repository import SupabaseMarketRepository
 from nqmate_api.market.service import ingest_session
+from nqmate_api.market.models import ContractRollover, MarketContract
 
 
 def trading_dates(start: date, end: date) -> list[date]:
@@ -27,9 +28,19 @@ async def run(start: date, end: date) -> int:
     provider = MassiveMarketDataProvider(settings.massive_api_key)
     repository = SupabaseMarketRepository.from_settings(settings)
     processed = 0
+    previous_contract: MarketContract | None = None
     for session_date in trading_dates(start, end):
         contract = await provider.get_contract("NQ", session_date)
+        if previous_contract and previous_contract.raw_contract_symbol != contract.raw_contract_symbol:
+            repository.upsert_rollover(ContractRollover(
+                product=contract.product,
+                from_contract=previous_contract.raw_contract_symbol,
+                to_contract=contract.raw_contract_symbol,
+                roll_date=session_date,
+                provider="massive",
+            ))
         await ingest_session(provider, repository, session_date, contract)
+        previous_contract = contract
         processed += 1
         print(f"ingested {session_date.isoformat()} {contract.raw_contract_symbol}")
     return processed

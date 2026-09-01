@@ -6,7 +6,7 @@ Always read this file at session start. It is the concise handoff for what exist
 
 ## Current Phase
 
-Phase 1 — Historical Market Engine (ready to start)
+Phase 1 — Historical Market Engine
 
 ## Completed
 
@@ -21,6 +21,7 @@ Phase 1 — Historical Market Engine (ready to start)
 - Session reads now use `SupabaseMarketRepository`; empty dates return HTTP 404 rather than an infrastructure error.
 - Contract metadata lookup, bounded backfill command, and chart-ready bars/levels endpoints added.
 - One historical NQ session (`2026-08-28`) ingested from Massive into Supabase and verified through the API.
+- Contract rollover transition persistence added in migration `002_contract_rollovers.sql`; ingestion records raw-contract changes.
 
 ## In Progress
 
@@ -28,9 +29,9 @@ Phase 1 historical market engine implementation, persistence, and ingestion inte
 
 ## Next
 
-1. Run the full 1–2 year historical minute-bar backfill within provider limits
-2. Validate session values against a trusted chart
-3. Add explicit contract rollover schedule persistence and reconciliation
+1. Apply migration `002_contract_rollovers.sql` in Supabase
+2. Run the full 1–2 year historical minute-bar backfill within provider limits
+3. Validate session values and rollover dates against a trusted chart
 
 ## Important Decisions
 

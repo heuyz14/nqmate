@@ -2,7 +2,7 @@ import unittest
 from datetime import date, datetime, timezone
 from unittest.mock import MagicMock
 
-from nqmate_api.market.models import MarketBar, MarketContract, MarketSession
+from nqmate_api.market.models import ContractRollover, MarketBar, MarketContract, MarketSession
 from nqmate_api.market.repository import SupabaseMarketRepository
 
 
@@ -34,3 +34,13 @@ class MarketRepositoryTests(unittest.TestCase):
         result = SupabaseMarketRepository(client).get_session(date(2026, 9, 1))
 
         self.assertIsNone(result)
+
+    def test_upsert_rollover_uses_transition_identity(self) -> None:
+        client = MagicMock()
+        rollover = ContractRollover("NQ", "NQU6", "NQZ6", date(2026, 9, 21), "massive")
+
+        SupabaseMarketRepository(client).upsert_rollover(rollover)
+
+        call = client.table.return_value.upsert.call_args
+        self.assertEqual(call.kwargs["on_conflict"], "product,from_contract,to_contract")
+        self.assertEqual(call.args[0]["roll_date"], "2026-09-21")

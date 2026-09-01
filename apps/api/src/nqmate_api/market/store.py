@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime, timezone
 from typing import Iterable
 
-from nqmate_api.market.models import MarketBar, MarketContract, MarketSession
+from nqmate_api.market.models import ContractRollover, MarketBar, MarketContract, MarketSession
 
 
 class MarketBarStore:
@@ -12,6 +12,7 @@ class MarketBarStore:
     def __init__(self) -> None:
         self._bars: dict[tuple[str, datetime, str, str], MarketBar] = {}
         self._sessions: dict[date, MarketSession] = {}
+        self._rollovers: dict[tuple[str, str, str], ContractRollover] = {}
 
     def add_bars(self, bars: Iterable[MarketBar]) -> int:
         added = 0
@@ -28,6 +29,9 @@ class MarketBarStore:
             key=lambda bar: bar.timestamp,
         )
 
+    def get_bars(self, start: datetime, end: datetime, symbol: str | None = None) -> list[MarketBar]:
+        return self.bars_between(start, end, symbol)
+
     def save_session(self, session: MarketSession) -> None:
         self._sessions[session.session_date] = session
 
@@ -36,6 +40,9 @@ class MarketBarStore:
 
     def upsert_contract(self, contract: MarketContract) -> None:
         return None
+
+    def upsert_rollover(self, rollover: ContractRollover) -> None:
+        self._rollovers[(rollover.product, rollover.from_contract, rollover.to_contract)] = rollover
 
     def upsert_session(self, session: MarketSession) -> None:
         self.save_session(session)

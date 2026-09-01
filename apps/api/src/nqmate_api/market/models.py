@@ -28,6 +28,15 @@ class MarketContract:
 
 
 @dataclass(frozen=True)
+class ContractRollover:
+    product: str
+    from_contract: str
+    to_contract: str
+    roll_date: date
+    provider: str
+
+
+@dataclass(frozen=True)
 class MarketSession:
     session_date: date
     nq_open: float
