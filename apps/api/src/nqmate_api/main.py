@@ -7,6 +7,7 @@ from nqmate_api.config import Settings
 from nqmate_api.health import check_neo4j, check_supabase, health_payload
 from nqmate_api.market.repository import MarketRepository, SupabaseMarketRepository
 from nqmate_api.market.calculations import aggregate_bars
+from nqmate_api.market.calculations import weekly_opening_gaps
 
 app = FastAPI(title="NQmate API", version="0.1.0")
 
@@ -103,4 +104,33 @@ async def get_nq_levels(
         "onh": session.overnight_high,
         "onl": session.overnight_low,
         "overnight_midpoint": (session.overnight_high + session.overnight_low) / 2,
+    }
+
+
+@app.get("/api/v1/market/nq/weekly-gaps", tags=["market"])
+async def get_nq_weekly_gaps(
+    start: date,
+    end: date,
+    repository: MarketRepository = Depends(get_market_repository),
+) -> dict[str, object]:
+    if end < start:
+        raise HTTPException(status_code=422, detail="end must be on or after start")
+    sessions = []
+    current = start
+    while current <= end:
+        session = repository.get_session(current)
+        if session is not None:
+            sessions.append(session)
+        current += timedelta(days=1)
+    gaps = weekly_opening_gaps(sessions)
+    return {
+        "start": start.isoformat(),
+        "end": end.isoformat(),
+        "gaps": [
+            {"week_start": gap.week_start.isoformat(), "session_date": gap.session_date.isoformat(),
+             "opening_price": gap.opening_price, "prior_close": gap.prior_close,
+             "gap_points": gap.gap_points, "gap_pct": gap.gap_pct,
+             "contract": gap.contract.raw_contract_symbol}
+            for gap in gaps
+        ],
     }

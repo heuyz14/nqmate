@@ -6,7 +6,7 @@ Always read this file at session start. It is the concise handoff for what exist
 
 ## Current Phase
 
-Phase 1 — Historical Market Engine
+Phase 1 — Historical Market Engine (implementation complete; validation pending)
 
 ## Completed
 
@@ -24,6 +24,7 @@ Phase 1 — Historical Market Engine
 - Contract rollover transition persistence added in migration `002_contract_rollovers.sql`; ingestion records raw-contract changes.
 - Backfill is rate-limited to Massive’s five requests per minute; the job reuses contracts until expiration and is safe to resume by date range.
 - Phase 1 derived market slice added: `/market/nq/bars` supports `1h`, `4h`, and `1d` deterministic aggregation from stored minute bars; weekly opening-gap calculation is available in the market calculation layer.
+- Weekly opening gaps are available through `/api/v1/market/nq/weekly-gaps`.
 
 ## In Progress
 
@@ -32,8 +33,7 @@ Phase 1 historical market engine implementation, persistence, and ingestion inte
 ## Next
 
 1. Validate session values, derived timeframes, and rollover dates against a trusted chart
-2. Add API retrieval for weekly opening-gap series if needed by the dashboard
-3. Continue remaining Phase 1 validation and prepare the Phase 2 handoff
+2. Prepare the Phase 2 handoff after validation
 
 ## Important Decisions
 

@@ -8,7 +8,7 @@ Base path: `/api/v1`.
 
 | Area | Endpoints |
 |---|---|
-| Market | `GET /market/nq/session/current`, `/market/nq/bars`, `/market/nq/levels`, `/market/nq/features`, and `/market/nq/session/{date}` |
+| Market | `GET /market/nq/session/current`, `/market/nq/bars`, `/market/nq/levels`, `/market/nq/weekly-gaps`, `/market/nq/features`, and `/market/nq/session/{date}` |
 | News | `GET /news`, `/news/high-impact`, `/news/{id}`; `POST /news/refresh` |
 | Macro | `GET /macro/calendar`, `/macro/upcoming`, `/macro/events/{id}` |
 | Bias | `GET /bias/current`, `/bias/history`, `/bias/{id}`; `POST /bias/generate` |
@@ -22,4 +22,3 @@ Base path: `/api/v1`.
 ## Contracts and rules
 
 Use Pydantic validation and versioned response schemas. The Phase 1 session endpoint must return OHLC, ONH, ONL, PDH, PDL, overnight return/range, ATR, and gap. Bias responses must retain evidence, counter-evidence, invalidation, catalyst risk, model, feature, and prompt versions. ML training endpoints are protected and unavailable to the public frontend.
-

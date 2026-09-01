@@ -97,3 +97,21 @@ class MarketEndpointTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["overnight_high"], 108)
         self.assertEqual(response.json()["contract"]["raw_contract_symbol"], "NQU6")
+
+    def test_weekly_gap_endpoint_returns_monday_gap(self) -> None:
+        from nqmate_api.market.models import MarketSession
+        from nqmate_api.main import app, get_market_repository
+        from fastapi.testclient import TestClient
+
+        contract = MarketContract("NQ", "NQU6", "NQ_CONT", date(2026, 9, 18))
+        store = MarketBarStore()
+        store.save_session(MarketSession(date(2026, 8, 28), 100, 110, 90, 105, 0, 0, 0, 0, None, None, None, None, None, None, 0, None, contract))
+        store.save_session(MarketSession(date(2026, 8, 31), 110, 115, 100, 112, 0, 0, 0, 0, None, None, 105, None, None, None, 0, None, contract))
+        app.dependency_overrides[get_market_repository] = lambda: store
+        try:
+            response = TestClient(app).get("/api/v1/market/nq/weekly-gaps?start=2026-08-28&end=2026-08-31")
+        finally:
+            app.dependency_overrides.clear()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["gaps"][0]["gap_points"], 5)
