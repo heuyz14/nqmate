@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, time, timedelta, timezone
 from functools import lru_cache
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -54,4 +54,48 @@ async def get_nq_session(session_date: date, repository: MarketRepository = Depe
             "expiration": session.contract.expiration.isoformat() if session.contract.expiration else None,
             "roll_date": session.contract.roll_date.isoformat() if session.contract.roll_date else None,
         },
+    }
+
+
+@app.get("/api/v1/market/nq/bars", tags=["market"])
+async def get_nq_bars(
+    start: date,
+    end: date,
+    repository: MarketRepository = Depends(get_market_repository),
+) -> dict[str, object]:
+    if end <= start:
+        raise HTTPException(status_code=422, detail="end must be after start")
+    bars = repository.get_bars(
+        datetime.combine(start, time.min, timezone.utc),
+        datetime.combine(end + timedelta(days=1), time.min, timezone.utc),
+    )
+    return {
+        "start": start.isoformat(),
+        "end": end.isoformat(),
+        "timeframe": "1min",
+        "bars": [
+            {"timestamp": bar.timestamp.isoformat(), "open": bar.open, "high": bar.high,
+             "low": bar.low, "close": bar.close, "volume": bar.volume,
+             "symbol": bar.symbol, "provider": bar.provider}
+            for bar in bars
+        ],
+    }
+
+
+@app.get("/api/v1/market/nq/levels", tags=["market"])
+async def get_nq_levels(
+    session_date: date,
+    repository: MarketRepository = Depends(get_market_repository),
+) -> dict[str, object]:
+    session = repository.get_session(session_date)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Market session not found")
+    return {
+        "session_date": session_date.isoformat(),
+        "pdh": session.prior_day_high,
+        "pdl": session.prior_day_low,
+        "pdc": session.prior_day_close,
+        "onh": session.overnight_high,
+        "onl": session.overnight_low,
+        "overnight_midpoint": (session.overnight_high + session.overnight_low) / 2,
     }

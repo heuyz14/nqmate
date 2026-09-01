@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Any, Protocol, Sequence
 
 import httpx
@@ -50,7 +50,9 @@ class MassiveMarketDataProvider:
                 params={
                     "resolution": timeframe,
                     "window_start.gte": start.isoformat(),
-                    "window_start.lte": end.isoformat(),
+                    # The API's date filter is a candle-start filter. Include the
+                    # full end date so the regular session is not truncated at 00:00 UTC.
+                    "window_start.lt": (end + timedelta(days=1)).isoformat(),
                     "sort": "window_start.asc",
                     "limit": 50000,
                     "apiKey": self.api_key,
@@ -84,7 +86,36 @@ class MassiveMarketDataProvider:
                 await client.aclose()
 
     async def get_contract(self, product: str, as_of: date) -> MarketContract:
-        raise NotImplementedError("Contract resolution is handled by ContinuousContractResolver")
+        close_client = self.client is None
+        client = self.client or httpx.AsyncClient()
+        try:
+            response = await client.get(
+                f"{self.base_url}/futures/v1/contracts",
+                params={
+                    "product_code": product,
+                    "date": as_of.isoformat(),
+                    "active": "true",
+                    "type": "single",
+                    "limit": 1000,
+                    "apiKey": self.api_key,
+                },
+                timeout=30,
+            )
+            response.raise_for_status()
+            rows = response.json().get("results", [])
+            if not rows:
+                raise LookupError(f"No active {product} contract for {as_of}")
+            row = sorted(rows, key=lambda item: item.get("last_trade_date") or "9999-12-31")[0]
+            expiration = date.fromisoformat(row["last_trade_date"]) if row.get("last_trade_date") else None
+            return MarketContract(
+                product=product,
+                raw_contract_symbol=row["ticker"],
+                continuous_symbol=f"{product}_CONT",
+                expiration=expiration,
+            )
+        finally:
+            if close_client:
+                await client.aclose()
 
     async def get_market_status(self) -> str:
         return "unknown"

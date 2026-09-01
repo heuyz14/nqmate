@@ -19,6 +19,8 @@ Phase 1 — Historical Market Engine (ready to start)
 - Phase 1 market domain slice: `MarketBar`, `MarketContract`, `MarketSession`, deterministic session calculations, ATR(14), contract selection, Massive response mapping, deduplication, and session API contract.
 - Phase 1 persistence slice: Supabase migration and server-side repository payloads for contracts, minute bars, and sessions.
 - Session reads now use `SupabaseMarketRepository`; empty dates return HTTP 404 rather than an infrastructure error.
+- Contract metadata lookup, bounded backfill command, and chart-ready bars/levels endpoints added.
+- One historical NQ session (`2026-08-28`) ingested from Massive into Supabase and verified through the API.
 
 ## In Progress
 
@@ -26,11 +28,9 @@ Phase 1 historical market engine implementation, persistence, and ingestion inte
 
 ## Next
 
-1. Add a runnable historical-ingestion command using `SupabaseMarketRepository`
-2. Add NQ contract metadata retrieval and rollover schedule handling
-3. Run historical minute-bar ingestion/backfill
-4. Validate session values against a trusted chart
-5. Add chart-ready bar and level response data
+1. Run the full 1–2 year historical minute-bar backfill within provider limits
+2. Validate session values against a trusted chart
+3. Add explicit contract rollover schedule persistence and reconciliation
 
 ## Important Decisions
 
