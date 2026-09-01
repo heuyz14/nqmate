@@ -36,10 +36,13 @@ class HealthPayloadTests(unittest.TestCase):
 
 class SettingsTests(unittest.TestCase):
     def test_settings_loads_backend_env_file_from_any_working_directory(self) -> None:
+        from pathlib import Path
         from nqmate_api.config import Settings
 
         settings = Settings()
-        self.assertTrue(settings.supabase_url)
+        env_file = Path(settings.model_config["env_file"])
+        self.assertEqual(env_file.name, ".env")
+        self.assertEqual(env_file.parent.name, "api")
         self.assertTrue(settings.neo4j_uri)
 
 

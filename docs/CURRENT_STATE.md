@@ -17,18 +17,20 @@ Phase 1 — Historical Market Engine (ready to start)
 - Git `origin` configured for `git@github.com:heuyz14/nqmate.git`.
 - Hosted Supabase and Neo4j AuraDB connectivity verified through the API health endpoint.
 - Phase 1 market domain slice: `MarketBar`, `MarketContract`, `MarketSession`, deterministic session calculations, ATR(14), contract selection, Massive response mapping, deduplication, and session API contract.
+- Phase 1 persistence slice: Supabase migration and server-side repository payloads for contracts, minute bars, and sessions.
 
 ## In Progress
 
-Phase 1 historical market engine implementation.
+Phase 1 historical market engine implementation and persistence integration.
 
 ## Next
 
-1. Add durable market-bar/session persistence in Supabase/PostgreSQL
-2. Add NQ contract metadata retrieval and rollover schedule handling
-3. Run historical minute-bar ingestion/backfill
-4. Validate session values against a trusted chart
-5. Add chart-ready bar and level response data
+1. Apply `apps/api/migrations/001_market_engine.sql` in Supabase
+2. Wire runtime ingestion and session reads to `SupabaseMarketRepository`
+3. Add NQ contract metadata retrieval and rollover schedule handling
+4. Run historical minute-bar ingestion/backfill
+5. Validate session values against a trusted chart
+6. Add chart-ready bar and level response data
 
 ## Important Decisions
 
