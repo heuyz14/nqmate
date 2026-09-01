@@ -56,10 +56,11 @@ class SupabaseMarketRepository:
             "ingested_at": _iso(bar.ingested_at),
             "available_at": _iso(bar.available_at),
         } for bar in bars]
-        self.client.table("market_bars").upsert(
-            payload,
-            on_conflict="symbol,timestamp,timeframe,provider",
-        ).execute()
+        for offset in range(0, len(payload), 500):
+            self.client.table("market_bars").upsert(
+                payload[offset:offset + 500],
+                on_conflict="symbol,timestamp,timeframe,provider",
+            ).execute()
         return len(payload)
 
     def upsert_contract(self, contract: MarketContract) -> None:

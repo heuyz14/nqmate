@@ -21,6 +21,14 @@ class MarketRepositoryTests(unittest.TestCase):
             "symbol,timestamp,timeframe,provider",
         )
 
+    def test_upsert_bars_batches_large_payloads(self) -> None:
+        client = MagicMock()
+        timestamp = datetime(2026, 9, 1, tzinfo=timezone.utc)
+        item = MarketBar("NQU6", timestamp, "1min", 100, 102, 99, 101, 10, "massive", timestamp, timestamp)
+
+        self.assertEqual(SupabaseMarketRepository(client).upsert_bars([item] * 501), 501)
+        self.assertEqual(client.table.return_value.upsert.call_count, 2)
+
     def test_upsert_empty_bars_does_not_call_database(self) -> None:
         client = MagicMock()
 
