@@ -30,7 +30,10 @@ async def run(start: date, end: date) -> int:
     processed = 0
     previous_contract: MarketContract | None = None
     for session_date in trading_dates(start, end):
-        contract = await provider.get_contract("NQ", session_date)
+        if previous_contract is None or previous_contract.expiration is None or session_date > previous_contract.expiration:
+            contract = await provider.get_contract("NQ", session_date)
+        else:
+            contract = previous_contract
         if previous_contract and previous_contract.raw_contract_symbol != contract.raw_contract_symbol:
             repository.upsert_rollover(ContractRollover(
                 product=contract.product,
