@@ -38,6 +38,11 @@ def true_range(current: MarketBar, previous_close: Optional[float]) -> float:
     return max(current.high - current.low, abs(current.high - previous_close), abs(current.low - previous_close))
 
 
+def has_complete_session_bars(bars: Iterable[MarketBar], session_date: date) -> bool:
+    overnight, regular = _bars_for_date(bars, session_date)
+    return bool(overnight and regular)
+
+
 def atr(bars: Sequence[MarketBar], period: int = 14) -> Optional[float]:
     if len(bars) < period:
         return None

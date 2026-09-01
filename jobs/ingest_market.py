@@ -39,7 +39,10 @@ async def run(start: date, end: date) -> int:
                 roll_date=session_date,
                 provider="massive",
             ))
-        await ingest_session(provider, repository, session_date, contract)
+        session = await ingest_session(provider, repository, session_date, contract)
+        if session is None:
+            print(f"skipped {session_date.isoformat()} (no bars)")
+            continue
         previous_contract = contract
         processed += 1
         print(f"ingested {session_date.isoformat()} {contract.raw_contract_symbol}")

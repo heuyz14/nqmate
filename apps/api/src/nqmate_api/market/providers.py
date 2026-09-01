@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 from datetime import date, datetime, timedelta, timezone
+from time import monotonic
 from typing import Any, Protocol, Sequence
 
 import httpx
@@ -32,12 +34,28 @@ def _timestamp(value: int | float | str) -> datetime:
 class MassiveMarketDataProvider:
     """Massive Futures REST adapter; response values are validated into MarketBar."""
 
-    def __init__(self, api_key: str, base_url: str = "https://api.massive.com", client: httpx.AsyncClient | None = None) -> None:
+    def __init__(self, api_key: str, base_url: str = "https://api.massive.com", client: httpx.AsyncClient | None = None, request_interval_seconds: float = 12.0) -> None:
         if not api_key:
             raise ValueError("Massive API key is required")
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
         self.client = client
+        self.request_interval_seconds = request_interval_seconds
+        self._last_request_at = 0.0
+
+    async def _get(self, client: httpx.AsyncClient, url: str, **kwargs: Any) -> httpx.Response:
+        elapsed = monotonic() - self._last_request_at
+        if elapsed < self.request_interval_seconds:
+            await asyncio.sleep(self.request_interval_seconds - elapsed)
+        for attempt in range(4):
+            response = await client.get(url, **kwargs)
+            self._last_request_at = monotonic()
+            if response.status_code != 429 or attempt == 3:
+                return response
+            retry_after = response.headers.get("Retry-After")
+            delay = float(retry_after) if retry_after and retry_after.replace(".", "", 1).isdigit() else 12.0 * (attempt + 1)
+            await asyncio.sleep(min(delay, 60.0))
+        raise RuntimeError("Massive request retry exhausted")
 
     async def get_bars(self, ticker: str, start: date, end: date, timeframe: str = "1min") -> Sequence[MarketBar]:
         if timeframe != "1min":
@@ -45,7 +63,7 @@ class MassiveMarketDataProvider:
         close_client = self.client is None
         client = self.client or httpx.AsyncClient()
         try:
-            response = await client.get(
+            response = await self._get(client,
                 f"{self.base_url}/futures/v1/aggs/{ticker}",
                 params={
                     "resolution": timeframe,
@@ -89,7 +107,7 @@ class MassiveMarketDataProvider:
         close_client = self.client is None
         client = self.client or httpx.AsyncClient()
         try:
-            response = await client.get(
+            response = await self._get(client,
                 f"{self.base_url}/futures/v1/contracts",
                 params={
                     "product_code": product,

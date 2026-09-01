@@ -1,7 +1,7 @@
 import unittest
 from datetime import date, datetime, timedelta, timezone
 
-from nqmate_api.market.calculations import atr, build_market_session
+from nqmate_api.market.calculations import atr, build_market_session, has_complete_session_bars
 from nqmate_api.market.models import MarketBar, MarketContract, MarketSession
 
 
@@ -22,6 +22,11 @@ def bar(timestamp: datetime, value: float, provider: str = "test") -> MarketBar:
 
 
 class MarketCalculationTests(unittest.TestCase):
+    def test_holiday_with_prior_day_bars_is_not_a_complete_session(self) -> None:
+        bars = [bar(datetime(2025, 12, 31, 15, 0, tzinfo=timezone.utc), 100)]
+
+        self.assertFalse(has_complete_session_bars(bars, date(2026, 1, 1)))
+
     def test_session_calculates_overnight_levels_and_gap(self) -> None:
         session_date = date(2026, 9, 1)
         bars = [
