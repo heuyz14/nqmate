@@ -1,7 +1,7 @@
 import unittest
 from datetime import date, datetime, timedelta, timezone
 
-from nqmate_api.market.calculations import atr, build_market_session, has_complete_session_bars
+from nqmate_api.market.calculations import aggregate_bars, atr, build_market_session, has_complete_session_bars
 from nqmate_api.market.models import MarketBar, MarketContract, MarketSession
 
 
@@ -22,6 +22,20 @@ def bar(timestamp: datetime, value: float, provider: str = "test") -> MarketBar:
 
 
 class MarketCalculationTests(unittest.TestCase):
+    def test_aggregate_bars_preserves_ohlcv_and_point_in_time_availability(self) -> None:
+        first = bar(datetime(2026, 9, 1, 13, 30, tzinfo=timezone.utc), 100)
+        second = bar(datetime(2026, 9, 1, 13, 31, tzinfo=timezone.utc), 105)
+
+        result = aggregate_bars([second, first], "1h")
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual((result[0].open, result[0].high, result[0].low, result[0].close), (100, 107, 99, 106))
+        self.assertEqual(result[0].available_at, second.available_at)
+
+    def test_aggregate_rejects_unknown_timeframe(self) -> None:
+        with self.assertRaises(ValueError):
+            aggregate_bars([], "15m")
+
     def test_holiday_with_prior_day_bars_is_not_a_complete_session(self) -> None:
         bars = [bar(datetime(2025, 12, 31, 15, 0, tzinfo=timezone.utc), 100)]
 

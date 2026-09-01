@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from statistics import mean
 from typing import Iterable, Optional, Sequence
 from zoneinfo import ZoneInfo
@@ -11,6 +11,7 @@ EASTERN = ZoneInfo("America/New_York")
 OVERNIGHT_START = time(18, 0)
 REGULAR_START = time(9, 30)
 REGULAR_END = time(16, 0)
+DERIVED_TIMEFRAMES = {"1h": timedelta(hours=1), "4h": timedelta(hours=4), "1d": timedelta(days=1)}
 
 
 def _local_timestamp(bar: MarketBar) -> datetime:
@@ -41,6 +42,31 @@ def true_range(current: MarketBar, previous_close: Optional[float]) -> float:
 def has_complete_session_bars(bars: Iterable[MarketBar], session_date: date) -> bool:
     overnight, regular = _bars_for_date(bars, session_date)
     return bool(overnight and regular)
+
+
+def aggregate_bars(bars: Iterable[MarketBar], timeframe: str) -> list[MarketBar]:
+    """Aggregate canonical minute bars into deterministic UTC time buckets."""
+    if timeframe not in DERIVED_TIMEFRAMES:
+        raise ValueError(f"Unsupported derived timeframe: {timeframe}")
+    interval = DERIVED_TIMEFRAMES[timeframe]
+    epoch = datetime(1970, 1, 1, tzinfo=timezone.utc)
+    groups: dict[tuple[str, str, datetime], list[MarketBar]] = {}
+    for bar in bars:
+        timestamp = bar.timestamp.astimezone(timezone.utc)
+        bucket = epoch + ((timestamp - epoch) // interval) * interval
+        groups.setdefault((bar.symbol, bar.provider, bucket), []).append(bar)
+    result: list[MarketBar] = []
+    for (symbol, provider, bucket), items in sorted(groups.items(), key=lambda item: item[0][2]):
+        ordered = sorted(items, key=lambda item: item.timestamp)
+        result.append(MarketBar(
+            symbol=symbol, timestamp=bucket, timeframe=timeframe,
+            open=ordered[0].open, high=max(item.high for item in ordered),
+            low=min(item.low for item in ordered), close=ordered[-1].close,
+            volume=sum(item.volume for item in ordered), provider=provider,
+            ingested_at=max(item.ingested_at for item in ordered),
+            available_at=max(item.available_at for item in ordered),
+        ))
+    return result
 
 
 def atr(bars: Sequence[MarketBar], period: int = 14) -> Optional[float]:

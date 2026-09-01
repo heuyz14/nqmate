@@ -6,6 +6,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from nqmate_api.config import Settings
 from nqmate_api.health import check_neo4j, check_supabase, health_payload
 from nqmate_api.market.repository import MarketRepository, SupabaseMarketRepository
+from nqmate_api.market.calculations import aggregate_bars
 
 app = FastAPI(title="NQmate API", version="0.1.0")
 
@@ -61,23 +62,27 @@ async def get_nq_session(session_date: date, repository: MarketRepository = Depe
 async def get_nq_bars(
     start: date,
     end: date,
+    timeframe: str = "1min",
     repository: MarketRepository = Depends(get_market_repository),
 ) -> dict[str, object]:
     if end <= start:
         raise HTTPException(status_code=422, detail="end must be after start")
+    if timeframe not in {"1min", "1h", "4h", "1d"}:
+        raise HTTPException(status_code=422, detail="timeframe must be 1min, 1h, 4h, or 1d")
     bars = repository.get_bars(
         datetime.combine(start, time.min, timezone.utc),
         datetime.combine(end + timedelta(days=1), time.min, timezone.utc),
     )
+    output_bars = bars if timeframe == "1min" else aggregate_bars(bars, timeframe)
     return {
         "start": start.isoformat(),
         "end": end.isoformat(),
-        "timeframe": "1min",
+        "timeframe": timeframe,
         "bars": [
             {"timestamp": bar.timestamp.isoformat(), "open": bar.open, "high": bar.high,
              "low": bar.low, "close": bar.close, "volume": bar.volume,
              "symbol": bar.symbol, "provider": bar.provider}
-            for bar in bars
+            for bar in output_bars
         ],
     }
 
