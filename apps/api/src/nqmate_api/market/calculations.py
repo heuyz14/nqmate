@@ -5,7 +5,7 @@ from statistics import mean
 from typing import Iterable, Optional, Sequence
 from zoneinfo import ZoneInfo
 
-from nqmate_api.market.models import MarketBar, MarketContract, MarketSession
+from nqmate_api.market.models import MarketBar, MarketContract, MarketSession, WeeklyOpeningGap
 
 EASTERN = ZoneInfo("America/New_York")
 OVERNIGHT_START = time(18, 0)
@@ -65,6 +65,27 @@ def aggregate_bars(bars: Iterable[MarketBar], timeframe: str) -> list[MarketBar]
             volume=sum(item.volume for item in ordered), provider=provider,
             ingested_at=max(item.ingested_at for item in ordered),
             available_at=max(item.available_at for item in ordered),
+        ))
+    return result
+
+
+def weekly_opening_gaps(sessions: Sequence[MarketSession]) -> list[WeeklyOpeningGap]:
+    """Calculate Monday opening gaps from chronologically adjacent sessions."""
+    ordered = sorted(sessions, key=lambda item: item.session_date)
+    result: list[WeeklyOpeningGap] = []
+    for index, session in enumerate(ordered):
+        if session.session_date.weekday() != 0 or index == 0:
+            continue
+        prior = ordered[index - 1]
+        gap_points = session.nq_open - prior.nq_close
+        result.append(WeeklyOpeningGap(
+            week_start=session.session_date,
+            session_date=session.session_date,
+            opening_price=session.nq_open,
+            prior_close=prior.nq_close,
+            gap_points=gap_points,
+            gap_pct=gap_points / prior.nq_close if prior.nq_close else None,
+            contract=session.contract,
         ))
     return result
 

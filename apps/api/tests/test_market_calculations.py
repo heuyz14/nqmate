@@ -1,7 +1,7 @@
 import unittest
 from datetime import date, datetime, timedelta, timezone
 
-from nqmate_api.market.calculations import aggregate_bars, atr, build_market_session, has_complete_session_bars
+from nqmate_api.market.calculations import aggregate_bars, atr, build_market_session, has_complete_session_bars, weekly_opening_gaps
 from nqmate_api.market.models import MarketBar, MarketContract, MarketSession
 
 
@@ -22,6 +22,16 @@ def bar(timestamp: datetime, value: float, provider: str = "test") -> MarketBar:
 
 
 class MarketCalculationTests(unittest.TestCase):
+    def test_weekly_opening_gap_uses_prior_session_close(self) -> None:
+        contract = MarketContract("NQ", "NQU6", "NQ_CONT")
+        friday = MarketSession(date(2026, 8, 28), 100, 110, 90, 105, 0, 0, 0, 0, None, None, None, None, None, None, 0, None, contract)
+        monday = MarketSession(date(2026, 8, 31), 110, 115, 100, 112, 0, 0, 0, 0, None, None, 105, None, None, None, 0, None, contract)
+
+        result = weekly_opening_gaps([monday, friday])
+
+        self.assertEqual(result[0].gap_points, 5)
+        self.assertAlmostEqual(result[0].gap_pct, 5 / 105)
+
     def test_aggregate_bars_preserves_ohlcv_and_point_in_time_availability(self) -> None:
         first = bar(datetime(2026, 9, 1, 13, 30, tzinfo=timezone.utc), 100)
         second = bar(datetime(2026, 9, 1, 13, 31, tzinfo=timezone.utc), 105)

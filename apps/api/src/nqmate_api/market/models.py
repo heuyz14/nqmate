@@ -37,6 +37,17 @@ class ContractRollover:
 
 
 @dataclass(frozen=True)
+class WeeklyOpeningGap:
+    week_start: date
+    session_date: date
+    opening_price: float
+    prior_close: float
+    gap_points: float
+    gap_pct: Optional[float]
+    contract: MarketContract
+
+
+@dataclass(frozen=True)
 class MarketSession:
     session_date: date
     nq_open: float
