@@ -83,7 +83,7 @@ class SupabaseMarketRepository:
         response = self.client.table("market_sessions").select(
             "*, market_contracts(*)"
         ).eq("session_date", _iso(session_date)).maybe_single().execute()
-        if not response.data:
+        if response is None or not response.data:
             return None
         row: dict[str, Any] = response.data
         contract_row = row.pop("market_contracts")

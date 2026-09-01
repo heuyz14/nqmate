@@ -26,3 +26,11 @@ class MarketRepositoryTests(unittest.TestCase):
 
         self.assertEqual(SupabaseMarketRepository(client).upsert_bars([]), 0)
         client.table.assert_not_called()
+
+    def test_get_session_returns_none_when_supabase_has_no_response(self) -> None:
+        client = MagicMock()
+        client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = None
+
+        result = SupabaseMarketRepository(client).get_session(date(2026, 9, 1))
+
+        self.assertIsNone(result)
