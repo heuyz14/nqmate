@@ -6,7 +6,7 @@ Always read this file at session start. It is the concise handoff for what exist
 
 ## Current Phase
 
-Phase 0 — Project Bootstrap
+Phase 1 — Historical Market Engine (ready to start)
 
 ## Completed
 
@@ -14,22 +14,21 @@ Phase 0 — Project Bootstrap
 - Phase 0 repository skeleton created.
 - Python 3.12 virtual environment and API dependencies installed.
 - Next.js dependencies installed and production build verified.
-- Git `origin` configured for `https://github.com/heuyz14/nqmate.git`.
+- Git `origin` configured for `git@github.com:heuyz14/nqmate.git`.
+- Hosted Supabase and Neo4j AuraDB connectivity verified through the API health endpoint.
 
 ## In Progress
 
-Phase 0 service connectivity wiring and local runtime verification.
+Phase 0 complete. Phase 1 implementation has not started.
 
 ## Next
 
-1. Initialize monorepo
-2. Create Next.js application
-3. Create FastAPI application
-4. Configure environment validation
-5. Connect Supabase
-6. Connect Neo4j
-7. Define `MarketDataProvider`
-8. Begin historical NQ ingestion
+1. Define `MarketDataProvider`
+2. Implement `MassiveMarketDataProvider`
+3. Implement NQ contract resolution
+4. Begin historical minute-bar ingestion
+5. Build session segmentation and deterministic feature calculations
+6. Expose `GET /market/nq/session/{date}`
 
 ## Important Decisions
 
@@ -49,4 +48,4 @@ None.
 
 ## Last Updated
 
-2026-08-31
+2026-09-01
