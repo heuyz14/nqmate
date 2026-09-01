@@ -13,3 +13,4 @@ dist/
 coverage/
 *.egg-info/
 *.tsbuildinfo
+.DS_Store
