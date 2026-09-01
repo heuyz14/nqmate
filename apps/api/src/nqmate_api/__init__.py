@@ -1,0 +1,1 @@
+"""NQmate FastAPI backend."""

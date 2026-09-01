@@ -1,0 +1,25 @@
+## When to read this file
+
+Read when building dashboard pages, visual information hierarchy, chart overlays, loading/empty/error states, or research UI.
+
+# Frontend Dashboard
+
+## Pages
+
+- `/dashboard`: bias/confidence, NQ location, overnight structure, key levels, next catalyst, news risk, analogues, and a candlestick chart with PDH/PDL/ONH/ONL/VWAP.
+- `/news`: headline, time, source, entities, NQ relevance, directional effect, surprise, explanation, and macro/Fed/semiconductor/mega-cap/geopolitical filters.
+- `/calendar`: time, event, importance, consensus, previous, actual, surprise, NQ response.
+- `/regime`: dimensions, 20 closest sessions, aggregate outcomes, strategy performance.
+- `/strategies`: conditions, sample size, win rate, expectancy, best/worst regimes.
+- `/journal`: manual entry/exit/direction/setup/reason/screenshot/result R/notes linked to session, bias, regime, strategy, and news.
+- `/research`: structured questions answered from internal normalized data.
+- `/models` (later): versions, walk-forward metrics, calibration, importance/SHAP, regime/month/event performance, drift, and champion/challenger comparison.
+
+## Primary layout
+
+The main trading screen prioritizes current NQ, bias/confidence, catalyst, chart/context, bull/bear cases, high-impact news, and historical analogues. Do not overload it with raw model internals; diagnostics belong on `/models`.
+
+## UX rules
+
+Use responsive Next.js/React/Tailwind UI and accessible controls. Every data-driven view needs loading, empty, and error states. Bias display must include direction, confidence, evidence, counter-signals, important levels, upcoming risks, and invalidation. Conservative catalyst guardrails must be visible.
+
