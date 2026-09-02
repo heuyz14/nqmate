@@ -6,7 +6,7 @@ Always read this file at session start. It is the concise handoff for what exist
 
 ## Current Phase
 
-Phase 2 — News Pipeline
+Phase 3 — Macro Pipeline (Phase 2 complete)
 
 ## Completed
 
@@ -39,16 +39,17 @@ Phase 2 — News Pipeline
 - Phase 2 clustering slice added: normalized news events receive a stable logical-event key for near-duplicate grouping, with canonical-source selection preferring official Fed/BLS/BEA reporting; migration `005_news_clustering.sql` adds the persisted key.
 - Phase 2 optional NLP slice added: `GeminiNewsExtractor` is behind `NEWS_NLP_ENABLED`, validates structured output, and is wrapped in a provider/ID cache; deterministic classification remains the default.
 - Gemini configuration verified: the key authenticates successfully, the initial retired model was replaced with provider-recommended `gemini-3.6-flash`, and an NLP-enabled ingestion smoke test persisted structured fields successfully.
+- Phase 2 completion slice added: clusters persist canonical provider, contributing providers, event count, and availability span; `/api/v1/news/clusters` exposes them, with migration `006_news_event_clusters.sql`.
 
 ## In Progress
 
-Phase 2 news pipeline implementation, persistence, and ingestion integration.
+Phase 3 macro pipeline implementation is ready to begin.
 
 ## Next
 
-1. Run an opt-in Gemini extraction smoke test with `NEWS_NLP_ENABLED=true`
-2. Add cross-source cluster consolidation and official BLS/BEA release verification
-3. Add economic-event reaction storage and complete Phase 2 acceptance verification
+1. Apply migration `006_news_event_clusters.sql` in Supabase
+2. Begin official BLS/BEA release verification and point-in-time macro storage
+3. Add economic-event reaction storage and surprise interpretation
 
 ## Important Decisions
 

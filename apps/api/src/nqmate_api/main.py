@@ -192,6 +192,16 @@ async def get_high_impact_news(
     return {"start": start.isoformat(), "end": end.isoformat(), "events": repository.list_events(high_impact_only=True, limit=limit, start=start.isoformat(), end=end.isoformat())}
 
 
+@app.get("/api/v1/news/clusters", tags=["news"])
+async def get_news_clusters(
+    limit: int = 50,
+    repository: NewsRepository = Depends(get_news_repository),
+) -> dict[str, object]:
+    if limit < 1 or limit > 100:
+        raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
+    return {"clusters": repository.list_clusters(limit)}
+
+
 @app.get("/api/v1/macro/calendar", tags=["macro"])
 async def get_macro_calendar(
     start: datetime,

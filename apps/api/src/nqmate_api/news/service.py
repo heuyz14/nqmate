@@ -9,7 +9,7 @@ from nqmate_api.news.models import (
 )
 from nqmate_api.news.relevance import nq_relevance_score
 from nqmate_api.news.repository import NewsRepository
-from nqmate_api.news.clustering import cluster_key
+from nqmate_api.news.clustering import cluster_key, consolidate_events
 from nqmate_api.news.nlp import NewsEventExtractor, apply_extraction
 
 
@@ -74,14 +74,16 @@ def cluster_key_from_article(article: NewsArticle, event_type: NewsEventType) ->
 
 
 def persist_articles(repository: NewsRepository, articles: Sequence[NewsArticle], extractor: NewsEventExtractor | None = None) -> int:
-    created = 0
+    events: list[NewsEvent] = []
     for article in articles:
         event = classify_article(article)
         if extractor is not None:
             event = apply_extraction(event, extractor.extract(article))
         repository.upsert_event(event)
-        created += 1
-    return created
+        events.append(event)
+    for cluster in consolidate_events(events):
+        repository.upsert_cluster(cluster["logical_event_key"], cluster["canonical"], cluster["events"])
+    return len(events)
 
 
 def persist_calendar(repository: NewsRepository, events: Sequence[EconomicCalendarEvent]) -> int:

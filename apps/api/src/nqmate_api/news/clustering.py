@@ -32,3 +32,14 @@ def select_canonical_event(events: Sequence[NewsEvent]) -> NewsEvent:
         event.article.published_at,
         event.article.provider,
     ))
+
+
+def consolidate_events(events: Sequence[NewsEvent]) -> list[dict[str, object]]:
+    """Group normalized reports while retaining every source event."""
+    grouped: dict[str, list[NewsEvent]] = {}
+    for event in events:
+        grouped.setdefault(cluster_key(event), []).append(event)
+    return [
+        {"logical_event_key": key, "canonical": select_canonical_event(group), "events": group}
+        for key, group in grouped.items()
+    ]

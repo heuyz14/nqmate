@@ -11,6 +11,8 @@ from nqmate_api.news.models import EconomicCalendarEvent, NewsArticle, NewsEvent
 class NewsRepository(Protocol):
     def upsert_article(self, article: NewsArticle) -> None: ...
     def upsert_event(self, event: NewsEvent) -> None: ...
+    def upsert_cluster(self, logical_event_key: str, canonical: NewsEvent, events: Sequence[NewsEvent]) -> None: ...
+    def list_clusters(self, limit: int = 50) -> Sequence[dict[str, Any]]: ...
     def list_events(self, high_impact_only: bool = False, limit: int = 50,
                     start: str | None = None, end: str | None = None) -> Sequence[dict[str, Any]]: ...
     def upsert_calendar_event(self, event: EconomicCalendarEvent) -> None: ...
@@ -54,6 +56,22 @@ class SupabaseNewsRepository:
             "reason": event.reason, "model_version": event.model_version, "created_at": _iso(event.created_at),
             "logical_event_key": event.logical_event_key,
         }, on_conflict="article_id").execute()
+
+    def upsert_cluster(self, logical_event_key: str, canonical: NewsEvent, events: Sequence[NewsEvent]) -> None:
+        available = [event.article.available_at for event in events]
+        self.client.table("news_event_clusters").upsert({
+            "logical_event_key": logical_event_key,
+            "canonical_provider": canonical.article.provider,
+            "canonical_provider_id": canonical.article.provider_id,
+            "event_count": len(events),
+            "providers": sorted({event.article.provider for event in events}),
+            "first_available_at": _iso(min(available)), "last_available_at": _iso(max(available)),
+        }, on_conflict="logical_event_key").execute()
+
+    def list_clusters(self, limit: int = 50) -> Sequence[dict[str, Any]]:
+        return self.client.table("news_event_clusters").select("*").order(
+            "last_available_at", desc=True
+        ).limit(min(limit, 100)).execute().data or []
 
     def list_events(self, high_impact_only: bool = False, limit: int = 50,
                     start: str | None = None, end: str | None = None) -> Sequence[dict[str, Any]]:

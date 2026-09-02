@@ -39,4 +39,4 @@ Macro release pipeline, bias generation, embeddings/news-impact ML, graph, and a
 
 # Next Phase
 
-[Phase 3 — Macro pipeline](phase-3-macro.md).
+[Phase 3 — Macro pipeline](phase-3-macro.md). Phase 2 acceptance is complete after applying migrations `003_news.sql` through `006_news_event_clusters.sql` and verifying provider ingestion.

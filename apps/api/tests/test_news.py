@@ -9,7 +9,7 @@ from nqmate_api.news.polling import polling_interval_seconds
 from nqmate_api.news.providers import ForexFactoryCalendarProvider, MarketauxNewsProvider
 from nqmate_api.news.relevance import nq_relevance_score
 from nqmate_api.news.store import NewsStore
-from nqmate_api.news.clustering import cluster_key, select_canonical_event
+from nqmate_api.news.clustering import cluster_key, select_canonical_event, consolidate_events
 from nqmate_api.news.nlp import CachedNewsExtractor, NewsExtraction
 from nqmate_api.news.service import classify_article, economic_surprise, pre_event_risk
 
@@ -57,6 +57,18 @@ class NewsTests(unittest.IsolatedAsyncioTestCase):
         )
         official_event = classify_article(official_article)
         self.assertIs(select_canonical_event([market_event, official_event]), official_event)
+
+    def test_consolidation_keeps_one_canonical_event_per_cluster(self) -> None:
+        first = classify_article(article())
+        second = classify_article(NewsArticle(
+            "fed", "4", "https://example.test/4", "Federal Reserve comments as NVDA rises",
+            "Federal Reserve", first.event_timestamp + timedelta(minutes=10),
+            first.event_timestamp + timedelta(minutes=10), "Fed comments", ("NVDA",), ("monetary policy",),
+        ))
+        clusters = consolidate_events([first, second])
+        self.assertEqual(len(clusters), 1)
+        self.assertIs(clusters[0]["canonical"], second)
+        self.assertEqual(len(clusters[0]["events"]), 2)
 
     def test_nlp_extraction_is_cached_by_provider_identity(self) -> None:
         calls = []

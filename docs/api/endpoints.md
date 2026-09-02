@@ -9,7 +9,7 @@ Base path: `/api/v1`.
 | Area | Endpoints |
 |---|---|
 | Market | `GET /market/nq/session/current`, `/market/nq/bars`, `/market/nq/levels`, `/market/nq/weekly-gaps`, `/market/nq/features`, and `/market/nq/session/{date}` |
-| News | `GET /news`, `/news/high-impact`, `/news/{id}`; `POST /news/refresh` |
+| News | `GET /news`, `/news/high-impact`, `/news/clusters`, `/news/{id}`; `POST /news/refresh` |
 | Macro | `GET /macro/calendar`, `/macro/upcoming`, `/macro/events/{id}` |
 | Bias | `GET /bias/current`, `/bias/history`, `/bias/{id}`; `POST /bias/generate` |
 | Regimes | `GET /regimes/current`, `/regimes/similar`, `/regimes/{id}` |

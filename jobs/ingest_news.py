@@ -18,16 +18,18 @@ async def ingest_once() -> tuple[int, int]:
     repository = SupabaseNewsRepository.from_settings(settings)
     article_count = 0
     calendar_count = 0
+    articles_to_persist = []
     extractor: NewsEventExtractor | None = None
     if settings.news_nlp_enabled and settings.gemini_api_key:
         extractor = CachedNewsExtractor(GeminiNewsExtractor(settings.gemini_api_key, settings.gemini_model).extract)
     recent_cutoff = datetime.now(timezone.utc) - timedelta(days=14)
     if settings.marketaux_enabled and settings.marketaux_api_key:
         articles = await MarketauxNewsProvider(settings.marketaux_api_key).fetch(published_after=recent_cutoff)
-        article_count += persist_articles(repository, articles, extractor)
+        articles_to_persist.extend(articles)
     if settings.federal_reserve_enabled:
         articles = await FedRSSNewsProvider(settings.fed_rss_url or DEFAULT_FED_RSS_URL).fetch()
-        article_count += persist_articles(repository, articles, extractor)
+        articles_to_persist.extend(articles)
+    article_count = persist_articles(repository, articles_to_persist, extractor)
     if settings.forex_factory_enabled and settings.forex_factory_calendar_url:
         events = await ForexFactoryCalendarProvider(
             settings.forex_factory_calendar_url,
