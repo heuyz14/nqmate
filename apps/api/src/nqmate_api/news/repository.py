@@ -7,6 +7,7 @@ from supabase import Client, create_client
 from nqmate_api.config import Settings
 from nqmate_api.news.models import EconomicCalendarEvent, NewsArticle, NewsEvent
 from nqmate_api.macro.service import event_surprise
+from nqmate_api.macro.service import interpret_surprise
 
 
 class NewsRepository(Protocol):
@@ -89,12 +90,16 @@ class SupabaseNewsRepository:
 
     def upsert_calendar_event(self, event: EconomicCalendarEvent) -> None:
         provider_event_id = f"{event.event}:{event.currency}:{event.scheduled_at.isoformat()}"
+        surprise = event.surprise if event.surprise is not None else event_surprise(event)
+        interpretation = interpret_surprise(event.event, surprise) if surprise is not None else None
         self.client.table("economic_calendar_events").upsert({
             "provider": event.source, "provider_event_id": provider_event_id,
             "event": event.event, "currency": event.currency, "impact": event.impact.value,
             "scheduled_at": _iso(event.scheduled_at), "actual": event.actual,
             "forecast": event.forecast, "previous": event.previous,
-            "surprise": event.surprise if event.surprise is not None else event_surprise(event),
+            "surprise": surprise,
+            "expected_nq_direction": event.expected_nq_direction if event.expected_nq_direction is not None else (interpretation["expected_nq_direction"] if interpretation else None),
+            "surprise_interpretation": event.surprise_interpretation if event.surprise_interpretation is not None else (interpretation["interpretation"] if interpretation else None),
             "available_at": _iso(event.scheduled_at),
         }, on_conflict="provider,provider_event_id").execute()
 

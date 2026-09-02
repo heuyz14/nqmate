@@ -27,6 +27,8 @@ The initial Phase 3 adapter is `BLSProvider` for the official BLS Public Data AP
 
 Explicit BLS observation/release pairs can be linked with `link_release_timestamp`; the period is supplied by the caller and is never inferred from a title. Calendar events persist raw surprise (`actual - forecast`) when both values are available. Migration `008_macro_surprises.sql` adds the stored surprise field.
 
+`interpret_surprise` applies event-specific deterministic semantics: hotter inflation or stronger labor data can be NQ-bearish through rates, while stronger growth releases use a growth-positive mapping with an explicit rate-context caveat. Unknown event types remain `UNKNOWN`; the LLM does not calculate or override these fields. Migration `009_macro_surprise_interpretation.sql` stores the direction and rationale.
+
 Run `jobs/ingest_macro.py --series-id SERIES --start-year YYYY --end-year YYYY --skip-calendar` to ingest BLS observations when the BLS calendar feed is unavailable. The normal job can ingest both the calendar and observations when the official calendar endpoint is reachable.
 
 ## Economic event model

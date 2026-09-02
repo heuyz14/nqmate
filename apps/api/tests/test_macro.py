@@ -112,6 +112,16 @@ class MacroTests(unittest.IsolatedAsyncioTestCase):
         repository = FakeRepository(); link_release_timestamp(repository, observation, release)
         self.assertEqual(repository.value, ("CPI", "2026-08", release.scheduled_at))
 
+    def test_surprise_interpretation_is_event_specific_for_inflation(self) -> None:
+        from nqmate_api.macro.service import interpret_surprise
+        self.assertEqual(interpret_surprise("CPI", 0.2)["expected_nq_direction"], "BEARISH")
+        self.assertEqual(interpret_surprise("CPI", -0.2)["expected_nq_direction"], "BULLISH")
+
+    def test_surprise_interpretation_handles_zero_and_unknown_events(self) -> None:
+        from nqmate_api.macro.service import interpret_surprise
+        self.assertEqual(interpret_surprise("CPI", 0)["expected_nq_direction"], "NEUTRAL")
+        self.assertEqual(interpret_surprise("Unknown Release", 1)["expected_nq_direction"], "UNKNOWN")
+
     def test_observation_is_point_in_time_eligible_only_with_release_or_retrieval_timestamp(self) -> None:
         observation = MacroObservation("CPI", "2026-08", 324.123, None, datetime.now(timezone.utc), None)
         self.assertIsNotNone(observation.retrieved_at)

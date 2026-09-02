@@ -35,3 +35,20 @@ def event_surprise(event: EconomicCalendarEvent) -> float | None:
 def link_release_timestamp(repository: object, observation: MacroObservation, release: ScheduledRelease) -> None:
     """Link only an explicit observation/release pair; never infer the period."""
     repository.set_released_at(observation.series_id, observation.period, release.scheduled_at)
+
+
+def interpret_surprise(event_name: str, surprise: float) -> dict[str, str]:
+    """Translate a numeric surprise through the event's NQ/rates semantics."""
+    name = event_name.lower()
+    inflation = any(term in name for term in ("cpi", "ppi", "pce", "inflation"))
+    labor = any(term in name for term in ("employment", "payroll", "job openings", "unemployment", "jobs"))
+    growth = any(term in name for term in ("gdp", "retail sales", "consumer confidence"))
+    if inflation or labor:
+        direction = "BEARISH" if surprise > 0 else "BULLISH" if surprise < 0 else "NEUTRAL"
+        rationale = "hotter/stronger data may raise rates and pressure growth-stock valuations" if surprise > 0 else "cooler/weaker data may reduce rate pressure on growth-stock valuations" if surprise < 0 else "release matched expectations"
+    elif growth:
+        direction = "BULLISH" if surprise > 0 else "BEARISH" if surprise < 0 else "NEUTRAL"
+        rationale = "stronger/weaker growth signal changes the growth outlook; rate effects require context"
+    else:
+        direction, rationale = "UNKNOWN", "no event-specific NQ surprise mapping is configured"
+    return {"expected_nq_direction": direction, "interpretation": rationale}
