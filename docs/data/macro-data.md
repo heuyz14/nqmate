@@ -33,6 +33,8 @@ Post-release reactions are stored as associations in `macro_reactions` by event,
 
 `reaction_from_prices` deterministically calculates points and percentage return from an explicitly selected pre-event base price and post-event observed price. It rejects a zero base and does not select future bars implicitly; the caller must enforce the event timestamp and horizon.
 
+`sample_reactions` applies this rule at 5m/15m/30m/60m horizons using the last eligible pre-release bar and first eligible post-release bar. Bars whose `available_at` is later than their timestamp are excluded to preserve point-in-time correctness; missing horizons remain absent rather than being imputed.
+
 Run `jobs/ingest_macro.py --series-id SERIES --start-year YYYY --end-year YYYY --skip-calendar` to ingest BLS observations when the BLS calendar feed is unavailable. The normal job can ingest both the calendar and observations when the official calendar endpoint is reachable.
 
 ## Economic event model

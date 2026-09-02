@@ -5,6 +5,8 @@ from nqmate_api.news.models import CalendarImpact, EconomicCalendarEvent
 from typing import Sequence
 
 from nqmate_api.macro.models import MacroObservation, MacroReaction
+from nqmate_api.market.models import MarketBar
+from datetime import timedelta
 
 _HIGH_IMPACT_RELEASES = (
     "employment situation", "consumer price index", "producer price index",
@@ -41,6 +43,24 @@ def reaction_from_prices(event_id: str, instrument: str, horizon: str, base_pric
         return_pct=round((observed_price / base_price - 1) * 100, 10),
         observed_at=observed_at,
     )
+
+
+def sample_reactions(event_id: str, release_at: object, bars: Sequence[MarketBar], horizons: Sequence[str] = ("5m", "15m", "30m", "60m")) -> list[MacroReaction]:
+    ordered = sorted((bar for bar in bars if bar.available_at <= bar.timestamp), key=lambda bar: bar.timestamp)
+    base = [bar for bar in ordered if bar.timestamp <= release_at]
+    if not base:
+        return []
+    base_price = base[-1].close
+    reactions = []
+    for horizon in horizons:
+        try:
+            target = release_at + timedelta(minutes=int(horizon.rstrip("m")))
+        except (ValueError, AttributeError):
+            raise ValueError(f"unsupported reaction horizon: {horizon}")
+        observed = next((bar for bar in ordered if bar.timestamp >= target), None)
+        if observed is not None:
+            reactions.append(reaction_from_prices(event_id, "NQ", horizon, base_price, observed.close, observed.timestamp))
+    return reactions
 
 
 def link_release_timestamp(repository: object, observation: MacroObservation, release: ScheduledRelease) -> None:
