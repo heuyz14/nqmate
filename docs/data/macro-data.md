@@ -15,7 +15,7 @@ Avoid Trading Economics in V1. SEC company events are owned by [news-data.md](ne
 
 ## Pipeline
 
-Load the release schedule, ingest official values, deduplicate, store scheduled and released times, and calculate the surprise after release. The dashboard must expose upcoming important events and, after release, actual/consensus/previous and NQ response.
+Load the release schedule from [news-data.md](news-data.md), ingest official values, deduplicate, store scheduled and released times, and calculate the surprise after release. The dashboard must expose upcoming important events and, after release, actual/consensus/previous and NQ response. Source priority is official BLS/Fed/BEA, then Forex Factory for schedule/forecast, then Marketaux for breaking context.
 
 ## Economic event model
 
@@ -30,4 +30,3 @@ Use ALFRED vintages whenever historical revisions could leak future information.
 ## Catalyst guardrail
 
 High-impact releases reduce confidence. If an event is within 15 minutes, cap confidence at 0.55 and recommend `WAIT_FOR_RELEASE`; do not issue a high-confidence pre-event recommendation for FOMC, CPI, or NFP.
-
