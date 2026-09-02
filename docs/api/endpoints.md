@@ -22,3 +22,5 @@ Base path: `/api/v1`.
 ## Contracts and rules
 
 Use Pydantic validation and versioned response schemas. The Phase 1 session endpoint must return OHLC, ONH, ONL, PDH, PDL, overnight return/range, ATR, and gap. Bias responses must retain evidence, counter-evidence, invalidation, catalyst risk, model, feature, and prompt versions. ML training endpoints are protected and unavailable to the public frontend.
+
+News reads return normalized event records backed by `news_articles` and `news_events`. `/news/high-impact` filters by the configured NQ relevance threshold; publication/release availability remains part of the stored record.

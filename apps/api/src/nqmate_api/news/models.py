@@ -55,11 +55,15 @@ class NewsArticle:
 class NewsEvent:
     article: NewsArticle
     event_type: NewsEventType
+    event_subtype: Optional[str]
     event_timestamp: datetime
     stance: NewsStance
+    sentiment: Optional[float]
     nq_direction: NewsDirection
+    impact: Optional[str]
     nq_relevance_score: float
     impact_horizon: ImpactHorizon
+    themes: tuple[str, ...]
     confidence: Optional[float]
     summary: Optional[str]
     reason: Optional[str]

@@ -28,3 +28,17 @@ class NewsTests(unittest.IsolatedAsyncioTestCase):
         self.assertGreater(nq_relevance_score(item), 0)
         self.assertTrue(store.upsert_article(item))
         self.assertFalse(store.upsert_article(item))
+
+    def test_news_endpoint_reads_repository(self) -> None:
+        from fastapi.testclient import TestClient
+        from nqmate_api.main import app, get_news_repository
+
+        fake = type("FakeNewsRepository", (), {"list_events": lambda self, high_impact_only=False, limit=50: [{"id": "event-1"}]})()
+        app.dependency_overrides[get_news_repository] = lambda: fake
+        try:
+            response = TestClient(app).get("/api/v1/news/high-impact?limit=1")
+        finally:
+            app.dependency_overrides.clear()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["events"][0]["id"], "event-1")

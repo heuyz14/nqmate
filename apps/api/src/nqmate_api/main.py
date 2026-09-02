@@ -8,6 +8,7 @@ from nqmate_api.health import check_neo4j, check_supabase, health_payload
 from nqmate_api.market.repository import MarketRepository, SupabaseMarketRepository
 from nqmate_api.market.calculations import EASTERN, REGULAR_END, REGULAR_START, aggregate_bars, technical_features
 from nqmate_api.market.calculations import weekly_opening_gaps
+from nqmate_api.news.repository import NewsRepository, SupabaseNewsRepository
 
 app = FastAPI(title="NQmate API", version="0.1.0")
 
@@ -15,6 +16,11 @@ app = FastAPI(title="NQmate API", version="0.1.0")
 @lru_cache(maxsize=1)
 def get_market_repository() -> MarketRepository:
     return SupabaseMarketRepository.from_settings(Settings())
+
+
+@lru_cache(maxsize=1)
+def get_news_repository() -> NewsRepository:
+    return SupabaseNewsRepository.from_settings(Settings())
 
 
 @app.get("/health", tags=["health"])
@@ -151,3 +157,23 @@ async def get_nq_features(
     return {"session_date": session_date.isoformat(), "features": technical_features(
         bars, session.prior_day_high, session.prior_day_low,
     )}
+
+
+@app.get("/api/v1/news", tags=["news"])
+async def get_news(
+    limit: int = 50,
+    repository: NewsRepository = Depends(get_news_repository),
+) -> dict[str, object]:
+    if limit < 1 or limit > 100:
+        raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
+    return {"events": repository.list_events(limit=limit)}
+
+
+@app.get("/api/v1/news/high-impact", tags=["news"])
+async def get_high_impact_news(
+    limit: int = 50,
+    repository: NewsRepository = Depends(get_news_repository),
+) -> dict[str, object]:
+    if limit < 1 or limit > 100:
+        raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
+    return {"events": repository.list_events(high_impact_only=True, limit=limit)}
