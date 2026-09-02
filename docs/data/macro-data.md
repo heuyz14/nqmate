@@ -31,6 +31,8 @@ Explicit BLS observation/release pairs can be linked with `link_release_timestam
 
 Post-release reactions are stored as associations in `macro_reactions` by event, instrument, horizon, points, percentage, and observed timestamp. They are descriptive outcomes, not causal claims; migration `010_macro_reactions.sql` adds the table and `/api/v1/macro/events/{id}/reactions` reads it.
 
+`reaction_from_prices` deterministically calculates points and percentage return from an explicitly selected pre-event base price and post-event observed price. It rejects a zero base and does not select future bars implicitly; the caller must enforce the event timestamp and horizon.
+
 Run `jobs/ingest_macro.py --series-id SERIES --start-year YYYY --end-year YYYY --skip-calendar` to ingest BLS observations when the BLS calendar feed is unavailable. The normal job can ingest both the calendar and observations when the official calendar endpoint is reachable.
 
 ## Economic event model

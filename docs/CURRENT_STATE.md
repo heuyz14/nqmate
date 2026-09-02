@@ -50,6 +50,7 @@ Phase 3 — Macro Pipeline (Phase 2 complete)
 - Migration `008_macro_surprises.sql` applied and verified through the macro API.
 - Phase 3 interpretation slice added: deterministic event-specific NQ surprise direction and rationale are persisted with migration `009_macro_surprise_interpretation.sql`.
 - Phase 3 reaction-storage slice added: migration `010_macro_reactions.sql`, repository persistence, and event reaction API are implemented for post-release NQ/yield outcome associations.
+- Phase 3 reaction-calculation slice added: deterministic point and percentage returns from explicit base/observed prices are tested with zero-base protection.
 
 ## In Progress
 
@@ -57,8 +58,8 @@ Phase 3 macro pipeline implementation is ready to begin.
 
 ## Next
 
-1. Apply migrations `009_macro_surprise_interpretation.sql` and `010_macro_reactions.sql`
-2. Connect BLS release records and observed NQ/yield reactions to event records
+1. Connect BLS release records and observed NQ/yield reactions to event records
+2. Add market-bar sampling at 5m/15m/30m/60m horizons
 3. Add macro ingestion orchestration and acceptance verification
 
 ## Important Decisions

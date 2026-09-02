@@ -134,6 +134,17 @@ class MacroTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(interpret_surprise("CPI", 0)["expected_nq_direction"], "NEUTRAL")
         self.assertEqual(interpret_surprise("Unknown Release", 1)["expected_nq_direction"], "UNKNOWN")
 
+    def test_reaction_from_prices_is_deterministic(self) -> None:
+        from nqmate_api.macro.service import reaction_from_prices
+        reaction = reaction_from_prices("event-1", "NQ", "5m", 20000, 20100, datetime(2026, 9, 2, 12, 35, tzinfo=timezone.utc))
+        self.assertEqual(reaction.return_points, 100)
+        self.assertEqual(reaction.return_pct, 0.5)
+
+    def test_reaction_from_prices_rejects_zero_base(self) -> None:
+        from nqmate_api.macro.service import reaction_from_prices
+        with self.assertRaises(ValueError):
+            reaction_from_prices("event-1", "NQ", "5m", 0, 1, datetime.now(timezone.utc))
+
     def test_observation_is_point_in_time_eligible_only_with_release_or_retrieval_timestamp(self) -> None:
         observation = MacroObservation("CPI", "2026-08", 324.123, None, datetime.now(timezone.utc), None)
         self.assertIsNotNone(observation.retrieved_at)

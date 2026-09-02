@@ -4,7 +4,7 @@ from nqmate_api.macro.models import ScheduledRelease
 from nqmate_api.news.models import CalendarImpact, EconomicCalendarEvent
 from typing import Sequence
 
-from nqmate_api.macro.models import MacroObservation
+from nqmate_api.macro.models import MacroObservation, MacroReaction
 
 _HIGH_IMPACT_RELEASES = (
     "employment situation", "consumer price index", "producer price index",
@@ -30,6 +30,17 @@ def event_surprise(event: EconomicCalendarEvent) -> float | None:
     if event.actual is None or event.forecast is None:
         return None
     return round(event.actual - event.forecast, 10)
+
+
+def reaction_from_prices(event_id: str, instrument: str, horizon: str, base_price: float, observed_price: float, observed_at: object) -> MacroReaction:
+    if base_price == 0:
+        raise ValueError("base price must not be zero")
+    return MacroReaction(
+        event_id=event_id, instrument=instrument, horizon=horizon,
+        return_points=round(observed_price - base_price, 10),
+        return_pct=round((observed_price / base_price - 1) * 100, 10),
+        observed_at=observed_at,
+    )
 
 
 def link_release_timestamp(repository: object, observation: MacroObservation, release: ScheduledRelease) -> None:
