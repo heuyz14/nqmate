@@ -177,3 +177,20 @@ async def get_high_impact_news(
     if limit < 1 or limit > 100:
         raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
     return {"events": repository.list_events(high_impact_only=True, limit=limit)}
+
+
+@app.get("/api/v1/macro/calendar", tags=["macro"])
+async def get_macro_calendar(
+    start: datetime,
+    end: datetime,
+    high_impact_only: bool = False,
+    limit: int = 100,
+    repository: NewsRepository = Depends(get_news_repository),
+) -> dict[str, object]:
+    if end < start:
+        raise HTTPException(status_code=422, detail="end must be on or after start")
+    if limit < 1 or limit > 100:
+        raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
+    return {"start": start.isoformat(), "end": end.isoformat(), "events": repository.list_calendar_events(
+        start.isoformat(), end.isoformat(), high_impact_only, limit,
+    )}

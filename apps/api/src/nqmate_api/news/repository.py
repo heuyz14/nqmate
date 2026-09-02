@@ -5,13 +5,15 @@ from typing import Any, Protocol, Sequence
 from supabase import Client, create_client
 
 from nqmate_api.config import Settings
-from nqmate_api.news.models import NewsArticle, NewsEvent
+from nqmate_api.news.models import EconomicCalendarEvent, NewsArticle, NewsEvent
 
 
 class NewsRepository(Protocol):
     def upsert_article(self, article: NewsArticle) -> None: ...
     def upsert_event(self, event: NewsEvent) -> None: ...
     def list_events(self, high_impact_only: bool = False, limit: int = 50) -> Sequence[dict[str, Any]]: ...
+    def upsert_calendar_event(self, event: EconomicCalendarEvent) -> None: ...
+    def list_calendar_events(self, start: str, end: str, high_impact_only: bool = False, limit: int = 100) -> Sequence[dict[str, Any]]: ...
 
 
 def _iso(value: Any) -> str:
@@ -57,4 +59,22 @@ class SupabaseNewsRepository:
         ).limit(min(limit, 100))
         if high_impact_only:
             query = query.gte("nq_relevance_score", 0.75)
+        return query.execute().data or []
+
+    def upsert_calendar_event(self, event: EconomicCalendarEvent) -> None:
+        provider_event_id = f"{event.event}:{event.currency}:{event.scheduled_at.isoformat()}"
+        self.client.table("economic_calendar_events").upsert({
+            "provider": event.source, "provider_event_id": provider_event_id,
+            "event": event.event, "currency": event.currency, "impact": event.impact.value,
+            "scheduled_at": _iso(event.scheduled_at), "actual": event.actual,
+            "forecast": event.forecast, "previous": event.previous,
+            "available_at": _iso(event.scheduled_at),
+        }, on_conflict="provider,provider_event_id").execute()
+
+    def list_calendar_events(self, start: str, end: str, high_impact_only: bool = False, limit: int = 100) -> Sequence[dict[str, Any]]:
+        query = self.client.table("economic_calendar_events").select("*").gte(
+            "scheduled_at", start
+        ).lte("scheduled_at", end).order("scheduled_at").limit(min(limit, 100))
+        if high_impact_only:
+            query = query.eq("impact", "HIGH")
         return query.execute().data or []

@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock
 
 import httpx
 
-from nqmate_api.news.models import NewsArticle
+from nqmate_api.news.models import CalendarImpact, EconomicCalendarEvent, NewsArticle
 from nqmate_api.news.polling import polling_interval_seconds
 from nqmate_api.news.providers import ForexFactoryCalendarProvider, MarketauxNewsProvider
 from nqmate_api.news.relevance import nq_relevance_score
@@ -17,6 +17,19 @@ def article() -> NewsArticle:
 
 
 class NewsTests(unittest.IsolatedAsyncioTestCase):
+    def test_calendar_event_upsert_uses_stable_identity(self) -> None:
+        from unittest.mock import MagicMock
+        from nqmate_api.news.repository import SupabaseNewsRepository
+        timestamp = datetime(2026, 9, 1, 12, tzinfo=timezone.utc)
+        event = EconomicCalendarEvent("CPI", "USD", CalendarImpact.HIGH, timestamp, "forex_factory", forecast=0.3)
+        client = MagicMock()
+
+        SupabaseNewsRepository(client).upsert_calendar_event(event)
+
+        call = client.table.return_value.upsert.call_args
+        self.assertEqual(call.kwargs["on_conflict"], "provider,provider_event_id")
+        self.assertEqual(call.args[0]["impact"], "HIGH")
+
     async def test_forex_factory_filters_usd_and_maps_values(self) -> None:
         response = httpx.Response(200, json=[
             {"event": "CPI", "currency": "USD", "impact": "HIGH", "scheduledAt": "2026-09-01T12:30:00Z", "forecast": "0.3", "previous": "0.2"},
