@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     news_poll_interval_idle: int = 300
     news_min_nq_relevance: float = 0.50
     news_high_impact_threshold: float = 0.75
+    news_nlp_enabled: bool = False
     forex_factory_calendar_url: str | None = None
     forex_factory_timezone: str = "America/New_York"
     fed_rss_url: str | None = None

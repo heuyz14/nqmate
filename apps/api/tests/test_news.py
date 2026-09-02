@@ -10,6 +10,7 @@ from nqmate_api.news.providers import ForexFactoryCalendarProvider, MarketauxNew
 from nqmate_api.news.relevance import nq_relevance_score
 from nqmate_api.news.store import NewsStore
 from nqmate_api.news.clustering import cluster_key, select_canonical_event
+from nqmate_api.news.nlp import CachedNewsExtractor, NewsExtraction
 from nqmate_api.news.service import classify_article, economic_surprise, pre_event_risk
 
 
@@ -56,6 +57,30 @@ class NewsTests(unittest.IsolatedAsyncioTestCase):
         )
         official_event = classify_article(official_article)
         self.assertIs(select_canonical_event([market_event, official_event]), official_event)
+
+    def test_nlp_extraction_is_cached_by_provider_identity(self) -> None:
+        calls = []
+
+        def extract(article):
+            calls.append(article.provider_id)
+            return NewsExtraction(event_subtype="RATE_DECISION", confidence=0.9)
+
+        cached = CachedNewsExtractor(extract)
+        first = cached.extract(article())
+        second = cached.extract(article())
+        self.assertEqual(first, second)
+        self.assertEqual(calls, ["1"])
+
+    def test_gemini_adapter_parses_structured_output(self) -> None:
+        from nqmate_api.news.nlp import GeminiNewsExtractor
+
+        def handler(request):
+            return httpx.Response(200, json={"candidates": [{"content": {"parts": [{"text": '{"event_subtype":"AI","nq_direction":"bullish","confidence":0.8,"themes":["AI"]}'}]}}]}, request=request)
+
+        client = httpx.Client(transport=httpx.MockTransport(handler))
+        result = GeminiNewsExtractor("test-key", client=client).extract(article())
+        self.assertEqual(result.event_subtype, "AI")
+        self.assertEqual(result.confidence, 0.8)
 
     def test_calendar_event_upsert_uses_stable_identity(self) -> None:
         from unittest.mock import MagicMock
