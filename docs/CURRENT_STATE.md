@@ -6,7 +6,7 @@ Always read this file at session start. It is the concise handoff for what exist
 
 ## Current Phase
 
-Phase 1 — Historical Market Engine (implementation complete; validation pending)
+Phase 2 — News Pipeline
 
 ## Completed
 
@@ -27,15 +27,16 @@ Phase 1 — Historical Market Engine (implementation complete; validation pendin
 - Weekly opening gaps are available through `/api/v1/market/nq/weekly-gaps`.
 - Deterministic feature endpoint added at `/api/v1/market/nq/features` with 5m/15m/30m returns, EMA 9/20/50, VWAP, VWAP distance, range position, prior-level distances, and nullable NQ/ES relative strength.
 - macOS daily market updater added at `jobs/ingest_market_daily.py`, scheduled by `ops/com.nqmate.market-daily.plist` for 4:05 PM America/New_York.
+- Phase 2 news slice added: Marketaux and Fed RSS adapters, strict normalized article/event models, deterministic NQ relevance scoring, and provider/ID deduplication store.
 
 ## In Progress
 
-Phase 1 historical market engine implementation, persistence, and ingestion integration.
+Phase 2 news pipeline implementation, persistence, and ingestion integration.
 
 ## Next
 
-1. Validate session values, derived timeframes, feature values, and rollover dates against a trusted chart
-2. Prepare the Phase 2 handoff after validation
+1. Add Supabase news/article/event persistence and news API endpoints
+2. Add scheduled/manual news polling and mocked extraction integration
 
 ## Important Decisions
 

@@ -1,0 +1,67 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import datetime
+from enum import StrEnum
+from typing import Optional
+
+
+class NewsEventType(StrEnum):
+    FED = "fed"
+    MACRO = "macro"
+    EARNINGS = "earnings"
+    TECHNOLOGY = "technology"
+    GEOPOLITICAL = "geopolitical"
+    MARKET_MOVE = "market_move"
+    OTHER = "other"
+
+
+class NewsStance(StrEnum):
+    POSITIVE = "positive"
+    NEGATIVE = "negative"
+    NEUTRAL = "neutral"
+    MIXED = "mixed"
+
+
+class NewsDirection(StrEnum):
+    BULLISH = "bullish"
+    BEARISH = "bearish"
+    NEUTRAL = "neutral"
+    UNKNOWN = "unknown"
+
+
+class ImpactHorizon(StrEnum):
+    INTRADAY = "intraday"
+    SHORT_TERM = "short_term"
+    MULTI_DAY = "multi_day"
+    UNKNOWN = "unknown"
+
+
+@dataclass(frozen=True)
+class NewsArticle:
+    provider: str
+    provider_id: str
+    url: str
+    headline: str
+    source: str
+    published_at: datetime
+    available_at: datetime
+    summary: Optional[str] = None
+    entities: tuple[str, ...] = ()
+    topics: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class NewsEvent:
+    article: NewsArticle
+    event_type: NewsEventType
+    event_timestamp: datetime
+    stance: NewsStance
+    nq_direction: NewsDirection
+    nq_relevance_score: float
+    impact_horizon: ImpactHorizon
+    confidence: Optional[float]
+    summary: Optional[str]
+    reason: Optional[str]
+    model_version: str
+    created_at: datetime
