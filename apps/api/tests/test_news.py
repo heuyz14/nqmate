@@ -78,7 +78,7 @@ class NewsTests(unittest.IsolatedAsyncioTestCase):
         from fastapi.testclient import TestClient
         from nqmate_api.main import app, get_news_repository
 
-        fake = type("FakeNewsRepository", (), {"list_events": lambda self, high_impact_only=False, limit=50: [{"id": "event-1"}]})()
+        fake = type("FakeNewsRepository", (), {"list_events": lambda self, high_impact_only=False, limit=50, start=None, end=None: [{"id": "event-1"}]})()
         app.dependency_overrides[get_news_repository] = lambda: fake
         try:
             response = TestClient(app).get("/api/v1/news/high-impact?limit=1")

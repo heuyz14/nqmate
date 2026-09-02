@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+from datetime import datetime, timedelta, timezone
 
 from nqmate_api.config import Settings
 from nqmate_api.news.providers import FedRSSNewsProvider, ForexFactoryCalendarProvider, MarketauxNewsProvider
@@ -16,8 +17,9 @@ async def ingest_once() -> tuple[int, int]:
     repository = SupabaseNewsRepository.from_settings(settings)
     article_count = 0
     calendar_count = 0
+    recent_cutoff = datetime.now(timezone.utc) - timedelta(days=14)
     if settings.marketaux_enabled and settings.marketaux_api_key:
-        articles = await MarketauxNewsProvider(settings.marketaux_api_key).fetch()
+        articles = await MarketauxNewsProvider(settings.marketaux_api_key).fetch(published_after=recent_cutoff)
         article_count += persist_articles(repository, articles)
     if settings.federal_reserve_enabled:
         articles = await FedRSSNewsProvider(settings.fed_rss_url or DEFAULT_FED_RSS_URL).fetch()

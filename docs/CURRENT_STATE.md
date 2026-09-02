@@ -31,6 +31,7 @@ Phase 2 — News Pipeline
 - Phase 2 requirements expanded: Forex Factory calendar, official-release priority, adaptive polling, multi-axis classification, surprise semantics, logical cross-source deduplication, and pre-event risk awareness.
 - Phase 2 persistence/API slice added: Supabase migration `003_news.sql`, server-side article/event repository, and `/api/v1/news` plus `/api/v1/news/high-impact` read endpoints.
 - Phase 2 calendar/polling slice added: Forex Factory USD calendar normalization, configurable ET adaptive polling cadence, and environment flags for source enablement and relevance thresholds.
+- Phase 2 news recency slice added: Marketaux uses publication date filters and API news reads default to a 14-day hot cache while retaining the full Supabase archive.
 - Forex Factory CSV export support verified against the configured `nfs.faireconomy.media/ff_calendar_thisweek.csv` feed; date/time values are normalized from the configured `FOREX_FACTORY_TIMEZONE`.
 - Phase 2 calendar persistence/API slice added: migration `004_economic_calendar.sql`, stable provider/time event identity, and `/api/v1/macro/calendar` retrieval.
 - Phase 2 ingestion slice added: configured Marketaux, Federal Reserve RSS, and Forex Factory providers are orchestrated by `jobs/ingest_news.py`; baseline deterministic article classification is persisted as cached events.

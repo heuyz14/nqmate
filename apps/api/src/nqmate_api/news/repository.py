@@ -11,7 +11,8 @@ from nqmate_api.news.models import EconomicCalendarEvent, NewsArticle, NewsEvent
 class NewsRepository(Protocol):
     def upsert_article(self, article: NewsArticle) -> None: ...
     def upsert_event(self, event: NewsEvent) -> None: ...
-    def list_events(self, high_impact_only: bool = False, limit: int = 50) -> Sequence[dict[str, Any]]: ...
+    def list_events(self, high_impact_only: bool = False, limit: int = 50,
+                    start: str | None = None, end: str | None = None) -> Sequence[dict[str, Any]]: ...
     def upsert_calendar_event(self, event: EconomicCalendarEvent) -> None: ...
     def list_calendar_events(self, start: str, end: str, high_impact_only: bool = False, limit: int = 100) -> Sequence[dict[str, Any]]: ...
 
@@ -53,10 +54,15 @@ class SupabaseNewsRepository:
             "reason": event.reason, "model_version": event.model_version, "created_at": _iso(event.created_at),
         }, on_conflict="article_id").execute()
 
-    def list_events(self, high_impact_only: bool = False, limit: int = 50) -> Sequence[dict[str, Any]]:
+    def list_events(self, high_impact_only: bool = False, limit: int = 50,
+                    start: str | None = None, end: str | None = None) -> Sequence[dict[str, Any]]:
         query = self.client.table("news_events").select("*, news_articles(*)").order(
             "event_timestamp", desc=True
         ).limit(min(limit, 100))
+        if start:
+            query = query.gte("event_timestamp", start)
+        if end:
+            query = query.lte("event_timestamp", end)
         if high_impact_only:
             query = query.gte("nq_relevance_score", 0.75)
         return query.execute().data or []

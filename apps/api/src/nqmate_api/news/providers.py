@@ -14,7 +14,8 @@ from nqmate_api.news.models import CalendarImpact, EconomicCalendarEvent, NewsAr
 
 
 class NewsProvider(Protocol):
-    async def fetch(self, query: str | None = None) -> Sequence[NewsArticle]: ...
+    async def fetch(self, query: str | None = None, published_after: datetime | None = None,
+                    published_before: datetime | None = None) -> Sequence[NewsArticle]: ...
 
 
 class EconomicCalendarProvider(Protocol):
@@ -31,13 +32,16 @@ class MarketauxNewsProvider:
             raise ValueError("Marketaux API key is required")
         self.api_key, self.client, self.base_url = api_key, client, base_url.rstrip("/")
 
-    async def fetch(self, query: str | None = None) -> Sequence[NewsArticle]:
+    async def fetch(self, query: str | None = None, published_after: datetime | None = None,
+                    published_before: datetime | None = None) -> Sequence[NewsArticle]:
         close_client = self.client is None
         client = self.client or httpx.AsyncClient()
         try:
             response = await client.get(f"{self.base_url}/v1/news/all", params={
                 "api_token": self.api_key, "search": query or "Nasdaq NQ futures",
                 "language": "en", "limit": 3,
+                "published_after": published_after.isoformat() if published_after else None,
+                "published_before": published_before.isoformat() if published_before else None,
             }, timeout=30)
             response.raise_for_status()
             now = datetime.now(timezone.utc)
@@ -62,7 +66,8 @@ class FedRSSNewsProvider:
     def __init__(self, feed_url: str, client: httpx.AsyncClient | None = None) -> None:
         self.feed_url, self.client = feed_url, client
 
-    async def fetch(self, query: str | None = None) -> Sequence[NewsArticle]:
+    async def fetch(self, query: str | None = None, published_after: datetime | None = None,
+                    published_before: datetime | None = None) -> Sequence[NewsArticle]:
         close_client = self.client is None
         client = self.client or httpx.AsyncClient()
         try:

@@ -25,4 +25,6 @@ Use Pydantic validation and versioned response schemas. The Phase 1 session endp
 
 News reads return normalized event records backed by `news_articles` and `news_events`. `/news/high-impact` filters by the configured NQ relevance threshold; publication/release availability remains part of the stored record.
 
+`/news` and `/news/high-impact` default to the latest 14 days and accept optional `start`/`end` ISO datetimes. Older records remain queryable through explicit ranges.
+
 `/macro/calendar` returns persisted scheduled economic events filtered by ISO datetime range, with optional HIGH-impact filtering and a bounded limit.

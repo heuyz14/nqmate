@@ -162,21 +162,33 @@ async def get_nq_features(
 @app.get("/api/v1/news", tags=["news"])
 async def get_news(
     limit: int = 50,
+    start: datetime | None = None,
+    end: datetime | None = None,
     repository: NewsRepository = Depends(get_news_repository),
 ) -> dict[str, object]:
     if limit < 1 or limit > 100:
         raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
-    return {"events": repository.list_events(limit=limit)}
+    end = end or datetime.now(timezone.utc)
+    start = start or end - timedelta(days=14)
+    if end < start:
+        raise HTTPException(status_code=422, detail="end must be on or after start")
+    return {"start": start.isoformat(), "end": end.isoformat(), "events": repository.list_events(limit=limit, start=start.isoformat(), end=end.isoformat())}
 
 
 @app.get("/api/v1/news/high-impact", tags=["news"])
 async def get_high_impact_news(
     limit: int = 50,
+    start: datetime | None = None,
+    end: datetime | None = None,
     repository: NewsRepository = Depends(get_news_repository),
 ) -> dict[str, object]:
     if limit < 1 or limit > 100:
         raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
-    return {"events": repository.list_events(high_impact_only=True, limit=limit)}
+    end = end or datetime.now(timezone.utc)
+    start = start or end - timedelta(days=14)
+    if end < start:
+        raise HTTPException(status_code=422, detail="end must be on or after start")
+    return {"start": start.isoformat(), "end": end.isoformat(), "events": repository.list_events(high_impact_only=True, limit=limit, start=start.isoformat(), end=end.isoformat())}
 
 
 @app.get("/api/v1/macro/calendar", tags=["macro"])

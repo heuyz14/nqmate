@@ -16,6 +16,8 @@ Forex Factory machine-readable calendar exports are the primary schedule/consens
 
 Do not poll continuously. Use configurable adaptive polling: overnight low frequency, premarket medium frequency, highest priority 08:00–10:30 ET, lower frequency midday, and higher frequency 14:00–16:00 ET. Suggested ET polls are 06:00, 07:00, 08:00, 08:25, 08:45, 09:15, 09:25, 10:00, 12:00, 14:00, and 15:30. Configure `NEWS_POLL_INTERVAL_ACTIVE`, `NEWS_POLL_INTERVAL_IDLE`, `FOREX_FACTORY_ENABLED`, `MARKETAUX_ENABLED`, and `NEWS_MIN_NQ_RELEVANCE`; respect Marketaux’s free-tier limits. Batch requests where supported. Deduplicate by URL/provider UUID, store all fetched stories, and queue NLP once; do not repeatedly fetch the same story.
 
+Keep the full normalized archive in Supabase, but treat the most recent 14 days as the hot cache for dashboard retrieval. Marketaux polling must use `published_after` (and `published_before` when needed) so stale provider responses do not refill the hot window. API reads default to the 14-day window and allow explicit ranges for research.
+
 ## Normalized event
 
 Each `NewsArticle` becomes a strict-enum `NewsEvent` with article ID, event type, subtype, event timestamp, stance/sentiment, NQ direction, relevance, impact, surprise, confidence, themes, summary, reason, model version, and creation time. Initial categories are INFLATION, EMPLOYMENT, FED, INTEREST_RATES, TREASURY, ECONOMIC_GROWTH, CONSUMER, EARNINGS, MEGA_CAP_TECH, SEMICONDUCTORS, AI, GEOPOLITICAL, REGULATION, BANKING_CREDIT, and OTHER.
