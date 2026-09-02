@@ -236,6 +236,17 @@ async def get_macro_observations(
     return {"series_id": series_id, "observations": repository.list(series_id, limit)}
 
 
+@app.get("/api/v1/macro/events/{event_id}/reactions", tags=["macro"])
+async def get_macro_reactions(
+    event_id: str,
+    limit: int = 100,
+    repository: MacroRepository = Depends(get_macro_repository),
+) -> dict[str, object]:
+    if limit < 1 or limit > 500:
+        raise HTTPException(status_code=422, detail="limit must be between 1 and 500")
+    return {"event_id": event_id, "reactions": repository.list_reactions(event_id, limit)}
+
+
 @app.get("/api/v1/macro/upcoming", tags=["macro"])
 async def get_upcoming_macro_event(
     repository: NewsRepository = Depends(get_news_repository),

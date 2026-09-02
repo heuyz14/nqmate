@@ -24,3 +24,13 @@ class ScheduledRelease:
     release_id: str
     title: str
     scheduled_at: datetime
+
+
+@dataclass(frozen=True)
+class MacroReaction:
+    event_id: str
+    instrument: str
+    horizon: str
+    return_points: float | None
+    return_pct: float | None
+    observed_at: datetime

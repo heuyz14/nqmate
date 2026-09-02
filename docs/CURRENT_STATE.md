@@ -49,6 +49,7 @@ Phase 3 — Macro Pipeline (Phase 2 complete)
 - Phase 3 release-link/surprise slice added: explicit observation-to-release timestamp linking and `actual - forecast` persistence are implemented; migration `008_macro_surprises.sql` is pending application.
 - Migration `008_macro_surprises.sql` applied and verified through the macro API.
 - Phase 3 interpretation slice added: deterministic event-specific NQ surprise direction and rationale are persisted with migration `009_macro_surprise_interpretation.sql`.
+- Phase 3 reaction-storage slice added: migration `010_macro_reactions.sql`, repository persistence, and event reaction API are implemented for post-release NQ/yield outcome associations.
 
 ## In Progress
 
@@ -56,8 +57,8 @@ Phase 3 macro pipeline implementation is ready to begin.
 
 ## Next
 
-1. Apply migration `009_macro_surprise_interpretation.sql` and connect BLS release records to observations
-2. Add post-release NQ/yield reaction storage
+1. Apply migrations `009_macro_surprise_interpretation.sql` and `010_macro_reactions.sql`
+2. Connect BLS release records and observed NQ/yield reactions to event records
 3. Add macro ingestion orchestration and acceptance verification
 
 ## Important Decisions

@@ -29,6 +29,8 @@ Explicit BLS observation/release pairs can be linked with `link_release_timestam
 
 `interpret_surprise` applies event-specific deterministic semantics: hotter inflation or stronger labor data can be NQ-bearish through rates, while stronger growth releases use a growth-positive mapping with an explicit rate-context caveat. Unknown event types remain `UNKNOWN`; the LLM does not calculate or override these fields. Migration `009_macro_surprise_interpretation.sql` stores the direction and rationale.
 
+Post-release reactions are stored as associations in `macro_reactions` by event, instrument, horizon, points, percentage, and observed timestamp. They are descriptive outcomes, not causal claims; migration `010_macro_reactions.sql` adds the table and `/api/v1/macro/events/{id}/reactions` reads it.
+
 Run `jobs/ingest_macro.py --series-id SERIES --start-year YYYY --end-year YYYY --skip-calendar` to ingest BLS observations when the BLS calendar feed is unavailable. The normal job can ingest both the calendar and observations when the official calendar endpoint is reachable.
 
 ## Economic event model

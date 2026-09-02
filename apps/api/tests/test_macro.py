@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock
 
 import httpx
 
-from nqmate_api.macro.models import MacroObservation
+from nqmate_api.macro.models import MacroObservation, MacroReaction
 from nqmate_api.macro.providers import BLSProvider, BLSReleaseCalendarProvider, BEAProvider, FREDProvider
 from nqmate_api.macro.service import release_to_calendar_event
 from nqmate_api.news.models import EconomicCalendarEvent, CalendarImpact
@@ -111,6 +111,18 @@ class MacroTests(unittest.IsolatedAsyncioTestCase):
         release = ScheduledRelease("cpi-1", "Consumer Price Index", datetime(2026, 9, 11, 12, 30, tzinfo=timezone.utc))
         repository = FakeRepository(); link_release_timestamp(repository, observation, release)
         self.assertEqual(repository.value, ("CPI", "2026-08", release.scheduled_at))
+
+    def test_macro_reaction_repository_persists_association(self) -> None:
+        from unittest.mock import MagicMock
+        from nqmate_api.macro.repository import SupabaseMacroRepository
+
+        reaction = MacroReaction("event-1", "NQ", "5m", 12.5, 0.04, datetime.now(timezone.utc))
+        client = MagicMock()
+        SupabaseMacroRepository(client).upsert_reaction(reaction)
+        payload = client.table.return_value.upsert.call_args.args[0]
+        self.assertEqual(payload["event_id"], "event-1")
+        self.assertEqual(payload["instrument"], "NQ")
+        self.assertEqual(payload["horizon"], "5m")
 
     def test_surprise_interpretation_is_event_specific_for_inflation(self) -> None:
         from nqmate_api.macro.service import interpret_surprise
