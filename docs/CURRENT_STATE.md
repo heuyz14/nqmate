@@ -36,6 +36,7 @@ Phase 2 — News Pipeline
 - Phase 2 calendar persistence/API slice added: migration `004_economic_calendar.sql`, stable provider/time event identity, and `/api/v1/macro/calendar` retrieval.
 - Phase 2 ingestion slice added: configured Marketaux, Federal Reserve RSS, and Forex Factory providers are orchestrated by `jobs/ingest_news.py`; baseline deterministic article classification is persisted as cached events.
 - Phase 2 catalyst-awareness slice added: `/api/v1/macro/upcoming` returns the next HIGH-impact event, minutes until release, pre/post-release risk state, and economic surprise when available; pure surprise/risk logic is tested.
+- Phase 2 clustering slice added: normalized news events receive a stable logical-event key for near-duplicate grouping, with canonical-source selection preferring official Fed/BLS/BEA reporting; migration `005_news_clustering.sql` adds the persisted key.
 
 ## In Progress
 
@@ -43,9 +44,9 @@ Phase 2 news pipeline implementation, persistence, and ingestion integration.
 
 ## Next
 
-1. Add optional cached NLP extraction and cross-source event clustering
-2. Add official BLS/BEA release verification and economic-event reaction storage
-3. Complete Phase 2 integration tests and acceptance verification
+1. Apply migration `005_news_clustering.sql` in Supabase
+2. Add optional cached NLP extraction and cross-source cluster consolidation
+3. Add official BLS/BEA release verification and economic-event reaction storage
 
 ## Important Decisions
 

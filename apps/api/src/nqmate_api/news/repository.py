@@ -52,6 +52,7 @@ class SupabaseNewsRepository:
             "nq_relevance_score": event.nq_relevance_score, "impact_horizon": event.impact_horizon.value,
             "themes": list(event.themes), "confidence": event.confidence, "summary": event.summary,
             "reason": event.reason, "model_version": event.model_version, "created_at": _iso(event.created_at),
+            "logical_event_key": event.logical_event_key,
         }, on_conflict="article_id").execute()
 
     def list_events(self, high_impact_only: bool = False, limit: int = 50,

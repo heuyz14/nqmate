@@ -9,6 +9,7 @@ from nqmate_api.news.polling import polling_interval_seconds
 from nqmate_api.news.providers import ForexFactoryCalendarProvider, MarketauxNewsProvider
 from nqmate_api.news.relevance import nq_relevance_score
 from nqmate_api.news.store import NewsStore
+from nqmate_api.news.clustering import cluster_key, select_canonical_event
 from nqmate_api.news.service import classify_article, economic_surprise, pre_event_risk
 
 
@@ -35,6 +36,26 @@ class NewsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(event.event_type.value, "fed")
         self.assertEqual(event.event_timestamp, event.article.available_at)
         self.assertEqual(event.nq_direction.value, "unknown")
+
+    def test_cross_source_reports_share_a_cluster_key(self) -> None:
+        first = classify_article(article())
+        second_article = NewsArticle(
+            "fed", "2", "https://example.test/2", "Federal Reserve comments as NVDA rises",
+            "Federal Reserve", first.event_timestamp + timedelta(minutes=10),
+            first.event_timestamp + timedelta(minutes=10), "Fed comments", ("NVDA",), ("monetary policy",),
+        )
+        second = classify_article(second_article)
+        self.assertEqual(cluster_key(first), cluster_key(second))
+
+    def test_canonical_cluster_event_prefers_official_source(self) -> None:
+        market_event = classify_article(article())
+        official_article = NewsArticle(
+            "fed", "3", "https://example.test/3", "Federal Reserve issues statement",
+            "Federal Reserve", market_event.event_timestamp + timedelta(minutes=2),
+            market_event.event_timestamp + timedelta(minutes=2), "Statement", (), (),
+        )
+        official_event = classify_article(official_article)
+        self.assertIs(select_canonical_event([market_event, official_event]), official_event)
 
     def test_calendar_event_upsert_uses_stable_identity(self) -> None:
         from unittest.mock import MagicMock

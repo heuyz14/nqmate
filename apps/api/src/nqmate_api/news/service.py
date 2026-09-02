@@ -9,6 +9,7 @@ from nqmate_api.news.models import (
 )
 from nqmate_api.news.relevance import nq_relevance_score
 from nqmate_api.news.repository import NewsRepository
+from nqmate_api.news.clustering import cluster_key
 
 
 def economic_surprise(actual: float | None, forecast: float | None) -> float | None:
@@ -55,7 +56,20 @@ def classify_article(article: NewsArticle) -> NewsEvent:
         themes=article.topics, confidence=None, summary=article.summary,
         reason="Baseline deterministic classification; NLP extraction is optional.",
         model_version="rules-v1", created_at=datetime.now(timezone.utc),
+        logical_event_key=cluster_key_from_article(article, event_type),
     )
+
+
+def cluster_key_from_article(article: NewsArticle, event_type: NewsEventType) -> str:
+    """Build the same cluster identity used for persisted normalized events."""
+    provisional = NewsEvent(
+        article=article, event_type=event_type, event_subtype=None,
+        event_timestamp=article.published_at, stance=NewsStance.NEUTRAL,
+        sentiment=None, nq_direction=NewsDirection.UNKNOWN, impact=None,
+        nq_relevance_score=0, impact_horizon=ImpactHorizon.UNKNOWN, themes=article.topics,
+        confidence=None, summary=None, reason=None, model_version="", created_at=article.published_at,
+    )
+    return cluster_key(provisional)
 
 
 def persist_articles(repository: NewsRepository, articles: Sequence[NewsArticle]) -> int:

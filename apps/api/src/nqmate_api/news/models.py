@@ -87,3 +87,4 @@ class NewsEvent:
     reason: Optional[str]
     model_version: str
     created_at: datetime
+    logical_event_key: Optional[str] = None
