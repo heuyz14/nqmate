@@ -43,6 +43,7 @@ Phase 3 — Macro Pipeline (Phase 2 complete)
 - Phase 3 foundation slice added: official `BLSProvider` and point-in-time `MacroObservation` preserve release, retrieval, and vintage timestamps without fabricating release availability.
 - Phase 3 persistence slice added: migration `007_macro_observations.sql`, `SupabaseMacroRepository`, and `/api/v1/macro/observations` provide bounded official-observation storage and reads.
 - Phase 3 official-provider slice added: `FREDProvider` supports FRED/ALFRED realtime vintage bounds, and `BEAProvider` normalizes official dataset observations; both preserve unknown release times.
+- Phase 3 release-calendar slice added: `BLSReleaseCalendarProvider` parses the official BLS iCalendar feed into scheduled release records with timezone-aware UTC timestamps.
 
 ## In Progress
 
@@ -50,7 +51,7 @@ Phase 3 macro pipeline implementation is ready to begin.
 
 ## Next
 
-1. Add BLS release-calendar mapping and connect provider observations to event records
+1. Connect BLS scheduled releases and provider observations to event records
 2. Add economic-event surprise interpretation and post-release reaction storage
 3. Add macro ingestion orchestration and acceptance verification
 

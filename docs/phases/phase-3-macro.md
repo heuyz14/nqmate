@@ -19,7 +19,7 @@ Provide point-in-time macro context and a visible upcoming-event calendar.
 
 # Acceptance Criteria
 
-Dashboard shows the next important event; released events show actual, consensus, previous, surprise, and point-in-time availability; vintage-aware history is used where available. The current provider layer includes BLS, FRED/ALFRED, and BEA normalized observations.
+Dashboard shows the next important event; released events show actual, consensus, previous, surprise, and point-in-time availability; vintage-aware history is used where available. The current provider layer includes BLS series, the official BLS release calendar, FRED/ALFRED, and BEA normalized observations.
 
 # Tests
 

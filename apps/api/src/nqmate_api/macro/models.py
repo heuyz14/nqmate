@@ -17,3 +17,10 @@ class MacroObservation:
         """Require an explicit release time when evaluating historical availability."""
         available_at = self.released_at or self.retrieved_at
         return available_at <= timestamp
+
+
+@dataclass(frozen=True)
+class ScheduledRelease:
+    release_id: str
+    title: str
+    scheduled_at: datetime

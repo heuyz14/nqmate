@@ -19,6 +19,8 @@ Load the release schedule from [news-data.md](news-data.md), ingest official val
 
 The initial Phase 3 adapter is `BLSProvider` for the official BLS Public Data API v2. Its `MacroObservation` keeps `released_at`, `retrieved_at`, and `vintage_date` separate; because the BLS series response does not itself provide a release timestamp, the adapter leaves `released_at` and `vintage_date` null rather than inventing them. Historical backtests must use an explicitly known release time or the retrieval timestamp as the conservative availability boundary.
 
+`BLSReleaseCalendarProvider` parses the official [BLS iCalendar schedule](https://www.bls.gov/schedule/news_release/bls.ics) into `ScheduledRelease` records. The calendar supplies the authoritative scheduled timestamp; it is kept separate from the later series observation and actual release value.
+
 `SupabaseMacroRepository` persists these observations in `macro_observations`, and `/api/v1/macro/observations` provides bounded retrieval. Migration `007_macro_observations.sql` must be applied before persistence is used.
 
 `FREDProvider` retrieves official FRED series and accepts `realtime_start`/`realtime_end` for ALFRED-style vintage queries; the returned `realtime_start` is stored as `vintage_date`. `BEAProvider` retrieves a requested official dataset/table/line/period. Neither adapter invents release timestamps; release-calendar mapping remains a separate input.

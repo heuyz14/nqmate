@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from typing import Any, Sequence
 
 import httpx
 
-from nqmate_api.macro.models import MacroObservation
+from nqmate_api.macro.models import MacroObservation, ScheduledRelease
 
 
 class BLSProvider:
@@ -43,6 +44,42 @@ class BLSProvider:
                 vintage_date=None,
             ))
         return observations
+
+
+class BLSReleaseCalendarProvider:
+    """Parse the official BLS iCalendar release schedule."""
+
+    def __init__(self, url: str = "https://www.bls.gov/schedule/news_release/bls.ics", client: httpx.AsyncClient | None = None) -> None:
+        self._url, self._client = url, client or httpx.AsyncClient(timeout=30)
+
+    async def fetch(self) -> Sequence[ScheduledRelease]:
+        response = await self._client.get(self._url)
+        response.raise_for_status()
+        lines = [line.strip() for line in response.text.splitlines()]
+        releases: list[ScheduledRelease] = []
+        current: dict[str, str] = {}
+        for line in lines + ["END:VEVENT"]:
+            if line == "BEGIN:VEVENT":
+                current = {}
+            elif line == "END:VEVENT" and current:
+                if current.get("uid") and current.get("summary") and current.get("dtstart"):
+                    releases.append(ScheduledRelease(current["uid"], current["summary"], _parse_ics_datetime(current["dtstart"], current.get("tzid"))))
+                current = {}
+            elif ":" in line:
+                name, value = line.split(":", 1)
+                key, *parameters = name.split(";")
+                current[key.lower()] = value
+                for parameter in parameters:
+                    if parameter.startswith("TZID="):
+                        current["tzid"] = parameter[5:]
+        return releases
+
+
+def _parse_ics_datetime(value: str, timezone_name: str | None) -> datetime:
+    if value.endswith("Z"):
+        return datetime.strptime(value, "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
+    local = datetime.strptime(value, "%Y%m%dT%H%M%S")
+    return local.replace(tzinfo=ZoneInfo(timezone_name or "America/New_York")).astimezone(timezone.utc)
 
 
 class FREDProvider:

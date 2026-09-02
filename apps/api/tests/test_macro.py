@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock
 import httpx
 
 from nqmate_api.macro.models import MacroObservation
-from nqmate_api.macro.providers import BLSProvider, BEAProvider, FREDProvider
+from nqmate_api.macro.providers import BLSProvider, BLSReleaseCalendarProvider, BEAProvider, FREDProvider
 
 
 class MacroTests(unittest.IsolatedAsyncioTestCase):
@@ -30,6 +30,15 @@ class MacroTests(unittest.IsolatedAsyncioTestCase):
         client.post.return_value = response
         with self.assertRaises(ValueError):
             await BLSProvider(client=client).fetch("bad", 2026, 2026)
+
+    async def test_bls_calendar_parses_release_timestamp(self) -> None:
+        ics = "BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:employment-2026-09-04\nDTSTART;TZID=America/New_York:20260904T083000\nSUMMARY:Employment Situation\nEND:VEVENT\nEND:VCALENDAR"
+        response = httpx.Response(200, text=ics, request=httpx.Request("GET", "https://example.test"))
+        client = AsyncMock(spec=httpx.AsyncClient); client.get.return_value = response
+        result = await BLSReleaseCalendarProvider("https://example.test", client=client).fetch()
+        self.assertEqual(result[0].title, "Employment Situation")
+        self.assertEqual(result[0].release_id, "employment-2026-09-04")
+        self.assertEqual(result[0].scheduled_at.isoformat(), "2026-09-04T12:30:00+00:00")
 
     async def test_fred_provider_preserves_vintage_boundary(self) -> None:
         response = httpx.Response(200, json={"observations": [{
