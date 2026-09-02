@@ -67,6 +67,7 @@ class NewsTests(unittest.IsolatedAsyncioTestCase):
         result = await MarketauxNewsProvider("key", client=client, base_url="https://example.test").fetch()
         self.assertEqual(result[0].available_at, result[0].published_at)
         self.assertEqual(result[0].entities, ("NVDA",))
+        self.assertNotIn("published_before", client.get.await_args.kwargs["params"])
 
     def test_relevance_and_deduplication(self) -> None:
         item = article(); store = NewsStore()

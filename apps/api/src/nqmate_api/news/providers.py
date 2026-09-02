@@ -37,12 +37,15 @@ class MarketauxNewsProvider:
         close_client = self.client is None
         client = self.client or httpx.AsyncClient()
         try:
-            response = await client.get(f"{self.base_url}/v1/news/all", params={
+            params: dict[str, str | int] = {
                 "api_token": self.api_key, "search": query or "Nasdaq NQ futures",
                 "language": "en", "limit": 3,
-                "published_after": published_after.isoformat() if published_after else None,
-                "published_before": published_before.isoformat() if published_before else None,
-            }, timeout=30)
+            }
+            if published_after:
+                params["published_after"] = published_after.isoformat()
+            if published_before:
+                params["published_before"] = published_before.isoformat()
+            response = await client.get(f"{self.base_url}/v1/news/all", params=params, timeout=30)
             response.raise_for_status()
             now = datetime.now(timezone.utc)
             result = []
