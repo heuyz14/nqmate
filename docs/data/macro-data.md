@@ -17,6 +17,8 @@ Avoid Trading Economics in V1. SEC company events are owned by [news-data.md](ne
 
 Load the release schedule from [news-data.md](news-data.md), ingest official values, deduplicate, store scheduled and released times, and calculate the surprise after release. The dashboard must expose upcoming important events and, after release, actual/consensus/previous and NQ response. Source priority is official BLS/Fed/BEA, then Forex Factory for schedule/forecast, then Marketaux for breaking context.
 
+The initial Phase 3 adapter is `BLSProvider` for the official BLS Public Data API v2. Its `MacroObservation` keeps `released_at`, `retrieved_at`, and `vintage_date` separate; because the BLS series response does not itself provide a release timestamp, the adapter leaves `released_at` and `vintage_date` null rather than inventing them. Historical backtests must use an explicitly known release time or the retrieval timestamp as the conservative availability boundary.
+
 ## Economic event model
 
 `EconomicEvent` stores ID, event type, scheduled/released timestamps, actual, consensus, previous, absolute and standardized surprise, growth/inflation/rates directions, NQ expected effect, NQ actual 5m/30m/2h, and 10Y response at 5m/30m. Taxonomy includes Fed events, CPI/PPI/PCE/NFP/jobless claims/GDP/PMI/ISM/retail sales, and other required releases.

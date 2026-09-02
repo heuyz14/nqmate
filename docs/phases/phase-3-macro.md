@@ -23,7 +23,7 @@ Dashboard shows the next important event; released events show actual, consensus
 
 # Tests
 
-Parsing, surprise math, vintage selection, release timing, event categorization, and API integration tests.
+Parsing, surprise math, vintage selection, release timing, event categorization, and API integration tests. The initial BLS adapter and timestamp-separation behavior are covered in `apps/api/tests/test_macro.py`.
 
 # Explicitly Out of Scope
 
@@ -32,4 +32,3 @@ Bias engine, ML, deep learning, graph, and execution.
 # Next Phase
 
 [Phase 4 — Bias engine](phase-4-bias-engine.md).
-
