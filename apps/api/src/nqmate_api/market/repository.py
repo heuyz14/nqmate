@@ -21,6 +21,8 @@ class MarketRepository(Protocol):
 
     def get_session(self, session_date: date) -> MarketSession | None: ...
 
+    def get_previous_session(self, session_date: date) -> MarketSession | None: ...
+
     def get_bars(self, start: datetime, end: datetime, symbol: str | None = None) -> Sequence[MarketBar]: ...
 
 
@@ -112,6 +114,14 @@ class SupabaseMarketRepository:
             contract_row["roll_date"] = date.fromisoformat(contract_row["roll_date"])
         row["contract"] = MarketContract(**contract_row)
         return MarketSession(**row)
+
+    def get_previous_session(self, session_date: date) -> MarketSession | None:
+        response = self.client.table("market_sessions").select("session_date").lt(
+            "session_date", _iso(session_date)
+        ).order("session_date", desc=True).limit(1).execute()
+        if not response.data:
+            return None
+        return self.get_session(date.fromisoformat(response.data[0]["session_date"]))
 
     def get_bars(self, start: datetime, end: datetime, symbol: str | None = None) -> Sequence[MarketBar]:
         query = self.client.table("market_bars").select("*").gte(

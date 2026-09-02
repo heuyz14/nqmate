@@ -49,3 +49,7 @@ class MarketBarStore:
 
     def get_session(self, session_date: date) -> MarketSession | None:
         return self._sessions.get(session_date)
+
+    def get_previous_session(self, session_date: date) -> MarketSession | None:
+        prior_dates = [item for item in self._sessions if item < session_date]
+        return self._sessions[max(prior_dates)] if prior_dates else None
