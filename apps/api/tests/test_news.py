@@ -9,6 +9,7 @@ from nqmate_api.news.polling import polling_interval_seconds
 from nqmate_api.news.providers import ForexFactoryCalendarProvider, MarketauxNewsProvider
 from nqmate_api.news.relevance import nq_relevance_score
 from nqmate_api.news.store import NewsStore
+from nqmate_api.news.service import classify_article
 
 
 def article() -> NewsArticle:
@@ -17,6 +18,12 @@ def article() -> NewsArticle:
 
 
 class NewsTests(unittest.IsolatedAsyncioTestCase):
+    def test_baseline_classifier_preserves_point_in_time_article(self) -> None:
+        event = classify_article(article())
+        self.assertEqual(event.event_type.value, "fed")
+        self.assertEqual(event.event_timestamp, event.article.available_at)
+        self.assertEqual(event.nq_direction.value, "unknown")
+
     def test_calendar_event_upsert_uses_stable_identity(self) -> None:
         from unittest.mock import MagicMock
         from nqmate_api.news.repository import SupabaseNewsRepository
