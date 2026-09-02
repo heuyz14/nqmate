@@ -6,7 +6,7 @@ Always read this file at session start. It is the concise handoff for what exist
 
 ## Current Phase
 
-Phase 3 — Macro Pipeline (Phase 2 complete)
+Phase 4 — Bias Engine (Phase 3 implementation complete; BLS calendar live access remains network-dependent)
 
 ## Completed
 
@@ -54,16 +54,17 @@ Phase 3 — Macro Pipeline (Phase 2 complete)
 - Phase 3 market-bar sampling slice added: `sample_reactions` selects eligible pre/post-release NQ minute bars at 5m/15m/30m/60m horizons without imputing missing data.
 - Phase 3 event-reaction wiring added: `persist_sampled_reactions` connects sampled labels to calendar event IDs and persists them idempotently.
 - Phase 3 provider acceptance smoke tests passed: BLS returned 7 CPI observations, FRED/ALFRED returned observations, BEA returned 25 quarterly observations, and the reaction endpoint returned HTTP 200 against Supabase.
+- Phase 4 deterministic bias slice added: typed `BiasSnapshot`, weighted reproducible scoring, direction thresholds, normalized-input validation, and the 15-minute catalyst guardrail with `WAIT_FOR_RELEASE`.
 
 ## In Progress
 
-Phase 3 acceptance is complete for data APIs and persistence. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live.
+Phase 4 deterministic bias implementation is in progress. Phase 3 data APIs and persistence are accepted; the BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live.
 
 ## Next
 
-1. Retry BLS calendar ingestion from a permitted network
-2. Begin Phase 4 bias-engine preparation
-3. Add dashboard macro/reaction display
+1. Add bias evidence, invalidation, and counter-evidence fields
+2. Add bias API and immutable prediction persistence
+3. Add evidence-constrained LLM explanation after deterministic scoring
 
 ## Important Decisions
 

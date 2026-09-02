@@ -16,6 +16,8 @@ Generate a reproducible, conservative V0 bias without ML.
 - Add bias states, catalyst guardrail, bull/bear cases, invalidation, uncertainty, and strict JSON prompt contract.
 - Persist immutable predictions with evidence IDs, scores, model/feature/prompt versions; add current/history UI.
 
+The initial implementation slice provides `BiasSnapshot` and deterministic `score_bias` in `apps/api/src/nqmate_api/bias/`. Inputs are normalized to `[-1, 1]`; weights are overnight .20, gap .10, technical location .20, relative strength .15, macro .20, and news .15. A high-impact event within 15 minutes caps confidence at .55 and returns `WAIT_FOR_RELEASE`.
+
 # Acceptance Criteria
 
 Identical inputs produce the same score; high-impact events within 15 minutes cap confidence at .55 and recommend waiting; LLM output uses only supplied evidence and contains required fields.
@@ -31,4 +33,3 @@ ML probabilities, historical analogues, graph, strategy memory, and execution.
 # Next Phase
 
 [Phase 5 — Historical analogues](phase-5-analogues.md).
-
