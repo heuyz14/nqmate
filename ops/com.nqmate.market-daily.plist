@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.nqmate.market-daily</string>
+    <key>WorkingDirectory</key>
+    <string>/Users/bubba/ProjectPort/nqmate</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/bubba/ProjectPort/nqmate/apps/api/.venv/bin/python</string>
+        <string>-m</string>
+        <string>jobs.ingest_market_daily</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PYTHONPATH</key>
+        <string>/Users/bubba/ProjectPort/nqmate/apps/api/src</string>
+    </dict>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>16</integer>
+        <key>Minute</key>
+        <integer>5</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/Users/bubba/ProjectPort/nqmate/var/log/market-daily.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/bubba/ProjectPort/nqmate/var/log/market-daily.error.log</string>
+</dict>
+</plist>
