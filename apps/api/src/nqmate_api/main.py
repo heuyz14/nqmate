@@ -9,6 +9,7 @@ from nqmate_api.market.repository import MarketRepository, SupabaseMarketReposit
 from nqmate_api.market.calculations import EASTERN, REGULAR_END, REGULAR_START, aggregate_bars, technical_features
 from nqmate_api.market.calculations import weekly_opening_gaps
 from nqmate_api.news.repository import NewsRepository, SupabaseNewsRepository
+from nqmate_api.news.service import economic_surprise, pre_event_risk
 
 app = FastAPI(title="NQmate API", version="0.1.0")
 
@@ -206,3 +207,29 @@ async def get_macro_calendar(
     return {"start": start.isoformat(), "end": end.isoformat(), "events": repository.list_calendar_events(
         start.isoformat(), end.isoformat(), high_impact_only, limit,
     )}
+
+
+@app.get("/api/v1/macro/upcoming", tags=["macro"])
+async def get_upcoming_macro_event(
+    repository: NewsRepository = Depends(get_news_repository),
+) -> dict[str, object]:
+    now = datetime.now(timezone.utc)
+    events = repository.list_calendar_events(
+        now.isoformat(), (now + timedelta(days=14)).isoformat(), True, 100,
+    )
+    if not events:
+        return {"event": None, "minutes_until_event": None, "risk_state": None}
+
+    event = events[0]
+    scheduled_at = datetime.fromisoformat(str(event["scheduled_at"]).replace("Z", "+00:00"))
+    if scheduled_at.tzinfo is None:
+        scheduled_at = scheduled_at.replace(tzinfo=timezone.utc)
+    minutes_until = (scheduled_at - now).total_seconds() / 60
+    result = dict(event)
+    result["surprise"] = economic_surprise(event.get("actual"), event.get("forecast"))
+    result["minutes_until_event"] = round(minutes_until, 2)
+    return {
+        "event": result,
+        "minutes_until_event": round(minutes_until, 2),
+        "risk_state": pre_event_risk(scheduled_at, now),
+    }

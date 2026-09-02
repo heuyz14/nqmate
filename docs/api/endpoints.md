@@ -27,4 +27,4 @@ News reads return normalized event records backed by `news_articles` and `news_e
 
 `/news` and `/news/high-impact` default to the latest 14 days and accept optional `start`/`end` ISO datetimes. Older records remain queryable through explicit ranges.
 
-`/macro/calendar` returns persisted scheduled economic events filtered by ISO datetime range, with optional HIGH-impact filtering and a bounded limit.
+`/macro/calendar` returns persisted scheduled economic events filtered by ISO datetime range, with optional HIGH-impact filtering and a bounded limit. `/macro/upcoming` returns the next persisted HIGH-impact event within 14 days, raw `actual - forecast` surprise when both values exist, minutes until release, and the documented pre-event risk state.

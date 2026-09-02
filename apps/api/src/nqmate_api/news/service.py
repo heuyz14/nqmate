@@ -11,6 +11,29 @@ from nqmate_api.news.relevance import nq_relevance_score
 from nqmate_api.news.repository import NewsRepository
 
 
+def economic_surprise(actual: float | None, forecast: float | None) -> float | None:
+    """Return raw release surprise; missing values remain unavailable."""
+    if actual is None or forecast is None:
+        return None
+    return round(actual - forecast, 10)
+
+
+def pre_event_risk(scheduled_at: datetime, now: datetime) -> str:
+    """Classify the documented catalyst window around a scheduled release."""
+    minutes_until = (scheduled_at - now).total_seconds() / 60
+    if 0 < minutes_until <= 5:
+        return "CRITICAL_EVENT_RISK"
+    if 5 < minutes_until <= 30:
+        return "EVENT_RISK"
+    if -5 <= minutes_until <= 0:
+        return "INITIAL_REACTION"
+    if -30 <= minutes_until < -5:
+        return "CONTINUATION_REVERSAL"
+    if minutes_until > 30:
+        return "SCHEDULED"
+    return "OBSERVED"
+
+
 def classify_article(article: NewsArticle) -> NewsEvent:
     text = f"{article.headline} {article.summary or ''}".lower()
     if "fed" in text or "fomc" in text or "federal reserve" in text:

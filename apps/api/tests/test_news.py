@@ -1,5 +1,5 @@
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock
 
 import httpx
@@ -9,7 +9,7 @@ from nqmate_api.news.polling import polling_interval_seconds
 from nqmate_api.news.providers import ForexFactoryCalendarProvider, MarketauxNewsProvider
 from nqmate_api.news.relevance import nq_relevance_score
 from nqmate_api.news.store import NewsStore
-from nqmate_api.news.service import classify_article
+from nqmate_api.news.service import classify_article, economic_surprise, pre_event_risk
 
 
 def article() -> NewsArticle:
@@ -18,6 +18,18 @@ def article() -> NewsArticle:
 
 
 class NewsTests(unittest.IsolatedAsyncioTestCase):
+    def test_economic_surprise_is_actual_minus_forecast(self) -> None:
+        self.assertEqual(economic_surprise(3.4, 3.1), 0.3)
+        self.assertIsNone(economic_surprise(None, 3.1))
+        self.assertIsNone(economic_surprise(3.4, None))
+
+    def test_pre_event_risk_uses_release_windows(self) -> None:
+        now = datetime(2026, 9, 2, 12, tzinfo=timezone.utc)
+        self.assertEqual(pre_event_risk(now + timedelta(minutes=30), now), "EVENT_RISK")
+        self.assertEqual(pre_event_risk(now + timedelta(minutes=5), now), "CRITICAL_EVENT_RISK")
+        self.assertEqual(pre_event_risk(now + timedelta(minutes=2), now), "CRITICAL_EVENT_RISK")
+        self.assertEqual(pre_event_risk(now - timedelta(minutes=3), now), "INITIAL_REACTION")
+        self.assertEqual(pre_event_risk(now - timedelta(minutes=15), now), "CONTINUATION_REVERSAL")
     def test_baseline_classifier_preserves_point_in_time_article(self) -> None:
         event = classify_article(article())
         self.assertEqual(event.event_type.value, "fed")
@@ -91,3 +103,27 @@ class NewsTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["events"][0]["id"], "event-1")
+
+    def test_upcoming_macro_endpoint_returns_minutes_and_risk(self) -> None:
+        from fastapi.testclient import TestClient
+        from nqmate_api.main import app, get_news_repository
+
+        class FakeNewsRepository:
+            def list_calendar_events(self, start, end, high_impact_only=False, limit=100):
+                return [{
+                    "event": "CPI", "currency": "USD", "impact": "HIGH",
+                    "scheduled_at": (datetime.now(timezone.utc) + timedelta(minutes=3)).isoformat(),
+                    "actual": None, "forecast": 3.1, "previous": 3.0,
+                }]
+
+        app.dependency_overrides[get_news_repository] = FakeNewsRepository
+        try:
+            response = TestClient(app).get("/api/v1/macro/upcoming")
+        finally:
+            app.dependency_overrides.clear()
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body["event"]["event"], "CPI")
+        self.assertEqual(body["risk_state"], "CRITICAL_EVENT_RISK")
+        self.assertGreater(body["minutes_until_event"], 2)

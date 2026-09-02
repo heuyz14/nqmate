@@ -35,6 +35,7 @@ Phase 2 — News Pipeline
 - Forex Factory CSV export support verified against the configured `nfs.faireconomy.media/ff_calendar_thisweek.csv` feed; date/time values are normalized from the configured `FOREX_FACTORY_TIMEZONE`.
 - Phase 2 calendar persistence/API slice added: migration `004_economic_calendar.sql`, stable provider/time event identity, and `/api/v1/macro/calendar` retrieval.
 - Phase 2 ingestion slice added: configured Marketaux, Federal Reserve RSS, and Forex Factory providers are orchestrated by `jobs/ingest_news.py`; baseline deterministic article classification is persisted as cached events.
+- Phase 2 catalyst-awareness slice added: `/api/v1/macro/upcoming` returns the next HIGH-impact event, minutes until release, pre/post-release risk state, and economic surprise when available; pure surprise/risk logic is tested.
 
 ## In Progress
 
@@ -42,9 +43,9 @@ Phase 2 news pipeline implementation, persistence, and ingestion integration.
 
 ## Next
 
-1. Apply migrations `003_news.sql` and `004_economic_calendar.sql` in Supabase
-2. Configure provider URLs/keys and run `jobs.ingest_news` for a live smoke test
-3. Add optional cached NLP extraction and cross-source event clustering
+1. Add optional cached NLP extraction and cross-source event clustering
+2. Add official BLS/BEA release verification and economic-event reaction storage
+3. Complete Phase 2 integration tests and acceptance verification
 
 ## Important Decisions
 
@@ -64,4 +65,4 @@ None.
 
 ## Last Updated
 
-2026-09-01
+2026-09-02
