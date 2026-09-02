@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from nqmate_api.macro.models import ScheduledRelease
 from nqmate_api.news.models import CalendarImpact, EconomicCalendarEvent
+from typing import Sequence
+
+from nqmate_api.macro.models import MacroObservation
 
 _HIGH_IMPACT_RELEASES = (
     "employment situation", "consumer price index", "producer price index",
@@ -15,3 +18,9 @@ def release_to_calendar_event(release: ScheduledRelease) -> EconomicCalendarEven
     return EconomicCalendarEvent(
         event=title, currency="USD", impact=impact, scheduled_at=release.scheduled_at, source="bls",
     )
+
+
+def persist_observations(repository: object, observations: Sequence[MacroObservation]) -> int:
+    for observation in observations:
+        repository.upsert(observation)
+    return len(observations)

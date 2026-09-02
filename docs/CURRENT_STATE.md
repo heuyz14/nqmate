@@ -45,6 +45,7 @@ Phase 3 — Macro Pipeline (Phase 2 complete)
 - Phase 3 official-provider slice added: `FREDProvider` supports FRED/ALFRED realtime vintage bounds, and `BEAProvider` normalizes official dataset observations; both preserve unknown release times.
 - Phase 3 release-calendar slice added: `BLSReleaseCalendarProvider` parses the official BLS iCalendar feed into scheduled release records with timezone-aware UTC timestamps.
 - BLS calendar parser and mapping are tested; live ingestion currently receives HTTP 403 from BLS/Akamai in this environment, so the source URL is configurable and no fallback data is fabricated.
+- Phase 3 observation-ingestion slice added: `jobs/ingest_macro.py --series-id ... --skip-calendar` persists explicit BLS series observations independently of the blocked calendar feed; 2026 CPI smoke test stored 7 observations and API retrieval confirmed their `retrieved_at` metadata.
 
 ## In Progress
 

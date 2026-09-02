@@ -80,6 +80,18 @@ class MacroTests(unittest.IsolatedAsyncioTestCase):
         release = ScheduledRelease("other-1", "Import and Export Price Indexes", datetime(2026, 9, 10, 12, 30, tzinfo=timezone.utc))
         self.assertEqual(release_to_calendar_event(release).impact, CalendarImpact.MEDIUM)
 
+    def test_persist_observations_returns_count(self) -> None:
+        from nqmate_api.macro.service import persist_observations
+
+        class FakeRepository:
+            def __init__(self): self.items = []
+            def upsert(self, observation): self.items.append(observation)
+
+        observations = [MacroObservation("CPI", "2026-08", 1.0, None, datetime.now(timezone.utc), None)]
+        repository = FakeRepository()
+        self.assertEqual(persist_observations(repository, observations), 1)
+        self.assertEqual(repository.items, observations)
+
     def test_observation_is_point_in_time_eligible_only_with_release_or_retrieval_timestamp(self) -> None:
         observation = MacroObservation("CPI", "2026-08", 324.123, None, datetime.now(timezone.utc), None)
         self.assertIsNotNone(observation.retrieved_at)
