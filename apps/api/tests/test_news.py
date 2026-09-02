@@ -48,6 +48,14 @@ class NewsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result[0].actual, None)
         self.assertEqual(result[0].forecast, 0.3)
 
+    async def test_forex_factory_maps_csv_export(self) -> None:
+        response = httpx.Response(200, text="Title,Country,Date,Time,Impact,Forecast,Previous,URL\nCPI,USD,09-02-2026,8:30am,High,0.3%,0.2%,https://example.test/cpi\n", request=httpx.Request("GET", "https://example.test"))
+        client = AsyncMock(spec=httpx.AsyncClient); client.get.return_value = response
+        result = await ForexFactoryCalendarProvider("https://example.test", client=client).fetch()
+        self.assertEqual(result[0].event, "CPI")
+        self.assertEqual(result[0].impact.value, "HIGH")
+        self.assertEqual(result[0].forecast, 0.3)
+
     def test_adaptive_polling_windows(self) -> None:
         from datetime import datetime, timezone
         self.assertEqual(polling_interval_seconds(datetime(2026, 9, 1, 13, 0, tzinfo=timezone.utc)), 60)

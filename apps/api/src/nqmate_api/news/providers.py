@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import csv
+import io
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from typing import Any, Protocol, Sequence
 from xml.etree import ElementTree
+from zoneinfo import ZoneInfo
 
 import httpx
 
@@ -83,10 +86,10 @@ class FedRSSNewsProvider:
 class ForexFactoryCalendarProvider:
     """Adapter for a configured machine-readable Forex Factory calendar export."""
 
-    def __init__(self, export_url: str, client: httpx.AsyncClient | None = None) -> None:
+    def __init__(self, export_url: str, client: httpx.AsyncClient | None = None, timezone_name: str = "America/New_York") -> None:
         if not export_url:
             raise ValueError("Forex Factory export URL is required")
-        self.export_url, self.client = export_url, client
+        self.export_url, self.client, self.timezone = export_url, client, ZoneInfo(timezone_name)
 
     async def fetch(self) -> Sequence[EconomicCalendarEvent]:
         close_client = self.client is None
@@ -95,19 +98,30 @@ class ForexFactoryCalendarProvider:
             response = await client.get(self.export_url, timeout=30)
             response.raise_for_status()
             result = []
-            for item in response.json():
+            payload = response.text.lstrip()
+            rows = response.json() if payload.startswith("[") else list(csv.DictReader(io.StringIO(response.text)))
+            for item in rows:
                 currency = str(item.get("currency", "")).upper()
+                if not currency:
+                    currency = str(item.get("Country", "")).upper()
                 if currency != "USD":
                     continue
-                scheduled = item.get("scheduledAt") or item.get("date")
+                scheduled = item.get("scheduledAt") or item.get("date") or item.get("Date")
                 if not scheduled:
                     continue
+                if "T" not in str(scheduled):
+                    try:
+                        scheduled = datetime.strptime(
+                            f"{scheduled} {item.get('Time', '12:00am')}", "%m-%d-%Y %I:%M%p"
+                        ).replace(tzinfo=self.timezone).astimezone(timezone.utc).isoformat()
+                    except ValueError:
+                        continue
                 result.append(EconomicCalendarEvent(
-                    event=str(item.get("event", "")), currency=currency,
-                    impact=CalendarImpact(str(item.get("impact", "LOW")).upper()),
+                    event=str(item.get("event") or item.get("Title", "")), currency=currency,
+                    impact=CalendarImpact(str(item.get("impact") or item.get("Impact", "LOW")).upper()),
                     scheduled_at=_published(str(scheduled)), source="forex_factory",
-                    actual=_number(item.get("actual")), forecast=_number(item.get("forecast")),
-                    previous=_number(item.get("previous")),
+                    actual=_number(item.get("actual") or item.get("Actual")), forecast=_number(item.get("forecast") or item.get("Forecast")),
+                    previous=_number(item.get("previous") or item.get("Previous")),
                 ))
             return result
         finally:

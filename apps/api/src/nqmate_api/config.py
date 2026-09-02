@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     news_min_nq_relevance: float = 0.50
     news_high_impact_threshold: float = 0.75
     forex_factory_calendar_url: str | None = None
+    forex_factory_timezone: str = "America/New_York"
     fed_rss_url: str | None = None
     supabase_url: str = Field(default="", validation_alias="SUPABASE_URL")
     supabase_service_key: str | None = Field(default=None, validation_alias="SUPABASE_SERVICE_KEY")

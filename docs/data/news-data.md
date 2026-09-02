@@ -10,7 +10,7 @@ Use Marketaux Free rather than Benzinga for V1: approximately $0/month, 100 requ
 
 Also ingest Federal Reserve RSS/pages for decisions, policy releases, speeches, testimony, and press releases. Use SEC EDGAR, prioritizing 8-K filings for major Nasdaq weights; later include 10-Q and 10-K.
 
-Forex Factory machine-readable calendar exports are the primary schedule/consensus source for USD economic events. Normalize CPI/Core CPI, PPI, payrolls, unemployment, JOLTS, claims, ISM, confidence, GDP, retail sales, FOMC-related events, and Fed speakers with event, currency, impact (`LOW`/`MEDIUM`/`HIGH`), scheduled time, actual, forecast, previous, and `forex_factory` source. Prefer USD and HIGH-impact events. Forex Factory supplies schedule and expectations; official releases own authoritative actuals. Official source ownership and surprise semantics live in [macro-data.md](macro-data.md).
+Forex Factory machine-readable calendar exports are the primary schedule/consensus source for USD economic events. The current CSV export URL is `https://nfs.faireconomy.media/ff_calendar_thisweek.csv`; keep it configurable and parse its `Title`, `Country`, `Date`, `Time`, `Impact`, `Forecast`, `Previous`, and `URL` columns. Normalize CPI/Core CPI, PPI, payrolls, unemployment, JOLTS, claims, ISM, confidence, GDP, retail sales, FOMC-related events, and Fed speakers with event, currency, impact (`LOW`/`MEDIUM`/`HIGH`), scheduled time, actual, forecast, previous, and `forex_factory` source. Prefer USD and HIGH-impact events. Forex Factory supplies schedule and expectations; official releases own authoritative actuals. Official source ownership and surprise semantics live in [macro-data.md](macro-data.md).
 
 ## Polling and storage
 

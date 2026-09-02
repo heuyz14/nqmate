@@ -23,7 +23,10 @@ async def ingest_once() -> tuple[int, int]:
         articles = await FedRSSNewsProvider(settings.fed_rss_url or DEFAULT_FED_RSS_URL).fetch()
         article_count += persist_articles(repository, articles)
     if settings.forex_factory_enabled and settings.forex_factory_calendar_url:
-        events = await ForexFactoryCalendarProvider(settings.forex_factory_calendar_url).fetch()
+        events = await ForexFactoryCalendarProvider(
+            settings.forex_factory_calendar_url,
+            timezone_name=settings.forex_factory_timezone,
+        ).fetch()
         calendar_count += persist_calendar(repository, events)
     return article_count, calendar_count
 
