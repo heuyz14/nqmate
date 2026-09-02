@@ -109,7 +109,8 @@ def technical_features(bars: Sequence[MarketBar], prior_high: Optional[float] = 
     if latest is None:
         return {"return_5m": None, "return_15m": None, "return_30m": None,
                 "ema_9": None, "ema_20": None, "ema_50": None, "vwap": None,
-                "vwap_distance": None, "range_position": None}
+                "vwap_distance": None, "range_position": None,
+                "nq_es_relative_strength": None}
 
     def return_for(minutes: int) -> Optional[float]:
         if len(closes) <= minutes or closes[-minutes - 1] == 0:
@@ -126,6 +127,7 @@ def technical_features(bars: Sequence[MarketBar], prior_high: Optional[float] = 
         "vwap": vwap, "vwap_distance": latest.close - vwap if vwap is not None else None,
         "range_position": ((latest.close - session_low) / (session_high - session_low)
                            if session_high != session_low else None),
+        "nq_es_relative_strength": None,
         "prior_day_high_distance": latest.close - prior_high if prior_high is not None else None,
         "prior_day_low_distance": latest.close - prior_low if prior_low is not None else None,
     }
