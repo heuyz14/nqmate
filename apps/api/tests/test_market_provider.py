@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock
 import httpx
 
 from nqmate_api.market.contracts import ContinuousContractResolver
-from nqmate_api.market.models import MarketContract
+from nqmate_api.market.models import MarketContract, MarketSession
 from nqmate_api.market.providers import MassiveMarketDataProvider
 from nqmate_api.market.store import MarketBarStore
 from nqmate_api.market.models import MarketBar
@@ -97,6 +97,14 @@ class MarketEndpointTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["overnight_high"], 108)
         self.assertEqual(response.json()["contract"]["raw_contract_symbol"], "NQU6")
+
+    def test_store_finds_previous_trading_session_over_weekend(self) -> None:
+        contract = MarketContract("NQ", "NQU6", "NQ_CONT")
+        friday = MarketSession(date(2026, 8, 28), 100, 110, 90, 105, 0, 0, 0, 0, None, None, None, None, None, None, 0, None, contract)
+        store = MarketBarStore()
+        store.save_session(friday)
+
+        self.assertEqual(store.get_previous_session(date(2026, 8, 31)), friday)
 
     def test_weekly_gap_endpoint_returns_monday_gap(self) -> None:
         from nqmate_api.market.models import MarketSession
