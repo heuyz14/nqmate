@@ -6,6 +6,7 @@ from supabase import Client, create_client
 
 from nqmate_api.config import Settings
 from nqmate_api.news.models import EconomicCalendarEvent, NewsArticle, NewsEvent
+from nqmate_api.macro.service import event_surprise
 
 
 class NewsRepository(Protocol):
@@ -93,6 +94,7 @@ class SupabaseNewsRepository:
             "event": event.event, "currency": event.currency, "impact": event.impact.value,
             "scheduled_at": _iso(event.scheduled_at), "actual": event.actual,
             "forecast": event.forecast, "previous": event.previous,
+            "surprise": event.surprise if event.surprise is not None else event_surprise(event),
             "available_at": _iso(event.scheduled_at),
         }, on_conflict="provider,provider_event_id").execute()
 

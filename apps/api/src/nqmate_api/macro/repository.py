@@ -10,6 +10,7 @@ from nqmate_api.macro.models import MacroObservation
 
 class MacroRepository(Protocol):
     def upsert(self, observation: MacroObservation) -> None: ...
+    def set_released_at(self, series_id: str, period: str, released_at: Any) -> None: ...
     def list(self, series_id: str | None = None, limit: int = 100) -> Sequence[dict[str, Any]]: ...
 
 
@@ -33,6 +34,11 @@ class SupabaseMacroRepository:
             "value": observation.value, "released_at": _iso(observation.released_at),
             "retrieved_at": _iso(observation.retrieved_at), "vintage_date": _iso(observation.vintage_date),
         }, on_conflict="source,series_id,period,vintage_date").execute()
+
+    def set_released_at(self, series_id: str, period: str, released_at: Any) -> None:
+        self.client.table("macro_observations").update({
+            "released_at": _iso(released_at),
+        }).eq("source", "bls").eq("series_id", series_id).eq("period", period).execute()
 
     def list(self, series_id: str | None = None, limit: int = 100) -> Sequence[dict[str, Any]]:
         query = self.client.table("macro_observations").select("*").order("period", desc=True).limit(min(limit, 500))

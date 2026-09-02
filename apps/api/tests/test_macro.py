@@ -7,6 +7,7 @@ import httpx
 from nqmate_api.macro.models import MacroObservation
 from nqmate_api.macro.providers import BLSProvider, BLSReleaseCalendarProvider, BEAProvider, FREDProvider
 from nqmate_api.macro.service import release_to_calendar_event
+from nqmate_api.news.models import EconomicCalendarEvent, CalendarImpact
 
 
 class MacroTests(unittest.IsolatedAsyncioTestCase):
@@ -91,6 +92,25 @@ class MacroTests(unittest.IsolatedAsyncioTestCase):
         repository = FakeRepository()
         self.assertEqual(persist_observations(repository, observations), 1)
         self.assertEqual(repository.items, observations)
+
+    def test_event_surprise_is_actual_minus_forecast(self) -> None:
+        from nqmate_api.macro.service import event_surprise
+        event = EconomicCalendarEvent("CPI", "USD", CalendarImpact.HIGH, datetime.now(timezone.utc), "bls", actual=3.4, forecast=3.1)
+        self.assertEqual(event_surprise(event), 0.3)
+        self.assertIsNone(event_surprise(EconomicCalendarEvent("CPI", "USD", CalendarImpact.HIGH, datetime.now(timezone.utc), "bls")))
+
+    def test_release_link_updates_only_explicit_observation(self) -> None:
+        from nqmate_api.macro.models import ScheduledRelease
+        from nqmate_api.macro.service import link_release_timestamp
+
+        class FakeRepository:
+            def set_released_at(self, series_id, period, released_at):
+                self.value = (series_id, period, released_at)
+
+        observation = MacroObservation("CPI", "2026-08", 3.4, None, datetime.now(timezone.utc), None)
+        release = ScheduledRelease("cpi-1", "Consumer Price Index", datetime(2026, 9, 11, 12, 30, tzinfo=timezone.utc))
+        repository = FakeRepository(); link_release_timestamp(repository, observation, release)
+        self.assertEqual(repository.value, ("CPI", "2026-08", release.scheduled_at))
 
     def test_observation_is_point_in_time_eligible_only_with_release_or_retrieval_timestamp(self) -> None:
         observation = MacroObservation("CPI", "2026-08", 324.123, None, datetime.now(timezone.utc), None)

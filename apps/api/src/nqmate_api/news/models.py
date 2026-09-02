@@ -53,6 +53,7 @@ class EconomicCalendarEvent:
     actual: Optional[float] = None
     forecast: Optional[float] = None
     previous: Optional[float] = None
+    surprise: Optional[float] = None
 
 
 @dataclass(frozen=True)

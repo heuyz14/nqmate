@@ -24,3 +24,14 @@ def persist_observations(repository: object, observations: Sequence[MacroObserva
     for observation in observations:
         repository.upsert(observation)
     return len(observations)
+
+
+def event_surprise(event: EconomicCalendarEvent) -> float | None:
+    if event.actual is None or event.forecast is None:
+        return None
+    return round(event.actual - event.forecast, 10)
+
+
+def link_release_timestamp(repository: object, observation: MacroObservation, release: ScheduledRelease) -> None:
+    """Link only an explicit observation/release pair; never infer the period."""
+    repository.set_released_at(observation.series_id, observation.period, release.scheduled_at)
