@@ -42,6 +42,7 @@ Phase 3 — Macro Pipeline (Phase 2 complete)
 - Phase 2 completion slice added: clusters persist canonical provider, contributing providers, event count, and availability span; `/api/v1/news/clusters` exposes them, with migration `006_news_event_clusters.sql`.
 - Phase 3 foundation slice added: official `BLSProvider` and point-in-time `MacroObservation` preserve release, retrieval, and vintage timestamps without fabricating release availability.
 - Phase 3 persistence slice added: migration `007_macro_observations.sql`, `SupabaseMacroRepository`, and `/api/v1/macro/observations` provide bounded official-observation storage and reads.
+- Phase 3 official-provider slice added: `FREDProvider` supports FRED/ALFRED realtime vintage bounds, and `BEAProvider` normalizes official dataset observations; both preserve unknown release times.
 
 ## In Progress
 
@@ -49,9 +50,9 @@ Phase 3 macro pipeline implementation is ready to begin.
 
 ## Next
 
-1. Apply migration `007_macro_observations.sql` in Supabase and run a BLS persistence smoke test
-2. Add BLS release-calendar mapping and official BEA/FRED/ALFRED adapters
-3. Add economic-event surprise interpretation and post-release reaction storage
+1. Add BLS release-calendar mapping and connect provider observations to event records
+2. Add economic-event surprise interpretation and post-release reaction storage
+3. Add macro ingestion orchestration and acceptance verification
 
 ## Important Decisions
 

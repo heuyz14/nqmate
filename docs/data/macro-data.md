@@ -21,6 +21,8 @@ The initial Phase 3 adapter is `BLSProvider` for the official BLS Public Data AP
 
 `SupabaseMacroRepository` persists these observations in `macro_observations`, and `/api/v1/macro/observations` provides bounded retrieval. Migration `007_macro_observations.sql` must be applied before persistence is used.
 
+`FREDProvider` retrieves official FRED series and accepts `realtime_start`/`realtime_end` for ALFRED-style vintage queries; the returned `realtime_start` is stored as `vintage_date`. `BEAProvider` retrieves a requested official dataset/table/line/period. Neither adapter invents release timestamps; release-calendar mapping remains a separate input.
+
 ## Economic event model
 
 `EconomicEvent` stores ID, event type, scheduled/released timestamps, actual, consensus, previous, absolute and standardized surprise, growth/inflation/rates directions, NQ expected effect, NQ actual 5m/30m/2h, and 10Y response at 5m/30m. Taxonomy includes Fed events, CPI/PPI/PCE/NFP/jobless claims/GDP/PMI/ISM/retail sales, and other required releases.

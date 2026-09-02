@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock
 import httpx
 
 from nqmate_api.macro.models import MacroObservation
-from nqmate_api.macro.providers import BLSProvider
+from nqmate_api.macro.providers import BLSProvider, BEAProvider, FREDProvider
 
 
 class MacroTests(unittest.IsolatedAsyncioTestCase):
@@ -30,6 +30,26 @@ class MacroTests(unittest.IsolatedAsyncioTestCase):
         client.post.return_value = response
         with self.assertRaises(ValueError):
             await BLSProvider(client=client).fetch("bad", 2026, 2026)
+
+    async def test_fred_provider_preserves_vintage_boundary(self) -> None:
+        response = httpx.Response(200, json={"observations": [{
+            "realtime_start": "2026-09-01", "realtime_end": "2026-09-02",
+            "date": "2026-08-01", "value": "4.25"
+        }]}, request=httpx.Request("GET", "https://example.test"))
+        client = AsyncMock(spec=httpx.AsyncClient); client.get.return_value = response
+        result = await FREDProvider("test-key", client=client).fetch("DFF", realtime_start="2026-09-01", realtime_end="2026-09-02")
+        self.assertEqual(result[0].period, "2026-08-01")
+        self.assertEqual(result[0].value, 4.25)
+        self.assertEqual(result[0].vintage_date.isoformat(), "2026-09-01T00:00:00+00:00")
+
+    async def test_bea_provider_maps_official_data(self) -> None:
+        response = httpx.Response(200, json={"BEAAPI": {"Results": {"Data": [{
+            "LineDescription": "Personal consumption expenditures", "TimePeriod": "2026Q2", "DataValue": "123.4"
+        }]}}}, request=httpx.Request("GET", "https://example.test"))
+        client = AsyncMock(spec=httpx.AsyncClient); client.get.return_value = response
+        result = await BEAProvider("test-key", client=client).fetch("NIPA", "T10101", "1", "2026Q2")
+        self.assertEqual(result[0].period, "2026Q2")
+        self.assertEqual(result[0].value, 123.4)
 
     def test_observation_is_point_in_time_eligible_only_with_release_or_retrieval_timestamp(self) -> None:
         observation = MacroObservation("CPI", "2026-08", 324.123, None, datetime.now(timezone.utc), None)

@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     massive_api_key: str | None = None
     marketaux_api_key: str | None = None
     fred_api_key: str | None = None
+    bls_api_key: str | None = None
+    bea_api_key: str | None = None
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-3.6-flash"
     forex_factory_enabled: bool = True

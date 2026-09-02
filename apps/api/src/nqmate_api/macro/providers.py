@@ -43,3 +43,51 @@ class BLSProvider:
                 vintage_date=None,
             ))
         return observations
+
+
+class FREDProvider:
+    """Adapter for FRED observations; ALFRED vintages use the same endpoint."""
+
+    def __init__(self, api_key: str, client: httpx.AsyncClient | None = None, base_url: str = "https://api.stlouisfed.org/fred") -> None:
+        self._api_key, self._client, self._base_url = api_key, client or httpx.AsyncClient(timeout=30), base_url
+
+    async def fetch(self, series_id: str, realtime_start: str | None = None, realtime_end: str | None = None) -> Sequence[MacroObservation]:
+        params: dict[str, Any] = {"api_key": self._api_key, "file_type": "json", "series_id": series_id}
+        if realtime_start: params["realtime_start"] = realtime_start
+        if realtime_end: params["realtime_end"] = realtime_end
+        response = await self._client.get(f"{self._base_url}/series/observations", params=params)
+        response.raise_for_status()
+        payload = response.json()
+        observations = []
+        for row in payload.get("observations", []):
+            if row.get("value") in (None, "."):
+                continue
+            vintage = row.get("realtime_start")
+            observations.append(MacroObservation(
+                series_id=series_id, period=row["date"], value=float(row["value"]),
+                released_at=None, retrieved_at=datetime.now(timezone.utc),
+                vintage_date=datetime.fromisoformat(vintage).replace(tzinfo=timezone.utc) if vintage else None,
+            ))
+        return observations
+
+
+class BEAProvider:
+    """Adapter for official BEA public API datasets."""
+
+    def __init__(self, api_key: str, client: httpx.AsyncClient | None = None, base_url: str = "https://apps.bea.gov/api/data/") -> None:
+        self._api_key, self._client, self._base_url = api_key, client or httpx.AsyncClient(timeout=30), base_url
+
+    async def fetch(self, dataset: str, table: str, line: str, period: str) -> Sequence[MacroObservation]:
+        response = await self._client.get(self._base_url, params={
+            "UserID": self._api_key, "method": "GETDATA", "datasetname": dataset,
+            "TableName": table, "LineNumber": line, "Year": period[:4], "ResultFormat": "JSON",
+        })
+        response.raise_for_status()
+        payload = response.json().get("BEAAPI", {})
+        if payload.get("Results", {}).get("Error"):
+            raise ValueError("BEA request did not succeed")
+        rows = payload.get("Results", {}).get("Data", [])
+        return [MacroObservation(
+            series_id=f"{dataset}:{table}:{line}", period=row["TimePeriod"], value=float(str(row["DataValue"]).replace(",", "")),
+            released_at=None, retrieved_at=datetime.now(timezone.utc), vintage_date=None,
+        ) for row in rows if row.get("TimePeriod") == period and row.get("DataValue") not in (None, "")]
