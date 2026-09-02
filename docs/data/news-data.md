@@ -34,7 +34,7 @@ Expose the next HIGH-impact event and minutes until release. Use `EVENT_RISK` at
 
 Hide model access behind `LLMProvider` (`extract_event`, `summarize`, `reason_bias`) and support Gemini first, with OpenAI, Anthropic, and Ollama adapters later. Store embeddings for headlines/summaries/structured descriptions when introduced. Record post-event NQ/ES, 10Y, DXY, and VIX reactions at 5m/15m/30m/60m as associations, not causal claims. Combine similar-news retrieval with event type, regime, time, and relevance.
 
-The current optional `GeminiNewsExtractor` returns structured event fields and is wrapped by an in-process provider/ID cache during one ingestion run. Enable it only with `NEWS_NLP_ENABLED=true` and a server-side `GEMINI_API_KEY`; deterministic rules remain the default. Model output is validated before it can replace normalized fields.
+The current optional `GeminiNewsExtractor` returns structured event fields and is wrapped by an in-process provider/ID cache during one ingestion run. Enable it only with `NEWS_NLP_ENABLED=true` and a server-side `GEMINI_API_KEY`; deterministic rules remain the default. The default model is configurable through `GEMINI_MODEL` and currently uses `gemini-3.6-flash`. Model output is validated before it can replace normalized fields.
 
 Free AI tiers may allow provider use of submitted content for product improvement. Never send brokerage credentials, account IDs, personal financial information, or secret API keys to an AI provider.
 

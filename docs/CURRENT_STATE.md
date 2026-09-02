@@ -38,6 +38,7 @@ Phase 2 — News Pipeline
 - Phase 2 catalyst-awareness slice added: `/api/v1/macro/upcoming` returns the next HIGH-impact event, minutes until release, pre/post-release risk state, and economic surprise when available; pure surprise/risk logic is tested.
 - Phase 2 clustering slice added: normalized news events receive a stable logical-event key for near-duplicate grouping, with canonical-source selection preferring official Fed/BLS/BEA reporting; migration `005_news_clustering.sql` adds the persisted key.
 - Phase 2 optional NLP slice added: `GeminiNewsExtractor` is behind `NEWS_NLP_ENABLED`, validates structured output, and is wrapped in a provider/ID cache; deterministic classification remains the default.
+- Gemini configuration verified: the key authenticates successfully, the initial retired model was replaced with provider-recommended `gemini-3.6-flash`, and an NLP-enabled ingestion smoke test persisted structured fields successfully.
 
 ## In Progress
 

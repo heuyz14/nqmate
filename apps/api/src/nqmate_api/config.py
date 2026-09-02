@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     marketaux_api_key: str | None = None
     fred_api_key: str | None = None
     gemini_api_key: str | None = None
+    gemini_model: str = "gemini-3.6-flash"
     forex_factory_enabled: bool = True
     marketaux_enabled: bool = True
     bls_enabled: bool = True

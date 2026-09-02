@@ -42,9 +42,9 @@ class CachedNewsExtractor:
 class GeminiNewsExtractor:
     """Minimal structured-output adapter; callers should wrap it in the cache."""
 
-    def __init__(self, api_key: str, client: httpx.Client | None = None) -> None:
+    def __init__(self, api_key: str, model: str = "gemini-3.6-flash", client: httpx.Client | None = None) -> None:
         self._client = client or httpx.Client(timeout=30)
-        self._url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+        self._url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
         self._api_key = api_key
 
     def extract(self, article: NewsArticle) -> NewsExtraction:
