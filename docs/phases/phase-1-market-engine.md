@@ -17,6 +17,7 @@ Ingest historical minute bars and produce correct NQ contract-aware sessions and
 - Calculate PDH, PDL, PDC, ONH, ONL, midpoint, overnight return/range, opening gap, ATR(14), and initial technical features.
 - Backfill 1–2 years where available in resumable weekly batches; expose `GET /market/nq/session/{date}` and chart-level data.
 - Plan deterministic derived 1-hour, 4-hour, and daily candles from canonical minute bars, plus weekly opening-gap calculations.
+- Implement the initial deterministic technical features and expose their session snapshot endpoint.
 
 # Acceptance Criteria
 

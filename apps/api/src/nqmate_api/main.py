@@ -6,7 +6,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from nqmate_api.config import Settings
 from nqmate_api.health import check_neo4j, check_supabase, health_payload
 from nqmate_api.market.repository import MarketRepository, SupabaseMarketRepository
-from nqmate_api.market.calculations import aggregate_bars
+from nqmate_api.market.calculations import EASTERN, REGULAR_END, REGULAR_START, aggregate_bars, technical_features
 from nqmate_api.market.calculations import weekly_opening_gaps
 
 app = FastAPI(title="NQmate API", version="0.1.0")
@@ -134,3 +134,20 @@ async def get_nq_weekly_gaps(
             for gap in gaps
         ],
     }
+
+
+@app.get("/api/v1/market/nq/features", tags=["market"])
+async def get_nq_features(
+    session_date: date,
+    repository: MarketRepository = Depends(get_market_repository),
+) -> dict[str, object]:
+    session = repository.get_session(session_date)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Market session not found")
+    bars = repository.get_bars(
+        datetime.combine(session_date, REGULAR_START, EASTERN).astimezone(timezone.utc),
+        datetime.combine(session_date, REGULAR_END, EASTERN).astimezone(timezone.utc),
+    )
+    return {"session_date": session_date.isoformat(), "features": technical_features(
+        bars, session.prior_day_high, session.prior_day_low,
+    )}

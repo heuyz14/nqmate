@@ -90,6 +90,47 @@ def weekly_opening_gaps(sessions: Sequence[MarketSession]) -> list[WeeklyOpening
     return result
 
 
+def ema(values: Sequence[float], period: int) -> Optional[float]:
+    if len(values) < period:
+        return None
+    result = mean(values[:period])
+    multiplier = 2 / (period + 1)
+    for value in values[period:]:
+        result = (value - result) * multiplier + result
+    return result
+
+
+def technical_features(bars: Sequence[MarketBar], prior_high: Optional[float] = None,
+                       prior_low: Optional[float] = None) -> dict[str, Optional[float]]:
+    """Build deterministic features from chronologically ordered 1-minute bars."""
+    ordered = sorted(bars, key=lambda item: item.timestamp)
+    closes = [bar.close for bar in ordered]
+    latest = ordered[-1] if ordered else None
+    if latest is None:
+        return {"return_5m": None, "return_15m": None, "return_30m": None,
+                "ema_9": None, "ema_20": None, "ema_50": None, "vwap": None,
+                "vwap_distance": None, "range_position": None}
+
+    def return_for(minutes: int) -> Optional[float]:
+        if len(closes) <= minutes or closes[-minutes - 1] == 0:
+            return None
+        return closes[-1] / closes[-minutes - 1] - 1
+
+    volume = sum(bar.volume for bar in ordered)
+    vwap = sum(((bar.high + bar.low + bar.close) / 3) * bar.volume for bar in ordered) / volume if volume else None
+    session_high = max(bar.high for bar in ordered)
+    session_low = min(bar.low for bar in ordered)
+    return {
+        "return_5m": return_for(5), "return_15m": return_for(15), "return_30m": return_for(30),
+        "ema_9": ema(closes, 9), "ema_20": ema(closes, 20), "ema_50": ema(closes, 50),
+        "vwap": vwap, "vwap_distance": latest.close - vwap if vwap is not None else None,
+        "range_position": ((latest.close - session_low) / (session_high - session_low)
+                           if session_high != session_low else None),
+        "prior_day_high_distance": latest.close - prior_high if prior_high is not None else None,
+        "prior_day_low_distance": latest.close - prior_low if prior_low is not None else None,
+    }
+
+
 def atr(bars: Sequence[MarketBar], period: int = 14) -> Optional[float]:
     if len(bars) < period:
         return None

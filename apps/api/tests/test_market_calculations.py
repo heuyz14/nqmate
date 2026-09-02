@@ -1,7 +1,7 @@
 import unittest
 from datetime import date, datetime, timedelta, timezone
 
-from nqmate_api.market.calculations import aggregate_bars, atr, build_market_session, has_complete_session_bars, weekly_opening_gaps
+from nqmate_api.market.calculations import aggregate_bars, atr, build_market_session, has_complete_session_bars, technical_features, weekly_opening_gaps
 from nqmate_api.market.models import MarketBar, MarketContract, MarketSession
 
 
@@ -22,6 +22,17 @@ def bar(timestamp: datetime, value: float, provider: str = "test") -> MarketBar:
 
 
 class MarketCalculationTests(unittest.TestCase):
+    def test_technical_features_are_deterministic(self) -> None:
+        bars = [bar(datetime(2026, 9, 1, 13, i, tzinfo=timezone.utc), 100 + i) for i in range(50)]
+
+        result = technical_features(bars, prior_high=160, prior_low=90)
+
+        self.assertIsNotNone(result["ema_9"])
+        self.assertIsNotNone(result["ema_50"])
+        self.assertIsNotNone(result["vwap"])
+        self.assertAlmostEqual(result["return_5m"], 5 / 145)
+        self.assertAlmostEqual(result["range_position"], (150 - 99) / (151 - 99))
+
     def test_weekly_opening_gap_uses_prior_session_close(self) -> None:
         contract = MarketContract("NQ", "NQU6", "NQ_CONT")
         friday = MarketSession(date(2026, 8, 28), 100, 110, 90, 105, 0, 0, 0, 0, None, None, None, None, None, None, 0, None, contract)

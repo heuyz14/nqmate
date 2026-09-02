@@ -25,6 +25,7 @@ Phase 1 — Historical Market Engine (implementation complete; validation pendin
 - Backfill is rate-limited to Massive’s five requests per minute; the job reuses contracts until expiration and is safe to resume by date range.
 - Phase 1 derived market slice added: `/market/nq/bars` supports `1h`, `4h`, and `1d` deterministic aggregation from stored minute bars; weekly opening-gap calculation is available in the market calculation layer.
 - Weekly opening gaps are available through `/api/v1/market/nq/weekly-gaps`.
+- Deterministic feature endpoint added at `/api/v1/market/nq/features` with 5m/15m/30m returns, EMA 9/20/50, VWAP, VWAP distance, range position, and prior-level distances.
 
 ## In Progress
 
@@ -32,7 +33,7 @@ Phase 1 historical market engine implementation, persistence, and ingestion inte
 
 ## Next
 
-1. Validate session values, derived timeframes, and rollover dates against a trusted chart
+1. Validate session values, derived timeframes, feature values, and rollover dates against a trusted chart
 2. Prepare the Phase 2 handoff after validation
 
 ## Important Decisions
