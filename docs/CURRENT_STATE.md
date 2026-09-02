@@ -43,7 +43,7 @@ Phase 3 — Macro Pipeline (Phase 2 complete)
 - Phase 3 foundation slice added: official `BLSProvider` and point-in-time `MacroObservation` preserve release, retrieval, and vintage timestamps without fabricating release availability.
 - Phase 3 persistence slice added: migration `007_macro_observations.sql`, `SupabaseMacroRepository`, and `/api/v1/macro/observations` provide bounded official-observation storage and reads.
 - Phase 3 official-provider slice added: `FREDProvider` supports FRED/ALFRED realtime vintage bounds, and `BEAProvider` normalizes official dataset observations; both preserve unknown release times.
-- Phase 3 release-calendar slice added: `BLSReleaseCalendarProvider` parses the official BLS iCalendar feed into scheduled release records with timezone-aware UTC timestamps.
+- Phase 3 release-calendar slice added: `BLSReleaseCalendarProvider` parses the official BLS iCalendar feed into scheduled release records with timezone-aware UTC timestamps; live access remains blocked by BLS/Akamai HTTP 403 on this network.
 - BLS calendar parser and mapping are tested; live ingestion currently receives HTTP 403 from BLS/Akamai in this environment, so the source URL is configurable and no fallback data is fabricated.
 - Phase 3 observation-ingestion slice added: `jobs/ingest_macro.py --series-id ... --skip-calendar` persists explicit BLS series observations independently of the blocked calendar feed; 2026 CPI smoke test stored 7 observations and API retrieval confirmed their `retrieved_at` metadata.
 - Phase 3 release-link/surprise slice added: explicit observation-to-release timestamp linking and `actual - forecast` persistence are implemented; migration `008_macro_surprises.sql` is pending application.
@@ -53,16 +53,17 @@ Phase 3 — Macro Pipeline (Phase 2 complete)
 - Phase 3 reaction-calculation slice added: deterministic point and percentage returns from explicit base/observed prices are tested with zero-base protection.
 - Phase 3 market-bar sampling slice added: `sample_reactions` selects eligible pre/post-release NQ minute bars at 5m/15m/30m/60m horizons without imputing missing data.
 - Phase 3 event-reaction wiring added: `persist_sampled_reactions` connects sampled labels to calendar event IDs and persists them idempotently.
+- Phase 3 provider acceptance smoke tests passed: BLS returned 7 CPI observations, FRED/ALFRED returned observations, BEA returned 25 quarterly observations, and the reaction endpoint returned HTTP 200 against Supabase.
 
 ## In Progress
 
-Phase 3 macro pipeline implementation is ready to begin.
+Phase 3 acceptance is complete for data APIs and persistence. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live.
 
 ## Next
 
-1. Add macro ingestion orchestration and acceptance verification
-2. Verify BLS/BEA/FRED live provider smoke tests where network access permits
-3. Begin Phase 4 bias-engine preparation after macro acceptance
+1. Retry BLS calendar ingestion from a permitted network
+2. Begin Phase 4 bias-engine preparation
+3. Add dashboard macro/reaction display
 
 ## Important Decisions
 

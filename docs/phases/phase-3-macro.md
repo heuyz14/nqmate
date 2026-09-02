@@ -31,4 +31,4 @@ Bias engine, ML, deep learning, graph, and execution.
 
 # Next Phase
 
-[Phase 4 — Bias engine](phase-4-bias-engine.md).
+[Phase 4 — Bias engine](phase-4-bias-engine.md). Phase 3 provider and persistence acceptance is complete; live BLS calendar ingestion remains environment-dependent because the official ICS endpoint returns HTTP 403 here.

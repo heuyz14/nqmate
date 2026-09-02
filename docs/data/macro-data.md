@@ -23,7 +23,7 @@ The initial Phase 3 adapter is `BLSProvider` for the official BLS Public Data AP
 
 `SupabaseMacroRepository` persists these observations in `macro_observations`, and `/api/v1/macro/observations` provides bounded retrieval. Migration `007_macro_observations.sql` must be applied before persistence is used.
 
-`FREDProvider` retrieves official FRED series and accepts `realtime_start`/`realtime_end` for ALFRED-style vintage queries; the returned `realtime_start` is stored as `vintage_date`. `BEAProvider` retrieves a requested official dataset/table/line/period. Neither adapter invents release timestamps; release-calendar mapping remains a separate input.
+`FREDProvider` retrieves official FRED series and accepts `realtime_start`/`realtime_end` for ALFRED-style vintage queries; the returned `realtime_start` is stored as `vintage_date`. `BEAProvider` retrieves a requested official dataset/table/line/period and quarterly frequency. Neither adapter invents release timestamps; release-calendar mapping remains a separate input.
 
 Explicit BLS observation/release pairs can be linked with `link_release_timestamp`; the period is supplied by the caller and is never inferred from a title. Calendar events persist raw surprise (`actual - forecast`) when both values are available. Migration `008_macro_surprises.sql` adds the stored surprise field.
 

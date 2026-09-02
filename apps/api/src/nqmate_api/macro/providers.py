@@ -114,10 +114,10 @@ class BEAProvider:
     def __init__(self, api_key: str, client: httpx.AsyncClient | None = None, base_url: str = "https://apps.bea.gov/api/data/") -> None:
         self._api_key, self._client, self._base_url = api_key, client or httpx.AsyncClient(timeout=30), base_url
 
-    async def fetch(self, dataset: str, table: str, line: str, period: str) -> Sequence[MacroObservation]:
+    async def fetch(self, dataset: str, table: str, line: str, period: str, frequency: str = "Q") -> Sequence[MacroObservation]:
         response = await self._client.get(self._base_url, params={
             "UserID": self._api_key, "method": "GETDATA", "datasetname": dataset,
-            "TableName": table, "LineNumber": line, "Year": period[:4], "ResultFormat": "JSON",
+            "TableName": table, "LineNumber": line, "Year": period[:4], "Frequency": frequency, "ResultFormat": "JSON",
         })
         response.raise_for_status()
         payload = response.json().get("BEAAPI", {})
