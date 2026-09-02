@@ -63,6 +63,13 @@ def sample_reactions(event_id: str, release_at: object, bars: Sequence[MarketBar
     return reactions
 
 
+def persist_sampled_reactions(repository: object, event_id: str, release_at: object, bars: Sequence[MarketBar], horizons: Sequence[str] = ("5m", "15m", "30m", "60m")) -> int:
+    reactions = sample_reactions(event_id, release_at, bars, horizons)
+    for reaction in reactions:
+        repository.upsert_reaction(reaction)
+    return len(reactions)
+
+
 def link_release_timestamp(repository: object, observation: MacroObservation, release: ScheduledRelease) -> None:
     """Link only an explicit observation/release pair; never infer the period."""
     repository.set_released_at(observation.series_id, observation.period, release.scheduled_at)

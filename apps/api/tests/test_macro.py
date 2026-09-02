@@ -146,6 +146,20 @@ class MacroTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(ValueError):
             reaction_from_prices("event-1", "NQ", "5m", 0, 1, datetime.now(timezone.utc))
 
+    def test_persist_sampled_reactions_writes_each_available_horizon(self) -> None:
+        from nqmate_api.macro.service import persist_sampled_reactions
+        release = datetime(2026, 9, 2, 12, 30, tzinfo=timezone.utc)
+        def bar(minute, close):
+            timestamp = release + timedelta(minutes=minute)
+            return MarketBar("NQ", timestamp, "1min", close, close, close, close, 1, "massive", timestamp, timestamp)
+        class FakeRepository:
+            def __init__(self): self.items = []
+            def upsert_reaction(self, reaction): self.items.append(reaction)
+        repository = FakeRepository()
+        count = persist_sampled_reactions(repository, "event-1", release, [bar(-1, 20000), bar(6, 20010)], ("5m",))
+        self.assertEqual(count, 1)
+        self.assertEqual(repository.items[0].event_id, "event-1")
+
     def test_sample_reactions_uses_first_eligible_bar_at_each_horizon(self) -> None:
         from nqmate_api.macro.service import sample_reactions
         release = datetime(2026, 9, 2, 12, 30, tzinfo=timezone.utc)

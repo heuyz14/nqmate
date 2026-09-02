@@ -52,6 +52,7 @@ Phase 3 — Macro Pipeline (Phase 2 complete)
 - Phase 3 reaction-storage slice added: migration `010_macro_reactions.sql`, repository persistence, and event reaction API are implemented for post-release NQ/yield outcome associations.
 - Phase 3 reaction-calculation slice added: deterministic point and percentage returns from explicit base/observed prices are tested with zero-base protection.
 - Phase 3 market-bar sampling slice added: `sample_reactions` selects eligible pre/post-release NQ minute bars at 5m/15m/30m/60m horizons without imputing missing data.
+- Phase 3 event-reaction wiring added: `persist_sampled_reactions` connects sampled labels to calendar event IDs and persists them idempotently.
 
 ## In Progress
 
@@ -59,8 +60,8 @@ Phase 3 macro pipeline implementation is ready to begin.
 
 ## Next
 
-1. Connect BLS release records and sampled NQ/yield reactions to event records
-2. Add macro ingestion orchestration and acceptance verification
+1. Add macro ingestion orchestration and acceptance verification
+2. Verify BLS/BEA/FRED live provider smoke tests where network access permits
 3. Begin Phase 4 bias-engine preparation after macro acceptance
 
 ## Important Decisions
