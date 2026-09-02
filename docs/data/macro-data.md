@@ -19,7 +19,7 @@ Load the release schedule from [news-data.md](news-data.md), ingest official val
 
 The initial Phase 3 adapter is `BLSProvider` for the official BLS Public Data API v2. Its `MacroObservation` keeps `released_at`, `retrieved_at`, and `vintage_date` separate; because the BLS series response does not itself provide a release timestamp, the adapter leaves `released_at` and `vintage_date` null rather than inventing them. Historical backtests must use an explicitly known release time or the retrieval timestamp as the conservative availability boundary.
 
-`BLSReleaseCalendarProvider` parses the official [BLS iCalendar schedule](https://www.bls.gov/schedule/news_release/bls.ics) into `ScheduledRelease` records. The calendar supplies the authoritative scheduled timestamp; it is kept separate from the later series observation and actual release value.
+`BLSReleaseCalendarProvider` parses the official [BLS iCalendar schedule](https://www.bls.gov/schedule/news_release/bls.ics) into `ScheduledRelease` records. The calendar supplies the authoritative scheduled timestamp; it is kept separate from the later series observation and actual release value. `BLS_RELEASE_CALENDAR_URL` is configurable because public-network Akamai policies may deny some callers.
 
 `SupabaseMacroRepository` persists these observations in `macro_observations`, and `/api/v1/macro/observations` provides bounded retrieval. Migration `007_macro_observations.sql` must be applied before persistence is used.
 

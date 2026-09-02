@@ -44,6 +44,7 @@ Phase 3 — Macro Pipeline (Phase 2 complete)
 - Phase 3 persistence slice added: migration `007_macro_observations.sql`, `SupabaseMacroRepository`, and `/api/v1/macro/observations` provide bounded official-observation storage and reads.
 - Phase 3 official-provider slice added: `FREDProvider` supports FRED/ALFRED realtime vintage bounds, and `BEAProvider` normalizes official dataset observations; both preserve unknown release times.
 - Phase 3 release-calendar slice added: `BLSReleaseCalendarProvider` parses the official BLS iCalendar feed into scheduled release records with timezone-aware UTC timestamps.
+- BLS calendar parser and mapping are tested; live ingestion currently receives HTTP 403 from BLS/Akamai in this environment, so the source URL is configurable and no fallback data is fabricated.
 
 ## In Progress
 

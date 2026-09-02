@@ -53,7 +53,7 @@ class BLSReleaseCalendarProvider:
         self._url, self._client = url, client or httpx.AsyncClient(timeout=30)
 
     async def fetch(self) -> Sequence[ScheduledRelease]:
-        response = await self._client.get(self._url)
+        response = await self._client.get(self._url, headers={"User-Agent": "nqmate/0.1 (+https://github.com/heuyz14/nqmate)"})
         response.raise_for_status()
         lines = [line.strip() for line in response.text.splitlines()]
         releases: list[ScheduledRelease] = []

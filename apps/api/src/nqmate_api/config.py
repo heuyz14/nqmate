@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     marketaux_api_key: str | None = None
     fred_api_key: str | None = None
     bls_api_key: str | None = None
+    bls_release_calendar_url: str = "https://www.bls.gov/schedule/news_release/bls.ics"
     bea_api_key: str | None = None
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-3.6-flash"

@@ -6,6 +6,7 @@ import httpx
 
 from nqmate_api.macro.models import MacroObservation
 from nqmate_api.macro.providers import BLSProvider, BLSReleaseCalendarProvider, BEAProvider, FREDProvider
+from nqmate_api.macro.service import release_to_calendar_event
 
 
 class MacroTests(unittest.IsolatedAsyncioTestCase):
@@ -39,6 +40,7 @@ class MacroTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result[0].title, "Employment Situation")
         self.assertEqual(result[0].release_id, "employment-2026-09-04")
         self.assertEqual(result[0].scheduled_at.isoformat(), "2026-09-04T12:30:00+00:00")
+        self.assertIn("User-Agent", client.get.await_args.kwargs["headers"])
 
     async def test_fred_provider_preserves_vintage_boundary(self) -> None:
         response = httpx.Response(200, json={"observations": [{
@@ -59,6 +61,24 @@ class MacroTests(unittest.IsolatedAsyncioTestCase):
         result = await BEAProvider("test-key", client=client).fetch("NIPA", "T10101", "1", "2026Q2")
         self.assertEqual(result[0].period, "2026Q2")
         self.assertEqual(result[0].value, 123.4)
+
+    def test_bls_release_maps_to_high_impact_usd_calendar_event(self) -> None:
+        from nqmate_api.news.models import CalendarImpact
+        from nqmate_api.macro.models import ScheduledRelease
+
+        release = ScheduledRelease("employment-1", "Employment Situation", datetime(2026, 9, 4, 12, 30, tzinfo=timezone.utc))
+        event = release_to_calendar_event(release)
+        self.assertEqual(event.source, "bls")
+        self.assertEqual(event.currency, "USD")
+        self.assertEqual(event.impact, CalendarImpact.HIGH)
+        self.assertEqual(event.scheduled_at, release.scheduled_at)
+
+    def test_bls_release_mapping_does_not_mark_every_release_high_impact(self) -> None:
+        from nqmate_api.news.models import CalendarImpact
+        from nqmate_api.macro.models import ScheduledRelease
+
+        release = ScheduledRelease("other-1", "Import and Export Price Indexes", datetime(2026, 9, 10, 12, 30, tzinfo=timezone.utc))
+        self.assertEqual(release_to_calendar_event(release).impact, CalendarImpact.MEDIUM)
 
     def test_observation_is_point_in_time_eligible_only_with_release_or_retrieval_timestamp(self) -> None:
         observation = MacroObservation("CPI", "2026-08", 324.123, None, datetime.now(timezone.utc), None)
