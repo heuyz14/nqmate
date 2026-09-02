@@ -20,7 +20,7 @@ async def ingest_once() -> tuple[int, int]:
     calendar_count = 0
     extractor: NewsEventExtractor | None = None
     if settings.news_nlp_enabled and settings.gemini_api_key:
-        extractor = CachedNewsExtractor(GeminiNewsExtractor(settings.gemini_api_key).extract)
+        extractor = CachedNewsExtractor(GeminiNewsExtractor(settings.gemini_api_key, settings.gemini_model).extract)
     recent_cutoff = datetime.now(timezone.utc) - timedelta(days=14)
     if settings.marketaux_enabled and settings.marketaux_api_key:
         articles = await MarketauxNewsProvider(settings.marketaux_api_key).fetch(published_after=recent_cutoff)
