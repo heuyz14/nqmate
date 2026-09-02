@@ -16,6 +16,16 @@ class Settings(BaseSettings):
     marketaux_api_key: str | None = None
     fred_api_key: str | None = None
     gemini_api_key: str | None = None
+    forex_factory_enabled: bool = True
+    marketaux_enabled: bool = True
+    bls_enabled: bool = True
+    federal_reserve_enabled: bool = True
+    bea_enabled: bool = True
+    news_poll_interval_active: int = 60
+    news_poll_interval_idle: int = 300
+    news_min_nq_relevance: float = 0.50
+    news_high_impact_threshold: float = 0.75
+    forex_factory_calendar_url: str | None = None
     supabase_url: str = Field(default="", validation_alias="SUPABASE_URL")
     supabase_service_key: str | None = Field(default=None, validation_alias="SUPABASE_SERVICE_KEY")
     neo4j_uri: str = "bolt://localhost:7687"

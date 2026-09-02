@@ -2,16 +2,20 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
-from typing import Protocol, Sequence
+from typing import Any, Protocol, Sequence
 from xml.etree import ElementTree
 
 import httpx
 
-from nqmate_api.news.models import NewsArticle
+from nqmate_api.news.models import CalendarImpact, EconomicCalendarEvent, NewsArticle
 
 
 class NewsProvider(Protocol):
     async def fetch(self, query: str | None = None) -> Sequence[NewsArticle]: ...
+
+
+class EconomicCalendarProvider(Protocol):
+    async def fetch(self) -> Sequence[EconomicCalendarEvent]: ...
 
 
 def _published(value: str) -> datetime:
@@ -74,3 +78,47 @@ class FedRSSNewsProvider:
         finally:
             if close_client:
                 await client.aclose()
+
+
+class ForexFactoryCalendarProvider:
+    """Adapter for a configured machine-readable Forex Factory calendar export."""
+
+    def __init__(self, export_url: str, client: httpx.AsyncClient | None = None) -> None:
+        if not export_url:
+            raise ValueError("Forex Factory export URL is required")
+        self.export_url, self.client = export_url, client
+
+    async def fetch(self) -> Sequence[EconomicCalendarEvent]:
+        close_client = self.client is None
+        client = self.client or httpx.AsyncClient()
+        try:
+            response = await client.get(self.export_url, timeout=30)
+            response.raise_for_status()
+            result = []
+            for item in response.json():
+                currency = str(item.get("currency", "")).upper()
+                if currency != "USD":
+                    continue
+                scheduled = item.get("scheduledAt") or item.get("date")
+                if not scheduled:
+                    continue
+                result.append(EconomicCalendarEvent(
+                    event=str(item.get("event", "")), currency=currency,
+                    impact=CalendarImpact(str(item.get("impact", "LOW")).upper()),
+                    scheduled_at=_published(str(scheduled)), source="forex_factory",
+                    actual=_number(item.get("actual")), forecast=_number(item.get("forecast")),
+                    previous=_number(item.get("previous")),
+                ))
+            return result
+        finally:
+            if close_client:
+                await client.aclose()
+
+
+def _number(value: Any) -> float | None:
+    if value is None or value == "":
+        return None
+    try:
+        return float(str(value).replace(",", "").replace("%", ""))
+    except ValueError:
+        return None

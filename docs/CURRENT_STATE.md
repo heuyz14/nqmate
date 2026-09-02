@@ -30,6 +30,7 @@ Phase 2 — News Pipeline
 - Phase 2 news slice added: Marketaux and Fed RSS adapters, strict normalized article/event models, deterministic NQ relevance scoring, and provider/ID deduplication store.
 - Phase 2 requirements expanded: Forex Factory calendar, official-release priority, adaptive polling, multi-axis classification, surprise semantics, logical cross-source deduplication, and pre-event risk awareness.
 - Phase 2 persistence/API slice added: Supabase migration `003_news.sql`, server-side article/event repository, and `/api/v1/news` plus `/api/v1/news/high-impact` read endpoints.
+- Phase 2 calendar/polling slice added: Forex Factory USD calendar normalization, configurable ET adaptive polling cadence, and environment flags for source enablement and relevance thresholds.
 
 ## In Progress
 
@@ -38,7 +39,7 @@ Phase 2 news pipeline implementation, persistence, and ingestion integration.
 ## Next
 
 1. Apply migration `003_news.sql` in Supabase
-2. Add Forex Factory calendar adapter and scheduled/manual polling
+2. Add calendar/event persistence and upcoming-event API retrieval
 3. Add optional cached NLP extraction and cross-source event clustering
 
 ## Important Decisions

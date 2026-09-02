@@ -37,6 +37,24 @@ class ImpactHorizon(StrEnum):
     UNKNOWN = "unknown"
 
 
+class CalendarImpact(StrEnum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+
+
+@dataclass(frozen=True)
+class EconomicCalendarEvent:
+    event: str
+    currency: str
+    impact: CalendarImpact
+    scheduled_at: datetime
+    source: str
+    actual: Optional[float] = None
+    forecast: Optional[float] = None
+    previous: Optional[float] = None
+
+
 @dataclass(frozen=True)
 class NewsArticle:
     provider: str
