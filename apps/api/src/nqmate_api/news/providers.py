@@ -42,9 +42,9 @@ class MarketauxNewsProvider:
                 "language": "en", "limit": 3,
             }
             if published_after:
-                params["published_after"] = published_after.isoformat()
+                params["published_after"] = published_after.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
             if published_before:
-                params["published_before"] = published_before.isoformat()
+                params["published_before"] = published_before.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
             response = await client.get(f"{self.base_url}/v1/news/all", params=params, timeout=30)
             response.raise_for_status()
             now = datetime.now(timezone.utc)

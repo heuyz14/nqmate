@@ -64,10 +64,13 @@ class NewsTests(unittest.IsolatedAsyncioTestCase):
     async def test_marketaux_maps_article_and_publication_availability(self) -> None:
         response = httpx.Response(200, json={"data": [{"uuid": "1", "url": "https://example.test/1", "title": "Headline", "source": "Example", "published_at": "2026-09-01T12:00:00Z", "description": "Summary", "entities": [{"symbol": "NVDA"}], "topics": [{"name": "technology"}]}]}, request=httpx.Request("GET", "https://example.test"))
         client = AsyncMock(spec=httpx.AsyncClient); client.get.return_value = response
-        result = await MarketauxNewsProvider("key", client=client, base_url="https://example.test").fetch()
+        result = await MarketauxNewsProvider("key", client=client, base_url="https://example.test").fetch(
+            published_after=datetime(2026, 9, 1, 12, 0, tzinfo=timezone.utc)
+        )
         self.assertEqual(result[0].available_at, result[0].published_at)
         self.assertEqual(result[0].entities, ("NVDA",))
         self.assertNotIn("published_before", client.get.await_args.kwargs["params"])
+        self.assertEqual(client.get.await_args.kwargs["params"]["published_after"], "2026-09-01T12:00:00")
 
     def test_relevance_and_deduplication(self) -> None:
         item = article(); store = NewsStore()
