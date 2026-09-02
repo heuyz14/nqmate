@@ -10,6 +10,7 @@ from nqmate_api.market.calculations import EASTERN, REGULAR_END, REGULAR_START, 
 from nqmate_api.market.calculations import weekly_opening_gaps
 from nqmate_api.news.repository import NewsRepository, SupabaseNewsRepository
 from nqmate_api.news.service import economic_surprise, pre_event_risk
+from nqmate_api.macro.repository import MacroRepository, SupabaseMacroRepository
 
 app = FastAPI(title="NQmate API", version="0.1.0")
 
@@ -22,6 +23,11 @@ def get_market_repository() -> MarketRepository:
 @lru_cache(maxsize=1)
 def get_news_repository() -> NewsRepository:
     return SupabaseNewsRepository.from_settings(Settings())
+
+
+@lru_cache(maxsize=1)
+def get_macro_repository() -> MacroRepository:
+    return SupabaseMacroRepository.from_settings(Settings())
 
 
 @app.get("/health", tags=["health"])
@@ -217,6 +223,17 @@ async def get_macro_calendar(
     return {"start": start.isoformat(), "end": end.isoformat(), "events": repository.list_calendar_events(
         start.isoformat(), end.isoformat(), high_impact_only, limit,
     )}
+
+
+@app.get("/api/v1/macro/observations", tags=["macro"])
+async def get_macro_observations(
+    series_id: str | None = None,
+    limit: int = 100,
+    repository: MacroRepository = Depends(get_macro_repository),
+) -> dict[str, object]:
+    if limit < 1 or limit > 500:
+        raise HTTPException(status_code=422, detail="limit must be between 1 and 500")
+    return {"series_id": series_id, "observations": repository.list(series_id, limit)}
 
 
 @app.get("/api/v1/macro/upcoming", tags=["macro"])

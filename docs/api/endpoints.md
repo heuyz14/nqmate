@@ -10,7 +10,7 @@ Base path: `/api/v1`.
 |---|---|
 | Market | `GET /market/nq/session/current`, `/market/nq/bars`, `/market/nq/levels`, `/market/nq/weekly-gaps`, `/market/nq/features`, and `/market/nq/session/{date}` |
 | News | `GET /news`, `/news/high-impact`, `/news/clusters`, `/news/{id}`; `POST /news/refresh` |
-| Macro | `GET /macro/calendar`, `/macro/upcoming`, `/macro/events/{id}` |
+| Macro | `GET /macro/calendar`, `/macro/upcoming`, `/macro/observations`, `/macro/events/{id}` |
 | Bias | `GET /bias/current`, `/bias/history`, `/bias/{id}`; `POST /bias/generate` |
 | Regimes | `GET /regimes/current`, `/regimes/similar`, `/regimes/{id}` |
 | Strategies | `GET /strategies`; `POST /strategies`; `GET/PATCH /strategies/{id}`; `GET /strategies/{id}/performance` |
@@ -28,3 +28,5 @@ News reads return normalized event records backed by `news_articles` and `news_e
 `/news` and `/news/high-impact` default to the latest 14 days and accept optional `start`/`end` ISO datetimes. Older records remain queryable through explicit ranges.
 
 `/macro/calendar` returns persisted scheduled economic events filtered by ISO datetime range, with optional HIGH-impact filtering and a bounded limit. `/macro/upcoming` returns the next persisted HIGH-impact event within 14 days, raw `actual - forecast` surprise when both values exist, minutes until release, and the documented pre-event risk state.
+
+`/macro/observations` returns persisted official macro observations, optionally filtered by `series_id`, with a bounded limit.

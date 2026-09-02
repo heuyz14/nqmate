@@ -41,6 +41,7 @@ Phase 3 — Macro Pipeline (Phase 2 complete)
 - Gemini configuration verified: the key authenticates successfully, the initial retired model was replaced with provider-recommended `gemini-3.6-flash`, and an NLP-enabled ingestion smoke test persisted structured fields successfully.
 - Phase 2 completion slice added: clusters persist canonical provider, contributing providers, event count, and availability span; `/api/v1/news/clusters` exposes them, with migration `006_news_event_clusters.sql`.
 - Phase 3 foundation slice added: official `BLSProvider` and point-in-time `MacroObservation` preserve release, retrieval, and vintage timestamps without fabricating release availability.
+- Phase 3 persistence slice added: migration `007_macro_observations.sql`, `SupabaseMacroRepository`, and `/api/v1/macro/observations` provide bounded official-observation storage and reads.
 
 ## In Progress
 
@@ -48,8 +49,8 @@ Phase 3 macro pipeline implementation is ready to begin.
 
 ## Next
 
-1. Add BLS release-calendar mapping and persistent macro observations
-2. Add official BEA/FRED/ALFRED adapters with vintage-aware retrieval
+1. Apply migration `007_macro_observations.sql` in Supabase and run a BLS persistence smoke test
+2. Add BLS release-calendar mapping and official BEA/FRED/ALFRED adapters
 3. Add economic-event surprise interpretation and post-release reaction storage
 
 ## Important Decisions

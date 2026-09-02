@@ -34,3 +34,31 @@ class MacroTests(unittest.IsolatedAsyncioTestCase):
     def test_observation_is_point_in_time_eligible_only_with_release_or_retrieval_timestamp(self) -> None:
         observation = MacroObservation("CPI", "2026-08", 324.123, None, datetime.now(timezone.utc), None)
         self.assertIsNotNone(observation.retrieved_at)
+
+    def test_macro_repository_persists_timestamp_fields(self) -> None:
+        from unittest.mock import MagicMock
+        from nqmate_api.macro.repository import SupabaseMacroRepository
+
+        observation = MacroObservation("CUUR0000SA0", "2026-08", 324.123, None, datetime.now(timezone.utc), None)
+        client = MagicMock()
+        SupabaseMacroRepository(client).upsert(observation)
+        payload = client.table.return_value.upsert.call_args.args[0]
+        self.assertEqual(payload["series_id"], "CUUR0000SA0")
+        self.assertIsNone(payload["released_at"])
+        self.assertIn("retrieved_at", payload)
+
+    def test_macro_observations_endpoint_reads_repository(self) -> None:
+        from fastapi.testclient import TestClient
+        from nqmate_api.main import app, get_macro_repository
+
+        class FakeMacroRepository:
+            def list(self, series_id=None, limit=100):
+                return [{"series_id": series_id, "period": "2026-08", "value": 324.123}]
+
+        app.dependency_overrides[get_macro_repository] = lambda: FakeMacroRepository()
+        try:
+            response = TestClient(app).get("/api/v1/macro/observations?series_id=CUUR0000SA0&limit=1")
+        finally:
+            app.dependency_overrides.clear()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["observations"][0]["period"], "2026-08")

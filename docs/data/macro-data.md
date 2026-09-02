@@ -19,6 +19,8 @@ Load the release schedule from [news-data.md](news-data.md), ingest official val
 
 The initial Phase 3 adapter is `BLSProvider` for the official BLS Public Data API v2. Its `MacroObservation` keeps `released_at`, `retrieved_at`, and `vintage_date` separate; because the BLS series response does not itself provide a release timestamp, the adapter leaves `released_at` and `vintage_date` null rather than inventing them. Historical backtests must use an explicitly known release time or the retrieval timestamp as the conservative availability boundary.
 
+`SupabaseMacroRepository` persists these observations in `macro_observations`, and `/api/v1/macro/observations` provides bounded retrieval. Migration `007_macro_observations.sql` must be applied before persistence is used.
+
 ## Economic event model
 
 `EconomicEvent` stores ID, event type, scheduled/released timestamps, actual, consensus, previous, absolute and standardized surprise, growth/inflation/rates directions, NQ expected effect, NQ actual 5m/30m/2h, and 10Y response at 5m/30m. Taxonomy includes Fed events, CPI/PPI/PCE/NFP/jobless claims/GDP/PMI/ISM/retail sales, and other required releases.
