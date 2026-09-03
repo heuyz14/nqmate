@@ -18,7 +18,7 @@ from nqmate_api.bias.llm import GeminiBiasExplainer, LLMProvider
 from nqmate_api.bias.repository import BiasRepository, SupabaseBiasRepository
 from nqmate_api.bias.service import score_bias
 from nqmate_api.analogues.repository import AnalogueRepository, SupabaseAnalogueRepository
-from nqmate_api.analogues.service import rank_analogues
+from nqmate_api.analogues.service import rank_analogues, session_features
 
 app = FastAPI(title="NQmate API", version="0.1.0")
 
@@ -205,6 +205,17 @@ async def get_nq_features(
     return {"session_date": session_date.isoformat(), "features": technical_features(
         bars, session.prior_day_high, session.prior_day_low,
     )}
+
+
+@app.get("/api/v1/market/nq/analogue-features", tags=["market"])
+async def get_nq_analogue_features(
+    session_date: date,
+    repository: MarketRepository = Depends(get_market_repository),
+) -> dict[str, object]:
+    session = repository.get_session(session_date)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Market session not found")
+    return {"session_date": session_date.isoformat(), "feature_version": "analogue-v1", "features": session_features(session)}
 
 
 @app.get("/api/v1/news", tags=["news"])

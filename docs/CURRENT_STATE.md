@@ -70,6 +70,7 @@ Phase 5 — Historical Analogues (Phase 4 implementation complete; BLS calendar 
 - Phase 5 bias integration slice added: optional analogue bull-rate and return summaries enrich deterministic bias evidence/cases without changing Phase 4 score weights or catalyst guardrails.
 - Phase 5 end-to-end API slice added: `POST /bias/generate` can retrieve point-in-time analogues, feed their aggregate summary into evidence, and return ranked matches with the prediction.
 - Phase 5 dashboard slice added: `/regime` provides a responsive, accessible historical-regime query form and results table backed by `POST /regimes/similar`.
+- Phase 5 market-context slice added: `GET /market/nq/analogue-features` exposes the backend-calculated analogue vector, and `/regime` can load it before searching.
 
 ## In Progress
 
@@ -78,7 +79,7 @@ Phase 5 historical analogue implementation is in progress. Phase 3 data APIs and
 ## Next
 
 1. Add analogue API integration tests against populated Supabase vectors
-2. Connect dashboard inputs to the market-context assembler
+2. Add analogue outcome charts and strategy context
 3. Recheck September market-session availability after the trading day closes
 
 ## Important Decisions

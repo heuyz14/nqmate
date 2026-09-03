@@ -33,6 +33,8 @@ News reads return normalized event records backed by `news_articles` and `news_e
 
 `POST /regimes/similar` accepts a current session date, feature vector, prediction timestamp, metric, and top-K bound, then returns point-in-time eligible historical matches. Each match includes aggregated 30m/60m returns, open-to-close return, ONH/ONL-first rates, trend-day rate, and analogue bull rate.
 
+`GET /market/nq/analogue-features?session_date=YYYY-MM-DD` returns the deterministic pre-session feature vector used by analogue retrieval for a stored market session.
+
 `POST /bias/generate` also accepts optional `analogueBullRate`, `analogueAvg30mReturn`, `analogueAvg60mReturn`, and `analogueSampleSize` fields. These values enrich deterministic evidence and cases but do not alter the Phase 4 rules score or confidence calculation.
 
 The same request may include an `analogue` object containing `sessionDate`, `features`, `predictionTime`, `topK`, and `metric`. The API retrieves eligible matches, uses their aggregate summary for the bias evidence, and includes the ranked `analogue_matches` in the response when matches are found.

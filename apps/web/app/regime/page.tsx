@@ -43,6 +43,21 @@ export default function RegimePage() {
   const [result, setResult] = useState<Result | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [featureStatus, setFeatureStatus] = useState<string | null>(null);
+
+  async function loadStoredFeatures() {
+    setError(null);
+    setFeatureStatus(null);
+    try {
+      const response = await fetch(`${apiBase}/market/nq/analogue-features?session_date=${sessionDate}`);
+      if (!response.ok) throw new Error(`Could not load session features (${response.status})`);
+      const payload = (await response.json()) as { features: Record<string, number> };
+      setFeatures(Object.fromEntries(featureNames.map(([name]) => [name, String(payload.features[name] ?? 0)])));
+      setFeatureStatus("Stored session features loaded");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not load session features");
+    }
+  }
 
   async function findAnalogues(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -91,7 +106,7 @@ export default function RegimePage() {
               <label key={name}>{label}<input type="number" step="any" value={features[name]} onChange={(event) => setFeatures({ ...features, [name]: event.target.value })} required /></label>
             ))}
           </div>
-          <button className="primary-button" type="submit" disabled={loading}>{loading ? "Finding sessions…" : "Find similar sessions"}</button>
+          <div className="form-actions"><button className="secondary-button" type="button" onClick={loadStoredFeatures}>Load stored features</button><button className="primary-button" type="submit" disabled={loading}>{loading ? "Finding sessions…" : "Find similar sessions"}</button>{featureStatus && <span className="success" role="status">{featureStatus}</span>}</div>
         </form>
       </section>
 
