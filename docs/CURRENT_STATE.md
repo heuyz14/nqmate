@@ -6,7 +6,7 @@ Always read this file at session start. It is the concise handoff for what exist
 
 ## Current Phase
 
-Phase 5 — Historical Analogues (Phase 4 implementation complete; BLS calendar live access remains network-dependent)
+Phase 5 — Historical Analogues (complete; Phase 4 implementation complete; BLS calendar live access remains network-dependent)
 
 ## Completed
 
@@ -72,14 +72,15 @@ Phase 5 — Historical Analogues (Phase 4 implementation complete; BLS calendar 
 - Phase 5 dashboard slice added: `/regime` provides a responsive, accessible historical-regime query form and results table backed by `POST /regimes/similar`.
 - Phase 5 market-context slice added: `GET /market/nq/analogue-features` exposes the backend-calculated analogue vector, and `/regime` can load it before searching.
 - Phase 5 outcome visualization slice added: `/regime` displays historical 30m/60m/open-to-close ranges and ONH/ONL/trend-day read-through metrics; strategy-specific performance remains deferred to Phase 7.
+- Phase 5 repository verification completed: hosted Supabase contains 171 analogue vectors and all 171 have outcome payloads; latest stored session is `2026-09-02`.
 
 ## In Progress
 
-Phase 5 historical analogue implementation is in progress. Phase 3 data APIs and persistence are accepted; the BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
+Phase 5 acceptance is complete. Phase 3 data APIs and persistence are accepted; the BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
 
 ## Next
 
-1. Add analogue API integration tests against populated Supabase vectors
+1. Start Phase 6 knowledge graph implementation when explicitly requested
 2. Recheck September market-session availability after the trading day closes
 3. Recheck September market-session availability after the trading day closes
 

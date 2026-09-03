@@ -31,7 +31,7 @@ News reads return normalized event records backed by `news_articles` and `news_e
 
 `/macro/observations` returns persisted official macro observations, optionally filtered by `series_id`, with a bounded limit.
 
-`POST /regimes/similar` accepts a current session date, feature vector, prediction timestamp, metric, and top-K bound, then returns point-in-time eligible historical matches. Each match includes aggregated 30m/60m returns, open-to-close return, ONH/ONL-first rates, trend-day rate, and analogue bull rate.
+`POST /regimes/similar` accepts a current session date, feature vector, prediction timestamp, metric, and top-K bound, then returns point-in-time eligible historical matches. Each match includes aggregated 30m/60m returns, observed min/max ranges, open-to-close return, ONH/ONL-first rates, trend-day rate, and analogue bull rate.
 
 `GET /market/nq/analogue-features?session_date=YYYY-MM-DD` returns the deterministic pre-session feature vector used by analogue retrieval for a stored market session.
 
