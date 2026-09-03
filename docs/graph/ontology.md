@@ -8,6 +8,8 @@ Read when creating Neo4j labels, relationships, graph synchronization, graph-bac
 
 Neo4j is semantic relationship memory, not numerical truth. PostgreSQL/Supabase remains the source for raw bars, numerical features, releases, predictions, and outcomes. Do not duplicate raw candles in Neo4j. [knowledge-memory.md](knowledge-memory.md) defines temporal memory and retrieval use.
 
+The Python graph boundary in `apps/api/src/nqmate_api/graph/` owns constraint creation and idempotent semantic synchronization. Callers provide explicit regime dimensions; the graph layer does not infer undocumented classification thresholds.
+
 ## Nodes
 
 `Asset`, `Company`, `Sector`, `MarketSession`, `MarketRegime`, `NewsEvent`, `MacroEvent`, `Indicator`, `Setup`, `Strategy`, `Prediction`, `Outcome`, and `Narrative`.
@@ -38,4 +40,3 @@ Keep separately queryable: overnight direction (`STRONG_UP`, `UP`, `FLAT`, `DOWN
 ## Synchronization acceptance
 
 Sync sessions, regimes, events, strategies, setups, and outcomes. A graph-backed query must answer which strategies perform best in a high-volatility gap-up session with rising yields and return evidence.
-
