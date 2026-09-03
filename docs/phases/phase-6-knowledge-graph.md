@@ -18,6 +18,8 @@ Create semantic, temporal relationships among sessions, regimes, events, strateg
 
 The foundation slice adds `apps/api/src/nqmate_api/graph/ontology.py` and `graph/repository.py`. It defines unique constraints for semantic identifiers and an idempotent `MarketSession` → `MarketRegime` synchronization boundary. Regime dimensions are supplied explicitly; this slice does not invent thresholds or copy numerical candles into Neo4j.
 
+The classification slice adds `graph/regimes.py`, with isolated v0 thresholds for overnight direction, overnight volatility, gap, location, yield regime, and catalyst regime. Thresholds are documented in [ontology.md](../graph/ontology.md) and covered by unit tests so they can be calibrated without changing graph storage.
+
 # Acceptance Criteria
 
 A query for high-volatility gap-up sessions with rising yields returns graph-backed strategy evidence; raw candles remain in PostgreSQL only.

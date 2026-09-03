@@ -10,6 +10,8 @@ Neo4j is semantic relationship memory, not numerical truth. PostgreSQL/Supabase 
 
 The Python graph boundary in `apps/api/src/nqmate_api/graph/` owns constraint creation and idempotent semantic synchronization. Callers provide explicit regime dimensions; the graph layer does not infer undocumented classification thresholds.
 
+The Phase 6 v0 classifier is in `apps/api/src/nqmate_api/graph/regimes.py`. Its explicit thresholds are: overnight return strong at `±0.005` and ordinary direction by sign; gap is flat within `±0.001` percent; overnight-range/ATR ratios classify below `1.0` as LOW, below `2.0` as NORMAL, below `3.0` as HIGH, and otherwise EXTREME. Location is based on the overnight range versus PDH/PDL. Yield change uses the same `±0.001` flat threshold. Missing yield data maps to `YIELDS_FLAT`; missing catalyst data maps to `NO_MAJOR_EVENT`. These are versioned v0 defaults, not learned claims.
+
 ## Nodes
 
 `Asset`, `Company`, `Sector`, `MarketSession`, `MarketRegime`, `NewsEvent`, `MacroEvent`, `Indicator`, `Setup`, `Strategy`, `Prediction`, `Outcome`, and `Narrative`.

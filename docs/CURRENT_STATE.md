@@ -74,14 +74,15 @@ Phase 6 — Knowledge Graph (foundation in progress; Phase 5 complete; BLS calen
 - Phase 5 outcome visualization slice added: `/regime` displays historical 30m/60m/open-to-close ranges and ONH/ONL/trend-day read-through metrics; strategy-specific performance remains deferred to Phase 7.
 - Phase 5 repository verification completed: hosted Supabase contains 171 analogue vectors and all 171 have outcome payloads; latest stored session is `2026-09-02`.
 - Phase 6 ontology foundation added: Neo4j constraints, separate regime dimensions, and idempotent semantic session-to-regime synchronization are defined; raw candles remain in Supabase.
+- Phase 6 classification slice added: deterministic v0 regime dimensions are calculated in `graph/regimes.py` with isolated, tested thresholds and neutral defaults for missing macro/catalyst context.
 
 ## In Progress
 
-Phase 5 acceptance is complete. Phase 6 is limited to the ontology/sync foundation until real regime classification and source-record synchronization are added. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
+Phase 5 acceptance is complete. Phase 6 currently covers ontology, semantic sync boundaries, and deterministic v0 regime classification; source-record synchronization and graph-backed research queries remain. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
 
 ## Next
 
-1. Add deterministic regime-dimension classification from stored session/context data
+1. Add session-to-regime sync job using classified stored data
 2. Recheck September market-session availability after the trading day closes
 3. Recheck September market-session availability after the trading day closes
 
