@@ -14,7 +14,7 @@ Base path: `/api/v1`.
 | Bias | `GET /bias/current`, `/bias/history`, `/bias/{id}`; `POST /bias/generate`, `/bias/{id}/explain` |
 | Regimes | `GET /regimes/current`, `/regimes/{id}`; `POST /regimes/similar` |
 | Strategies | `GET /strategies`; `POST /strategies`; `GET/PATCH /strategies/{id}`; `GET /strategies/{id}/performance` |
-| Knowledge | `POST /knowledge/query`; `GET /knowledge/session/{date}` |
+| Knowledge | `POST /knowledge/query`; `GET /knowledge/session/{date}`, `/knowledge/regimes` |
 | Backtests | `POST /backtests`; `GET /backtests/{id}` |
 | ML (later) | `GET /ml/models`, `/ml/models/{id}`, `/ml/predictions/current`, `/ml/predictions/history`, `/ml/features/current`, `/ml/features/importance`, `/ml/calibration`, `/ml/performance`; protected `POST /ml/train`, `/ml/backtest` |
 | Health | `GET /health` returns 200 and exposes database/graph health in Phase 0 |
@@ -34,6 +34,8 @@ News reads return normalized event records backed by `news_articles` and `news_e
 `POST /regimes/similar` accepts a current session date, feature vector, prediction timestamp, metric, and top-K bound, then returns point-in-time eligible historical matches. Each match includes aggregated 30m/60m returns, observed min/max ranges, open-to-close return, ONH/ONL-first rates, trend-day rate, and analogue bull rate.
 
 `GET /market/nq/analogue-features?session_date=YYYY-MM-DD` returns the deterministic pre-session feature vector used by analogue retrieval for a stored market session.
+
+`GET /knowledge/regimes` accepts optional independent ontology filters (`overnight_direction`, `overnight_volatility`, `gap`, `location`, `yield_regime`, and `catalyst_regime`) plus a bounded limit, and returns graph-backed semantic sessions. It does not read raw candles.
 
 `POST /bias/generate` also accepts optional `analogueBullRate`, `analogueAvg30mReturn`, `analogueAvg60mReturn`, and `analogueSampleSize` fields. These values enrich deterministic evidence and cases but do not alter the Phase 4 rules score or confidence calculation.
 

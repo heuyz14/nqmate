@@ -24,6 +24,8 @@ The synchronization slice adds `jobs/sync_graph.py`. It initializes constraints,
 
 The source-record slice adds `jobs/sync_graph_sources.py` and semantic repository methods for news, macro calendar events, and predictions. A live bounded run synchronized 23 news events, 13 macro events, and 0 predictions (no stored predictions existed in the selected date window); verification found 23 `NewsEvent`, 13 `MacroEvent`, and 2 `Company` nodes. Raw article bodies and macro observations remain in Supabase.
 
+The traversal slice adds `Neo4jGraphRepository.query_regimes` and `GET /knowledge/regimes`. Filters remain independently queryable and are applied in Neo4j with a bounded result size; live verification returned 20 GAP_UP sessions.
+
 # Acceptance Criteria
 
 A query for high-volatility gap-up sessions with rising yields returns graph-backed strategy evidence; raw candles remain in PostgreSQL only.

@@ -77,10 +77,11 @@ Phase 6 — Knowledge Graph (foundation in progress; Phase 5 complete; BLS calen
 - Phase 6 classification slice added: deterministic v0 regime dimensions are calculated in `graph/regimes.py` with isolated, tested thresholds and neutral defaults for missing macro/catalyst context.
 - Phase 6 synchronization slice added: `jobs/sync_graph.py` initializes Neo4j constraints and synchronizes stored sessions into semantic regime relationships; live verification found 171 `MarketSession` nodes and 12 `MarketRegime` nodes.
 - Phase 6 source-record slice added: `jobs/sync_graph_sources.py` synchronizes normalized news, macro calendar events, and bias predictions; live verification found 23 `NewsEvent`, 13 `MacroEvent`, and 2 `Company` nodes. No predictions existed in the selected historical window.
+- Phase 6 traversal slice added: `GET /knowledge/regimes` returns bounded graph-backed sessions filtered by independent ontology dimensions; live verification returned 20 `GAP_UP` sessions.
 
 ## In Progress
 
-Phase 5 acceptance is complete. Phase 6 currently covers ontology, deterministic v0 regime classification, session-to-regime synchronization, and news/macro/prediction source boundaries; outcome links, strategy synchronization, and graph-backed research queries remain. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
+Phase 5 acceptance is complete. Phase 6 currently covers ontology, deterministic v0 regime classification, session-to-regime synchronization, news/macro/prediction source boundaries, and basic graph-backed regime retrieval; outcome links, strategy synchronization, and richer research evidence queries remain. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
 
 ## Next
 

@@ -14,6 +14,7 @@ class GraphRepository(Protocol):
     def sync_news_event(self, provider: str, provider_id: str, event_type: str, event_timestamp: str, available_at: str, relevance: float, direction: str, themes: tuple[str, ...], companies: tuple[str, ...]) -> None: ...
     def sync_macro_event(self, event_id: str, title: str, scheduled_at: str, available_at: str, impact: str) -> None: ...
     def sync_prediction(self, prediction_id: str, created_at: str, direction: str, score: float, confidence: float, session_date: str | None = None) -> None: ...
+    def query_regimes(self, filters: dict[str, str], limit: int = 20) -> list[dict[str, object]]: ...
 
 
 class Neo4jGraphRepository:
@@ -86,6 +87,17 @@ class Neo4jGraphRepository:
                 query, event_id=event_id, title=title, scheduled_at=scheduled_at,
                 available_at=available_at, impact=impact,
             )
+
+    def query_regimes(self, filters: dict[str, str], limit: int = 20) -> list[dict[str, object]]:
+        query = """
+        MATCH (market_session:MarketSession)-[:CLASSIFIED_AS]->(regime:MarketRegime)
+        WHERE all(name IN keys($filters) WHERE regime[name] = $filters[name])
+        RETURN market_session.session_date AS session_date, properties(regime) AS regime
+        ORDER BY market_session.session_date DESC
+        LIMIT $limit
+        """
+        with self.driver.session() as session:
+            return session.run(query, filters=filters, limit=limit).data()
 
     def close(self) -> None:
         self.driver.close()

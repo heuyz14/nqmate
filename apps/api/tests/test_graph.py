@@ -65,3 +65,34 @@ class GraphTests(unittest.TestCase):
         query = session.run.call_args.args[0]
         self.assertIn("MERGE (event:MacroEvent", query)
         self.assertNotIn("MacroObservation", query)
+
+    def test_query_regimes_filters_dimensions_without_candle_access(self) -> None:
+        driver = MagicMock()
+        session = driver.session.return_value.__enter__.return_value
+        session.run.return_value.data.return_value = [{"session_date": "2026-09-02", "regime": {"gap": "GAP_UP"}}]
+
+        result = Neo4jGraphRepository(driver).query_regimes({"gap": "GAP_UP"}, 10)
+
+        query = session.run.call_args.args[0]
+        self.assertIn("CLASSIFIED_AS", query)
+        self.assertNotIn("MarketBar", query)
+        self.assertEqual(result[0]["session_date"], "2026-09-02")
+
+    def test_knowledge_regime_endpoint_passes_only_requested_dimensions(self) -> None:
+        from fastapi.testclient import TestClient
+        from nqmate_api.main import app, get_graph_repository
+
+        class FakeGraph:
+            def query_regimes(self, filters, limit):
+                self.args = (filters, limit)
+                return [{"session_date": "2026-09-02"}]
+
+        graph = FakeGraph()
+        app.dependency_overrides[get_graph_repository] = lambda: graph
+        try:
+            response = TestClient(app).get("/api/v1/knowledge/regimes?gap=GAP_UP&limit=5")
+        finally:
+            app.dependency_overrides.clear()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(graph.args, ({"gap": "GAP_UP"}, 5))
+        self.assertEqual(response.json()["sessions"][0]["session_date"], "2026-09-02")

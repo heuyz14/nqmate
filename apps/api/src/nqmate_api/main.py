@@ -19,6 +19,7 @@ from nqmate_api.bias.repository import BiasRepository, SupabaseBiasRepository
 from nqmate_api.bias.service import score_bias
 from nqmate_api.analogues.repository import AnalogueRepository, SupabaseAnalogueRepository
 from nqmate_api.analogues.service import rank_analogues, session_features
+from nqmate_api.graph.repository import GraphRepository, Neo4jGraphRepository
 
 app = FastAPI(title="NQmate API", version="0.1.0")
 
@@ -46,6 +47,11 @@ def get_bias_repository() -> BiasRepository:
 @lru_cache(maxsize=1)
 def get_analogue_repository() -> AnalogueRepository:
     return SupabaseAnalogueRepository.from_settings(Settings())
+
+
+@lru_cache(maxsize=1)
+def get_graph_repository() -> GraphRepository:
+    return Neo4jGraphRepository.from_settings(Settings())
 
 
 class AnalogueQueryRequest(BaseModel):
@@ -367,6 +373,27 @@ async def get_similar_regimes(
         {"session_date": match.session_date, "distance": match.distance, "outcome_summary": match.outcome_summary}
         for match in matches
     ]}
+
+
+@app.get("/api/v1/knowledge/regimes", tags=["knowledge"])
+async def query_knowledge_regimes(
+    overnight_direction: str | None = None,
+    overnight_volatility: str | None = None,
+    gap: str | None = None,
+    location: str | None = None,
+    yield_regime: str | None = None,
+    catalyst_regime: str | None = None,
+    limit: int = 20,
+    repository: GraphRepository = Depends(get_graph_repository),
+) -> dict[str, object]:
+    if limit < 1 or limit > 100:
+        raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
+    filters = {key: value for key, value in {
+        "overnight_direction": overnight_direction, "overnight_volatility": overnight_volatility,
+        "gap": gap, "location": location, "yield_regime": yield_regime,
+        "catalyst_regime": catalyst_regime,
+    }.items() if value is not None}
+    return {"filters": filters, "sessions": repository.query_regimes(filters, limit)}
 
 
 @app.get("/api/v1/bias/history", tags=["bias"])
