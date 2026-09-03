@@ -14,3 +14,4 @@ coverage/
 *.egg-info/
 *.tsbuildinfo
 .DS_Store
+var/log/
