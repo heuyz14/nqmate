@@ -96,3 +96,26 @@ class GraphTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(graph.args, ({"gap": "GAP_UP"}, 5))
         self.assertEqual(response.json()["sessions"][0]["session_date"], "2026-09-02")
+
+    def test_sync_outcome_links_to_prediction(self) -> None:
+        driver = MagicMock()
+        session = driver.session.return_value.__enter__.return_value
+
+        Neo4jGraphRepository(driver).sync_outcome(
+            "outcome-1", "prediction-1", "2026-09-02T15:00:00+00:00", "NQ", "60m", 0.004,
+        )
+
+        query = session.run.call_args.args[0]
+        self.assertIn("MERGE (outcome:Outcome", query)
+        self.assertIn("RESULTED_IN", query)
+
+    def test_strategy_evidence_query_traverses_regime_relationship(self) -> None:
+        driver = MagicMock()
+        session = driver.session.return_value.__enter__.return_value
+        session.run.return_value.data.return_value = [{"strategy": "ONH Breakout", "sample_size": 12}]
+
+        result = Neo4jGraphRepository(driver).query_strategy_evidence({"gap": "GAP_UP"}, 10)
+
+        query = session.run.call_args.args[0]
+        self.assertIn("PERFORMS_WELL_IN", query)
+        self.assertEqual(result[0]["strategy"], "ONH Breakout")

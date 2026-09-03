@@ -14,7 +14,7 @@ Base path: `/api/v1`.
 | Bias | `GET /bias/current`, `/bias/history`, `/bias/{id}`; `POST /bias/generate`, `/bias/{id}/explain` |
 | Regimes | `GET /regimes/current`, `/regimes/{id}`; `POST /regimes/similar` |
 | Strategies | `GET /strategies`; `POST /strategies`; `GET/PATCH /strategies/{id}`; `GET /strategies/{id}/performance` |
-| Knowledge | `POST /knowledge/query`; `GET /knowledge/session/{date}`, `/knowledge/regimes` |
+| Knowledge | `POST /knowledge/query`; `GET /knowledge/session/{date}`, `/knowledge/regimes`, `/knowledge/strategy-evidence` |
 | Backtests | `POST /backtests`; `GET /backtests/{id}` |
 | ML (later) | `GET /ml/models`, `/ml/models/{id}`, `/ml/predictions/current`, `/ml/predictions/history`, `/ml/features/current`, `/ml/features/importance`, `/ml/calibration`, `/ml/performance`; protected `POST /ml/train`, `/ml/backtest` |
 | Health | `GET /health` returns 200 and exposes database/graph health in Phase 0 |
@@ -36,6 +36,8 @@ News reads return normalized event records backed by `news_articles` and `news_e
 `GET /market/nq/analogue-features?session_date=YYYY-MM-DD` returns the deterministic pre-session feature vector used by analogue retrieval for a stored market session.
 
 `GET /knowledge/regimes` accepts optional independent ontology filters (`overnight_direction`, `overnight_volatility`, `gap`, `location`, `yield_regime`, and `catalyst_regime`) plus a bounded limit, and returns graph-backed semantic sessions. It does not read raw candles.
+
+`GET /knowledge/strategy-evidence` uses the same filters to traverse `Strategy-[:PERFORMS_WELL_IN]->MarketRegime` and returns bounded strategy statistics. It returns an empty list until Phase 7 strategy memory creates strategy records.
 
 `POST /bias/generate` also accepts optional `analogueBullRate`, `analogueAvg30mReturn`, `analogueAvg60mReturn`, and `analogueSampleSize` fields. These values enrich deterministic evidence and cases but do not alter the Phase 4 rules score or confidence calculation.
 

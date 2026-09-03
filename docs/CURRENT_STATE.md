@@ -6,7 +6,7 @@ Always read this file at session start. It is the concise handoff for what exist
 
 ## Current Phase
 
-Phase 6 — Knowledge Graph (foundation in progress; Phase 5 complete; BLS calendar live access remains network-dependent)
+Phase 6 — Knowledge Graph (complete; Phase 5 complete; BLS calendar live access remains network-dependent)
 
 ## Completed
 
@@ -78,14 +78,15 @@ Phase 6 — Knowledge Graph (foundation in progress; Phase 5 complete; BLS calen
 - Phase 6 synchronization slice added: `jobs/sync_graph.py` initializes Neo4j constraints and synchronizes stored sessions into semantic regime relationships; live verification found 171 `MarketSession` nodes and 12 `MarketRegime` nodes.
 - Phase 6 source-record slice added: `jobs/sync_graph_sources.py` synchronizes normalized news, macro calendar events, and bias predictions; live verification found 23 `NewsEvent`, 13 `MacroEvent`, and 2 `Company` nodes. No predictions existed in the selected historical window.
 - Phase 6 traversal slice added: `GET /knowledge/regimes` returns bounded graph-backed sessions filtered by independent ontology dimensions; live verification returned 20 `GAP_UP` sessions.
+- Phase 6 completion slice added: prediction-to-outcome relationship and strategy-evidence traversal contracts are implemented; strategy results remain empty until Phase 7 strategy memory creates records.
 
 ## In Progress
 
-Phase 5 acceptance is complete. Phase 6 currently covers ontology, deterministic v0 regime classification, session-to-regime synchronization, news/macro/prediction source boundaries, and basic graph-backed regime retrieval; outcome links, strategy synchronization, and richer research evidence queries remain. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
+Phase 5 acceptance is complete. Phase 6 acceptance is complete for the available source boundaries, semantic relationships, deterministic regime classification, bounded graph retrieval, and outcome/strategy traversal contracts. Strategy record creation belongs to Phase 7. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
 
 ## Next
 
-1. Add outcome synchronization and semantic relationship links
+1. Start Phase 7 strategy memory implementation when explicitly requested
 2. Recheck September market-session availability after the trading day closes
 3. Recheck September market-session availability after the trading day closes
 

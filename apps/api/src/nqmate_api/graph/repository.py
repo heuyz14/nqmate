@@ -15,6 +15,8 @@ class GraphRepository(Protocol):
     def sync_macro_event(self, event_id: str, title: str, scheduled_at: str, available_at: str, impact: str) -> None: ...
     def sync_prediction(self, prediction_id: str, created_at: str, direction: str, score: float, confidence: float, session_date: str | None = None) -> None: ...
     def query_regimes(self, filters: dict[str, str], limit: int = 20) -> list[dict[str, object]]: ...
+    def sync_outcome(self, outcome_id: str, prediction_id: str, observed_at: str, instrument: str, horizon: str, return_pct: float | None) -> None: ...
+    def query_strategy_evidence(self, filters: dict[str, str], limit: int = 20) -> list[dict[str, object]]: ...
 
 
 class Neo4jGraphRepository:
@@ -94,6 +96,34 @@ class Neo4jGraphRepository:
         WHERE all(name IN keys($filters) WHERE regime[name] = $filters[name])
         RETURN market_session.session_date AS session_date, properties(regime) AS regime
         ORDER BY market_session.session_date DESC
+        LIMIT $limit
+        """
+        with self.driver.session() as session:
+            return session.run(query, filters=filters, limit=limit).data()
+
+    def sync_outcome(self, outcome_id: str, prediction_id: str, observed_at: str, instrument: str, horizon: str, return_pct: float | None) -> None:
+        query = """
+        MERGE (prediction:Prediction {id: $prediction_id})
+        MERGE (outcome:Outcome {id: $outcome_id})
+        SET outcome.observed_at = $observed_at, outcome.instrument = $instrument,
+            outcome.horizon = $horizon, outcome.return_pct = $return_pct
+        MERGE (prediction)-[:RESULTED_IN]->(outcome)
+        """
+        with self.driver.session() as session:
+            session.run(
+                query, outcome_id=outcome_id, prediction_id=prediction_id,
+                observed_at=observed_at, instrument=instrument, horizon=horizon,
+                return_pct=return_pct,
+            )
+
+    def query_strategy_evidence(self, filters: dict[str, str], limit: int = 20) -> list[dict[str, object]]:
+        query = """
+        MATCH (strategy:Strategy)-[:PERFORMS_WELL_IN]->(regime:MarketRegime)
+        WHERE all(name IN keys($filters) WHERE regime[name] = $filters[name])
+        RETURN strategy.name AS strategy, strategy.sample_size AS sample_size,
+               strategy.win_rate AS win_rate, strategy.expectancy AS expectancy,
+               properties(regime) AS regime
+        ORDER BY strategy.expectancy DESC
         LIMIT $limit
         """
         with self.driver.session() as session:

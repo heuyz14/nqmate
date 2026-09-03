@@ -396,6 +396,27 @@ async def query_knowledge_regimes(
     return {"filters": filters, "sessions": repository.query_regimes(filters, limit)}
 
 
+@app.get("/api/v1/knowledge/strategy-evidence", tags=["knowledge"])
+async def query_strategy_evidence(
+    overnight_direction: str | None = None,
+    overnight_volatility: str | None = None,
+    gap: str | None = None,
+    location: str | None = None,
+    yield_regime: str | None = None,
+    catalyst_regime: str | None = None,
+    limit: int = 20,
+    repository: GraphRepository = Depends(get_graph_repository),
+) -> dict[str, object]:
+    if limit < 1 or limit > 100:
+        raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
+    filters = {key: value for key, value in {
+        "overnight_direction": overnight_direction, "overnight_volatility": overnight_volatility,
+        "gap": gap, "location": location, "yield_regime": yield_regime,
+        "catalyst_regime": catalyst_regime,
+    }.items() if value is not None}
+    return {"filters": filters, "strategies": repository.query_strategy_evidence(filters, limit)}
+
+
 @app.get("/api/v1/bias/history", tags=["bias"])
 async def get_bias_history(
     limit: int = 50,
