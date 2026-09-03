@@ -60,16 +60,17 @@ Phase 4 — Bias Engine (Phase 3 implementation complete; BLS calendar live acce
 - Migration `011_bias_predictions.sql` applied.
 - Phase 4 explanation slice added: `LLMProvider` and `GeminiBiasExplainer` accept only deterministic bias evidence and validate structured explanation output; 72 tests pass.
 - Phase 4 explanation persistence slice added: migration `012_bias_explanations.sql`, bounded `/api/v1/bias/history`, and linked `/api/v1/bias/{id}/explain` storage are implemented.
+- Migration `012_bias_explanations.sql` applied and verified; live deterministic bias generation and Gemini explanation smoke tests returned HTTP 200 with persisted IDs.
 
 ## In Progress
 
-Phase 4 deterministic bias implementation is in progress. Phase 3 data APIs and persistence are accepted; the BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live.
+Phase 4 deterministic bias implementation is in progress. Phase 3 data APIs and persistence are accepted; the BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater checked September 2–3 but stored no sessions because no bars were available; September 3 is still incomplete/current.
 
 ## Next
 
-1. Apply migration `012_bias_explanations.sql` and run an opt-in live bias generation/explanation smoke test
-2. Complete Phase 4 acceptance verification
-3. Begin Phase 5 historical analogues
+1. Complete Phase 4 acceptance verification
+2. Begin Phase 5 historical analogues
+3. Recheck September market-session availability after the trading day closes
 
 ## Important Decisions
 
@@ -89,4 +90,4 @@ None.
 
 ## Last Updated
 
-2026-09-02
+2026-09-03
