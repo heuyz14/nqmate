@@ -22,6 +22,8 @@ The classification slice adds `graph/regimes.py`, with isolated v0 thresholds fo
 
 The synchronization slice adds `jobs/sync_graph.py`. It initializes constraints, reads a bounded date range of stored sessions, applies the deterministic classifier, and idempotently merges semantic session/regime nodes. A live run synced 171 sessions into Neo4j; verification found 171 `MarketSession` nodes and 12 shared `MarketRegime` nodes.
 
+The source-record slice adds `jobs/sync_graph_sources.py` and semantic repository methods for news, macro calendar events, and predictions. A live bounded run synchronized 23 news events, 13 macro events, and 0 predictions (no stored predictions existed in the selected date window); verification found 23 `NewsEvent`, 13 `MacroEvent`, and 2 `Company` nodes. Raw article bodies and macro observations remain in Supabase.
+
 # Acceptance Criteria
 
 A query for high-volatility gap-up sessions with rising yields returns graph-backed strategy evidence; raw candles remain in PostgreSQL only.

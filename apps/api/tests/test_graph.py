@@ -25,3 +25,43 @@ class GraphTests(unittest.TestCase):
         self.assertIn("MERGE (regime:MarketRegime", query)
         self.assertNotIn("MarketBar", query)
         self.assertEqual(session.run.call_args.kwargs["session_date"], "2026-09-02")
+
+    def test_sync_news_event_stores_semantics_and_mentions_companies(self) -> None:
+        driver = MagicMock()
+        session = driver.session.return_value.__enter__.return_value
+
+        Neo4jGraphRepository(driver).sync_news_event(
+            provider="marketaux", provider_id="article-1", event_type="technology",
+            event_timestamp="2026-09-02T13:00:00+00:00", available_at="2026-09-02T13:00:00+00:00",
+            relevance=0.9, direction="bullish", themes=("AI",), companies=("NVDA",),
+        )
+
+        query = session.run.call_args.args[0]
+        self.assertIn("MERGE (event:NewsEvent", query)
+        self.assertIn("MENTIONS", query)
+        self.assertNotIn("headline", query.lower())
+
+    def test_sync_prediction_links_only_when_session_is_supplied(self) -> None:
+        driver = MagicMock()
+        session = driver.session.return_value.__enter__.return_value
+
+        Neo4jGraphRepository(driver).sync_prediction(
+            "prediction-1", "2026-09-02T14:00:00+00:00", "BULLISH", 0.4, 0.4, "2026-09-02",
+        )
+
+        query = session.run.call_args.args[0]
+        self.assertIn("MERGE (prediction:Prediction", query)
+        self.assertIn("MADE_DURING", query)
+
+    def test_sync_macro_event_keeps_release_metadata_without_raw_observations(self) -> None:
+        driver = MagicMock()
+        session = driver.session.return_value.__enter__.return_value
+
+        Neo4jGraphRepository(driver).sync_macro_event(
+            "fed:rate-1", "FOMC rate decision", "2026-09-02T18:00:00+00:00",
+            "2026-09-02T18:00:00+00:00", "HIGH",
+        )
+
+        query = session.run.call_args.args[0]
+        self.assertIn("MERGE (event:MacroEvent", query)
+        self.assertNotIn("MacroObservation", query)
