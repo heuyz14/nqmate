@@ -25,13 +25,15 @@ The persistence/API slice adds migration `013_analogue_vectors.sql`, `SupabaseAn
 
 The outcome slice derives labels from regular-session bars after the prediction point: 30m and 60m forward returns, open-to-close return, ONH/ONL-first break labels, and a deterministic trend-day baseline. The API aggregates these labels across the selected matches; missing horizons or break labels remain absent rather than being imputed.
 
+The bias integration slice accepts the analogue bull rate and mean returns as optional inputs to `POST /bias/generate`. They are added to deterministic evidence, bull/bear cases, and uncertainty notes while leaving the existing rules score and catalyst guardrail unchanged.
+
 # Acceptance Criteria
 
 For a current session, the endpoint returns 20 comparable sessions with reproducible distances and outcome aggregates without future data leakage.
 
 # Tests
 
-Scaling, nearest-neighbor determinism, missing data, outcome aggregation, outcome-label calculation, and point-in-time retrieval tests.
+Scaling, nearest-neighbor determinism, missing data, outcome aggregation, outcome-label calculation, bias evidence integration, and point-in-time retrieval tests.
 
 # Explicitly Out of Scope
 

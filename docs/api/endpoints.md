@@ -31,4 +31,6 @@ News reads return normalized event records backed by `news_articles` and `news_e
 
 `/macro/observations` returns persisted official macro observations, optionally filtered by `series_id`, with a bounded limit.
 
-`POST /regimes/similar` accepts a current session date, feature vector, prediction timestamp, metric, and top-K bound, then returns point-in-time eligible historical matches.
+`POST /regimes/similar` accepts a current session date, feature vector, prediction timestamp, metric, and top-K bound, then returns point-in-time eligible historical matches. Each match includes aggregated 30m/60m returns, open-to-close return, ONH/ONL-first rates, trend-day rate, and analogue bull rate.
+
+`POST /bias/generate` also accepts optional `analogueBullRate`, `analogueAvg30mReturn`, `analogueAvg60mReturn`, and `analogueSampleSize` fields. These values enrich deterministic evidence and cases but do not alter the Phase 4 rules score or confidence calculation.

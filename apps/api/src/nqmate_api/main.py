@@ -56,6 +56,10 @@ class BiasSnapshotRequest(BaseModel):
     macroContext: float = Field(ge=-1, le=1)
     newsContext: float = Field(ge=-1, le=1)
     minutesToHighImpactEvent: float | None = None
+    analogueBullRate: float | None = Field(default=None, ge=0, le=1)
+    analogueAvg30mReturn: float | None = None
+    analogueAvg60mReturn: float | None = None
+    analogueSampleSize: int | None = Field(default=None, ge=0)
 
 
 @app.get("/health", tags=["health"])
@@ -284,6 +288,8 @@ async def generate_bias(
         request.overnightStructure, request.gap, request.technicalLocation,
         request.relativeStrength, request.macroContext, request.newsContext,
         request.minutesToHighImpactEvent,
+        request.analogueBullRate, request.analogueAvg30mReturn,
+        request.analogueAvg60mReturn, request.analogueSampleSize,
     )
     result = score_bias(snapshot)
     return repository.create(snapshot, result)

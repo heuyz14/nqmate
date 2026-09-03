@@ -26,7 +26,10 @@ def _summary(matches: Sequence[HistoricalSession]) -> dict[str, float]:
         values = [row.outcomes[name] for row in matches if isinstance(row.outcomes.get(name), bool)]
         return round(sum(values) / len(values), 10) if values else 0.0
 
-    return {"return_30m_mean": numeric_mean("return_30m"), "return_60m_mean": numeric_mean("return_60m"),
+    returns = [row.outcomes["return_60m"] for row in matches if isinstance(row.outcomes.get("return_60m"), (int, float))]
+
+    return {"analogue_bull_rate": round(sum(value > 0 for value in returns) / len(returns), 10) if returns else 0.0,
+            "return_30m_mean": numeric_mean("return_30m"), "return_60m_mean": numeric_mean("return_60m"),
             "open_close_mean": numeric_mean("open_close"), "onh_first_rate": boolean_rate("onh_first"),
             "onl_first_rate": boolean_rate("onl_first"), "trend_day_rate": boolean_rate("trend_day"),
             "sample_size": float(len(matches))}

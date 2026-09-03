@@ -30,3 +30,15 @@ class BiasTests(unittest.TestCase):
         self.assertTrue(result.bear_case)
         self.assertTrue(result.invalidation)
         self.assertTrue(result.uncertainty)
+
+    def test_analogue_summary_is_added_as_deterministic_evidence(self) -> None:
+        result = score_bias(BiasSnapshot(
+            0.2, 0.1, 0.2, -0.1, 0.1, 0.1, None,
+            analogue_bull_rate=0.8,
+            analogue_avg_30m_return=0.0015,
+            analogue_avg_60m_return=0.0025,
+            analogue_sample_size=20,
+        ))
+        self.assertIn("historical analogues favor bullish outcomes (80.0% up)", result.evidence)
+        self.assertIn("analogue 60m mean return is +0.25%", result.bull_case)
+        self.assertIn("historical analogue sample size: 20", result.uncertainty)

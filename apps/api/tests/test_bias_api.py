@@ -18,12 +18,16 @@ class BiasApiTests(unittest.TestCase):
             response = TestClient(app).post("/api/v1/bias/generate", json={
                 "overnightStructure": 0.8, "gap": 0.2, "technicalLocation": 0.6,
                 "relativeStrength": 0.4, "macroContext": -0.2, "newsContext": 0.3,
+                "analogueBullRate": 0.8, "analogueAvg60mReturn": 0.0025,
+                "analogueSampleSize": 20,
             })
         finally:
             app.dependency_overrides.clear()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["id"], "prediction-1")
         self.assertEqual(repository.saved[1].direction, "BULLISH")
+        self.assertIn("historical analogues favor bullish outcomes (80.0% up)", repository.saved[1].evidence)
+        self.assertIn("analogue 60m mean return is +0.25%", repository.saved[1].bull_case)
 
     def test_generate_bias_rejects_out_of_range_snapshot(self) -> None:
         response = TestClient(app).post("/api/v1/bias/generate", json={
