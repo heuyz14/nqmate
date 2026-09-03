@@ -19,7 +19,8 @@ Read when building dashboard pages, visual information hierarchy, chart overlays
 
 The main trading screen prioritizes current NQ, bias/confidence, catalyst, chart/context, bull/bear cases, high-impact news, and historical analogues. Do not overload it with raw model internals; diagnostics belong on `/models`.
 
+The initial `/regime` implementation is a focused historical-regime finder. It submits the six Phase 5 pre-session features and prediction timestamp to `POST /regimes/similar`, then presents ranked matches and aggregate outcome fields. It does not fabricate current-session features; the query values are explicit user inputs until the dashboard has a complete market-context assembler.
+
 ## UX rules
 
 Use responsive Next.js/React/Tailwind UI and accessible controls. Every data-driven view needs loading, empty, and error states. Bias display must include direction, confidence, evidence, counter-signals, important levels, upcoming risks, and invalidation. Conservative catalyst guardrails must be visible.
-
