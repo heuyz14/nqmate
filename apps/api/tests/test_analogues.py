@@ -2,8 +2,8 @@ import unittest
 from datetime import datetime, timezone
 
 from nqmate_api.analogues.models import HistoricalSession
-from nqmate_api.analogues.service import rank_analogues
-from nqmate_api.analogues.service import session_features
+from nqmate_api.analogues.service import rank_analogues, session_features, session_outcomes
+from nqmate_api.market.models import MarketBar
 
 
 class AnalogueTests(unittest.TestCase):
@@ -57,3 +57,19 @@ class AnalogueTests(unittest.TestCase):
         features = session_features(session)
         self.assertEqual(features["overnight_return"], 0.01)
         self.assertNotIn("nq_close", features)
+
+    def test_session_outcomes_calculate_forward_returns_and_breaks(self) -> None:
+        from datetime import date, timedelta
+        from nqmate_api.market.models import MarketContract, MarketSession
+        session = MarketSession(date(2026, 9, 1), 20000, 20200, 19900, 20100, 19950, 20100, 19800, 20000, 20250, 19750, 20000, 0, 0, 0.01, 300, 20, MarketContract("NQ", "NQU6", "NQ_CONT"))
+        start = datetime(2026, 9, 1, 13, 30, tzinfo=timezone.utc)
+        bars = [
+            MarketBar("NQ", start, "1min", 20000, 20010, 19995, 20005, 1, "massive", start, start),
+            MarketBar("NQ", start + timedelta(minutes=30), "1min", 20005, 20110, 20000, 20100, 1, "massive", start, start),
+            MarketBar("NQ", start + timedelta(minutes=60), "1min", 20100, 20120, 19900, 20050, 1, "massive", start, start),
+        ]
+        outcomes = session_outcomes(session, bars)
+        self.assertAlmostEqual(outcomes["return_30m"], 0.005)
+        self.assertAlmostEqual(outcomes["return_60m"], 0.0025)
+        self.assertTrue(outcomes["onh_first"])
+        self.assertFalse(outcomes["onl_first"])

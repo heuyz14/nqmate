@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-from datetime import date, timedelta, datetime, time
+from datetime import date, timedelta, datetime, time, timezone
 from zoneinfo import ZoneInfo
 
 from nqmate_api.analogues.models import HistoricalSession
 from nqmate_api.analogues.repository import SupabaseAnalogueRepository
-from nqmate_api.analogues.service import session_features
+from nqmate_api.analogues.service import session_features, session_outcomes
 from nqmate_api.config import Settings
 from nqmate_api.market.repository import SupabaseMarketRepository
 
@@ -22,7 +22,11 @@ async def populate(start: date, end: date) -> int:
         session = market.get_session(day)
         if session is not None:
             available_at = datetime.combine(day, time(9, 30), ZoneInfo("America/New_York"))
-            analogue.upsert(HistoricalSession(day.isoformat(), session_features(session), available_at, {}))
+            bars = market.get_bars(
+                datetime.combine(day - timedelta(days=1), time(18), ZoneInfo("America/New_York")).astimezone(timezone.utc),
+                datetime.combine(day, time(16), ZoneInfo("America/New_York")).astimezone(timezone.utc),
+            )
+            analogue.upsert(HistoricalSession(day.isoformat(), session_features(session), available_at, session_outcomes(session, bars)))
             count += 1
         day += timedelta(days=1)
     return count
