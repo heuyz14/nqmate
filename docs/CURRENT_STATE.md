@@ -6,7 +6,7 @@ Always read this file at session start. It is the concise handoff for what exist
 
 ## Current Phase
 
-Phase 6 — Knowledge Graph (complete; Phase 5 complete; BLS calendar live access remains network-dependent)
+Phase 6 — Knowledge Graph (implementation complete; acceptance query pending Phase 7 strategy records; BLS calendar live access remains network-dependent)
 
 ## Completed
 
@@ -82,13 +82,12 @@ Phase 6 — Knowledge Graph (complete; Phase 5 complete; BLS calendar live acces
 
 ## In Progress
 
-Phase 5 acceptance is complete. Phase 6 acceptance is complete for the available source boundaries, semantic relationships, deterministic regime classification, bounded graph retrieval, and outcome/strategy traversal contracts. Strategy record creation belongs to Phase 7. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
+Phase 5 acceptance is complete. Phase 6 implementation is complete for the available source boundaries, semantic relationships, deterministic regime classification, bounded graph retrieval, and outcome/strategy traversal contracts. The literal acceptance query for high-volatility GAP_UP sessions with rising yields returns no strategy evidence yet because no Strategy nodes or `PERFORMS_WELL_IN` relationships exist; Phase 7 strategy memory must supply those records. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
 
 ## Next
 
 1. Start Phase 7 strategy memory implementation when explicitly requested
 2. Recheck September market-session availability after the trading day closes
-3. Recheck September market-session availability after the trading day closes
 
 ## Important Decisions
 

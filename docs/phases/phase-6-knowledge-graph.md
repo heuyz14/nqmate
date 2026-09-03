@@ -30,7 +30,7 @@ The completion slice adds idempotent `Prediction-[:RESULTED_IN]->Outcome` synchr
 
 # Acceptance Criteria
 
-A query for high-volatility gap-up sessions with rising yields returns graph-backed strategy evidence; raw candles remain in PostgreSQL only.
+A query for high-volatility gap-up sessions with rising yields returns graph-backed strategy evidence once strategy records and performance relationships exist; raw candles remain in PostgreSQL only. The Phase 6 query contract is implemented, but live evidence remains pending Phase 7 strategy-memory records.
 
 # Tests
 
