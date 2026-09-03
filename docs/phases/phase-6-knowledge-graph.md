@@ -20,13 +20,15 @@ The foundation slice adds `apps/api/src/nqmate_api/graph/ontology.py` and `graph
 
 The classification slice adds `graph/regimes.py`, with isolated v0 thresholds for overnight direction, overnight volatility, gap, location, yield regime, and catalyst regime. Thresholds are documented in [ontology.md](../graph/ontology.md) and covered by unit tests so they can be calibrated without changing graph storage.
 
+The synchronization slice adds `jobs/sync_graph.py`. It initializes constraints, reads a bounded date range of stored sessions, applies the deterministic classifier, and idempotently merges semantic session/regime nodes. A live run synced 171 sessions into Neo4j; verification found 171 `MarketSession` nodes and 12 shared `MarketRegime` nodes.
+
 # Acceptance Criteria
 
 A query for high-volatility gap-up sessions with rising yields returns graph-backed strategy evidence; raw candles remain in PostgreSQL only.
 
 # Tests
 
-Ontology constraints, idempotent sync, temporal validity, relationship traversal, and graph query integration tests. The foundation tests verify separate dimensions and ensure sync Cypher contains no candle node or raw-bar write.
+Ontology constraints, idempotent sync, temporal validity, relationship traversal, and graph query integration tests. The foundation tests verify separate dimensions and ensure sync Cypher contains no candle node or raw-bar write; the sync-job test verifies bounded iteration and missing-session handling.
 
 # Explicitly Out of Scope
 
