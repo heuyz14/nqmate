@@ -54,6 +54,7 @@ Phase 4 — Bias Engine (Phase 3 implementation complete; BLS calendar live acce
 - Phase 3 market-bar sampling slice added: `sample_reactions` selects eligible pre/post-release NQ minute bars at 5m/15m/30m/60m horizons without imputing missing data.
 - Phase 3 event-reaction wiring added: `persist_sampled_reactions` connects sampled labels to calendar event IDs and persists them idempotently.
 - Phase 3 provider acceptance smoke tests passed: BLS returned 7 CPI observations, FRED/ALFRED returned observations, BEA returned 25 quarterly observations, and the reaction endpoint returned HTTP 200 against Supabase.
+- NQ sessions for 2026-09-01 and 2026-09-02 were successfully retried with contract `NQU6` and verified through the session API.
 - Phase 4 deterministic bias slice added: typed `BiasSnapshot`, weighted reproducible scoring, direction thresholds, normalized-input validation, and the 15-minute catalyst guardrail with `WAIT_FOR_RELEASE`.
 - Phase 4 evidence slice added: deterministic evidence factors, bull/bear cases, invalidation conditions, and uncertainty notes are included in `BiasResult`.
 - Phase 4 API/persistence slice added: migration `011_bias_predictions.sql`, `POST /api/v1/bias/generate`, and `GET /api/v1/bias/current` persist immutable rules-based predictions with versioned evidence.
@@ -64,7 +65,7 @@ Phase 4 — Bias Engine (Phase 3 implementation complete; BLS calendar live acce
 
 ## In Progress
 
-Phase 4 deterministic bias implementation is in progress. Phase 3 data APIs and persistence are accepted; the BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater checked September 2–3 but stored no sessions because no bars were available; September 3 is still incomplete/current.
+Phase 4 deterministic bias implementation is in progress. Phase 3 data APIs and persistence are accepted; the BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
 
 ## Next
 
