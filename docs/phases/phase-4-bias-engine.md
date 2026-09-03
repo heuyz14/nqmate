@@ -22,6 +22,8 @@ The current result also includes deterministic evidence factors, bull and bear c
 
 The API/persistence slice adds `POST /api/v1/bias/generate` and `GET /api/v1/bias/current`. Predictions are inserted, never updated, and store model/feature versions plus deterministic evidence fields. Migration `011_bias_predictions.sql` creates the table.
 
+The explanation slice adds an `LLMProvider` boundary and `GeminiBiasExplainer`. It receives the deterministic result as its only evidence, returns strict structured fields, and cannot alter the persisted deterministic score.
+
 # Acceptance Criteria
 
 Identical inputs produce the same score; high-impact events within 15 minutes cap confidence at .55 and recommend waiting; LLM output uses only supplied evidence and contains required fields.

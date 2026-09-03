@@ -57,6 +57,8 @@ Phase 4 — Bias Engine (Phase 3 implementation complete; BLS calendar live acce
 - Phase 4 deterministic bias slice added: typed `BiasSnapshot`, weighted reproducible scoring, direction thresholds, normalized-input validation, and the 15-minute catalyst guardrail with `WAIT_FOR_RELEASE`.
 - Phase 4 evidence slice added: deterministic evidence factors, bull/bear cases, invalidation conditions, and uncertainty notes are included in `BiasResult`.
 - Phase 4 API/persistence slice added: migration `011_bias_predictions.sql`, `POST /api/v1/bias/generate`, and `GET /api/v1/bias/current` persist immutable rules-based predictions with versioned evidence.
+- Migration `011_bias_predictions.sql` applied.
+- Phase 4 explanation slice added: `LLMProvider` and `GeminiBiasExplainer` accept only deterministic bias evidence and validate structured explanation output; 72 tests pass.
 
 ## In Progress
 
@@ -64,9 +66,9 @@ Phase 4 deterministic bias implementation is in progress. Phase 3 data APIs and 
 
 ## Next
 
-1. Apply migration `011_bias_predictions.sql` and run a live bias smoke test
-2. Add evidence-constrained LLM explanation after deterministic scoring
-3. Add current/history retrieval and acceptance verification
+1. Run an opt-in live bias generation/explanation smoke test
+2. Add explanation persistence and current/history retrieval
+3. Complete Phase 4 acceptance verification
 
 ## Important Decisions
 
