@@ -20,6 +20,8 @@ The initial implementation slice provides `BiasSnapshot` and deterministic `scor
 
 The current result also includes deterministic evidence factors, bull and bear cases, invalidation conditions, and uncertainty notes. These are generated from the supplied snapshot only and are not LLM-generated.
 
+The API/persistence slice adds `POST /api/v1/bias/generate` and `GET /api/v1/bias/current`. Predictions are inserted, never updated, and store model/feature versions plus deterministic evidence fields. Migration `011_bias_predictions.sql` creates the table.
+
 # Acceptance Criteria
 
 Identical inputs produce the same score; high-impact events within 15 minutes cap confidence at .55 and recommend waiting; LLM output uses only supplied evidence and contains required fields.

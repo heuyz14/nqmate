@@ -1,7 +1,9 @@
 from datetime import date, datetime, time, timedelta, timezone
 from functools import lru_cache
+from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException
+from pydantic import BaseModel, Field
 
 from nqmate_api.config import Settings
 from nqmate_api.health import check_neo4j, check_supabase, health_payload
@@ -11,6 +13,9 @@ from nqmate_api.market.calculations import weekly_opening_gaps
 from nqmate_api.news.repository import NewsRepository, SupabaseNewsRepository
 from nqmate_api.news.service import economic_surprise, pre_event_risk
 from nqmate_api.macro.repository import MacroRepository, SupabaseMacroRepository
+from nqmate_api.bias.models import BiasSnapshot
+from nqmate_api.bias.repository import BiasRepository, SupabaseBiasRepository
+from nqmate_api.bias.service import score_bias
 
 app = FastAPI(title="NQmate API", version="0.1.0")
 
@@ -28,6 +33,21 @@ def get_news_repository() -> NewsRepository:
 @lru_cache(maxsize=1)
 def get_macro_repository() -> MacroRepository:
     return SupabaseMacroRepository.from_settings(Settings())
+
+
+@lru_cache(maxsize=1)
+def get_bias_repository() -> BiasRepository:
+    return SupabaseBiasRepository.from_settings(Settings())
+
+
+class BiasSnapshotRequest(BaseModel):
+    overnightStructure: float = Field(ge=-1, le=1)
+    gap: float = Field(ge=-1, le=1)
+    technicalLocation: float = Field(ge=-1, le=1)
+    relativeStrength: float = Field(ge=-1, le=1)
+    macroContext: float = Field(ge=-1, le=1)
+    newsContext: float = Field(ge=-1, le=1)
+    minutesToHighImpactEvent: float | None = None
 
 
 @app.get("/health", tags=["health"])
@@ -245,6 +265,30 @@ async def get_macro_reactions(
     if limit < 1 or limit > 500:
         raise HTTPException(status_code=422, detail="limit must be between 1 and 500")
     return {"event_id": event_id, "reactions": repository.list_reactions(event_id, limit)}
+
+
+@app.post("/api/v1/bias/generate", tags=["bias"])
+async def generate_bias(
+    request: BiasSnapshotRequest,
+    repository: BiasRepository = Depends(get_bias_repository),
+) -> dict[str, Any]:
+    snapshot = BiasSnapshot(
+        request.overnightStructure, request.gap, request.technicalLocation,
+        request.relativeStrength, request.macroContext, request.newsContext,
+        request.minutesToHighImpactEvent,
+    )
+    result = score_bias(snapshot)
+    return repository.create(snapshot, result)
+
+
+@app.get("/api/v1/bias/current", tags=["bias"])
+async def get_current_bias(
+    repository: BiasRepository = Depends(get_bias_repository),
+) -> dict[str, Any]:
+    prediction = repository.latest()
+    if prediction is None:
+        raise HTTPException(status_code=404, detail="No bias prediction found")
+    return prediction
 
 
 @app.get("/api/v1/macro/upcoming", tags=["macro"])
