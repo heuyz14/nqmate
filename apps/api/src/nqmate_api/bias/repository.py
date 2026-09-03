@@ -5,12 +5,16 @@ from typing import Any, Protocol, Sequence
 from supabase import Client, create_client
 
 from nqmate_api.bias.models import BiasResult, BiasSnapshot
+from nqmate_api.bias.llm import BiasExplanation
 from nqmate_api.config import Settings
 
 
 class BiasRepository(Protocol):
     def create(self, snapshot: BiasSnapshot, result: BiasResult) -> dict[str, Any]: ...
     def latest(self) -> dict[str, Any] | None: ...
+    def history(self, limit: int = 50) -> Sequence[dict[str, Any]]: ...
+    def get(self, prediction_id: str) -> dict[str, Any] | None: ...
+    def create_explanation(self, prediction_id: str, explanation: BiasExplanation) -> dict[str, Any]: ...
 
 
 class SupabaseBiasRepository:
@@ -39,3 +43,21 @@ class SupabaseBiasRepository:
             "created_at", desc=True
         ).limit(1).execute()
         return (response.data or [None])[0]
+
+    def history(self, limit: int = 50) -> Sequence[dict[str, Any]]:
+        return self.client.table("bias_predictions").select("*").order(
+            "created_at", desc=True
+        ).limit(min(limit, 100)).execute().data or []
+
+    def get(self, prediction_id: str) -> dict[str, Any] | None:
+        response = self.client.table("bias_predictions").select("*").eq("id", prediction_id).maybe_single().execute()
+        return response.data if response and response.data else None
+
+    def create_explanation(self, prediction_id: str, explanation: BiasExplanation) -> dict[str, Any]:
+        response = self.client.table("bias_explanations").insert({
+            "prediction_id": prediction_id, "direction": explanation.direction,
+            "confidence": explanation.confidence, "summary": explanation.summary,
+            "bull_case": list(explanation.bull_case), "bear_case": list(explanation.bear_case),
+            "invalidation": list(explanation.invalidation), "risks": list(explanation.risks),
+        }).execute()
+        return (response.data or [{}])[0]

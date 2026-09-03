@@ -11,7 +11,7 @@ Base path: `/api/v1`.
 | Market | `GET /market/nq/session/current`, `/market/nq/bars`, `/market/nq/levels`, `/market/nq/weekly-gaps`, `/market/nq/features`, and `/market/nq/session/{date}` |
 | News | `GET /news`, `/news/high-impact`, `/news/clusters`, `/news/{id}`; `POST /news/refresh` |
 | Macro | `GET /macro/calendar`, `/macro/upcoming`, `/macro/observations`, `/macro/events/{id}`, `/macro/events/{id}/reactions` |
-| Bias | `GET /bias/current`, `/bias/history`, `/bias/{id}`; `POST /bias/generate` |
+| Bias | `GET /bias/current`, `/bias/history`, `/bias/{id}`; `POST /bias/generate`, `/bias/{id}/explain` |
 | Regimes | `GET /regimes/current`, `/regimes/similar`, `/regimes/{id}` |
 | Strategies | `GET /strategies`; `POST /strategies`; `GET/PATCH /strategies/{id}`; `GET /strategies/{id}/performance` |
 | Knowledge | `POST /knowledge/query`; `GET /knowledge/session/{date}` |

@@ -59,6 +59,7 @@ Phase 4 — Bias Engine (Phase 3 implementation complete; BLS calendar live acce
 - Phase 4 API/persistence slice added: migration `011_bias_predictions.sql`, `POST /api/v1/bias/generate`, and `GET /api/v1/bias/current` persist immutable rules-based predictions with versioned evidence.
 - Migration `011_bias_predictions.sql` applied.
 - Phase 4 explanation slice added: `LLMProvider` and `GeminiBiasExplainer` accept only deterministic bias evidence and validate structured explanation output; 72 tests pass.
+- Phase 4 explanation persistence slice added: migration `012_bias_explanations.sql`, bounded `/api/v1/bias/history`, and linked `/api/v1/bias/{id}/explain` storage are implemented.
 
 ## In Progress
 
@@ -66,9 +67,9 @@ Phase 4 deterministic bias implementation is in progress. Phase 3 data APIs and 
 
 ## Next
 
-1. Run an opt-in live bias generation/explanation smoke test
-2. Add explanation persistence and current/history retrieval
-3. Complete Phase 4 acceptance verification
+1. Apply migration `012_bias_explanations.sql` and run an opt-in live bias generation/explanation smoke test
+2. Complete Phase 4 acceptance verification
+3. Begin Phase 5 historical analogues
 
 ## Important Decisions
 

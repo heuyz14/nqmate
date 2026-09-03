@@ -21,7 +21,7 @@ class BiasExplanation:
 
 
 class LLMProvider(Protocol):
-    def explain_bias(self, result: BiasResult) -> BiasExplanation: ...
+    def explain(self, result: BiasResult) -> BiasExplanation: ...
 
 
 class GeminiBiasExplainer:

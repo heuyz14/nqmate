@@ -13,7 +13,8 @@ from nqmate_api.market.calculations import weekly_opening_gaps
 from nqmate_api.news.repository import NewsRepository, SupabaseNewsRepository
 from nqmate_api.news.service import economic_surprise, pre_event_risk
 from nqmate_api.macro.repository import MacroRepository, SupabaseMacroRepository
-from nqmate_api.bias.models import BiasSnapshot
+from nqmate_api.bias.models import BiasSnapshot, BiasResult
+from nqmate_api.bias.llm import GeminiBiasExplainer, LLMProvider
 from nqmate_api.bias.repository import BiasRepository, SupabaseBiasRepository
 from nqmate_api.bias.service import score_bias
 
@@ -289,6 +290,42 @@ async def get_current_bias(
     if prediction is None:
         raise HTTPException(status_code=404, detail="No bias prediction found")
     return prediction
+
+
+@app.get("/api/v1/bias/history", tags=["bias"])
+async def get_bias_history(
+    limit: int = 50,
+    repository: BiasRepository = Depends(get_bias_repository),
+) -> dict[str, object]:
+    if limit < 1 or limit > 100:
+        raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
+    return {"predictions": repository.history(limit)}
+
+
+def get_bias_llm_provider() -> LLMProvider:
+    settings = Settings()
+    if not settings.gemini_api_key:
+        raise HTTPException(status_code=503, detail="Gemini configuration is required for explanations")
+    return GeminiBiasExplainer(settings.gemini_api_key, settings.gemini_model)
+
+
+@app.post("/api/v1/bias/{prediction_id}/explain", tags=["bias"])
+async def explain_bias(
+    prediction_id: str,
+    repository: BiasRepository = Depends(get_bias_repository),
+    provider: LLMProvider = Depends(get_bias_llm_provider),
+) -> dict[str, Any]:
+    prediction = repository.get(prediction_id)
+    if prediction is None:
+        raise HTTPException(status_code=404, detail="Bias prediction not found")
+    result = BiasResult(
+        prediction["direction"], prediction["score"], prediction["confidence"], prediction["recommendation"], prediction.get("catalyst_risk"),
+        tuple(prediction.get("evidence") or ()), tuple(prediction.get("bull_case") or ()),
+        tuple(prediction.get("bear_case") or ()), tuple(prediction.get("invalidation") or ()),
+        tuple(prediction.get("uncertainty") or ()),
+    )
+    explanation = provider.explain(result)
+    return repository.create_explanation(prediction_id, explanation)
 
 
 @app.get("/api/v1/macro/upcoming", tags=["macro"])

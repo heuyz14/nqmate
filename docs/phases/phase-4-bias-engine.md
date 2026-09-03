@@ -24,6 +24,8 @@ The API/persistence slice adds `POST /api/v1/bias/generate` and `GET /api/v1/bia
 
 The explanation slice adds an `LLMProvider` boundary and `GeminiBiasExplainer`. It receives the deterministic result as its only evidence, returns strict structured fields, and cannot alter the persisted deterministic score.
 
+Migration `012_bias_explanations.sql` stores explanations separately from immutable predictions. `GET /api/v1/bias/history` returns bounded prediction history and `POST /api/v1/bias/{id}/explain` generates a linked explanation when Gemini is configured.
+
 # Acceptance Criteria
 
 Identical inputs produce the same score; high-impact events within 15 minutes cap confidence at .55 and recommend waiting; LLM output uses only supplied evidence and contains required fields.
