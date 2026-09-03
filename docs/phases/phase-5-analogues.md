@@ -27,6 +27,8 @@ The outcome slice derives labels from regular-session bars after the prediction 
 
 The bias integration slice accepts the analogue bull rate and mean returns as optional inputs to `POST /bias/generate`. They are added to deterministic evidence, bull/bear cases, and uncertainty notes while leaving the existing rules score and catalyst guardrail unchanged.
 
+The end-to-end API slice adds an optional `analogue` query object to the same bias request. FastAPI retrieves point-in-time matches, supplies their aggregate to the deterministic scorer, and returns the ranked matches with the persisted prediction response.
+
 # Acceptance Criteria
 
 For a current session, the endpoint returns 20 comparable sessions with reproducible distances and outcome aggregates without future data leakage.

@@ -2,7 +2,7 @@ import unittest
 from fastapi.testclient import TestClient
 
 from nqmate_api.bias.models import BiasResult
-from nqmate_api.main import app, get_bias_repository
+from nqmate_api.main import app, get_bias_repository, get_analogue_repository
 
 
 class BiasApiTests(unittest.TestCase):
@@ -35,3 +35,37 @@ class BiasApiTests(unittest.TestCase):
             "relativeStrength": 0, "macroContext": 0, "newsContext": 0,
         })
         self.assertEqual(response.status_code, 422)
+
+    def test_generate_bias_can_retrieve_analogue_context(self) -> None:
+        from datetime import datetime, timezone
+        from nqmate_api.analogues.models import HistoricalSession
+
+        class FakeBiasRepository:
+            def create(self, snapshot, result):
+                self.saved = (snapshot, result)
+                return {"id": "prediction-2", "direction": result.direction}
+
+        class FakeAnalogueRepository:
+            def list(self, limit=500):
+                return [HistoricalSession(
+                    "2026-09-02", {"gap": 0.1}, datetime(2026, 9, 2, 12, tzinfo=timezone.utc),
+                    {"return_60m": 0.01},
+                )]
+
+        bias_repository = FakeBiasRepository()
+        app.dependency_overrides[get_bias_repository] = lambda: bias_repository
+        app.dependency_overrides[get_analogue_repository] = lambda: FakeAnalogueRepository()
+        try:
+            response = TestClient(app).post("/api/v1/bias/generate", json={
+                "overnightStructure": 0.8, "gap": 0.2, "technicalLocation": 0.6,
+                "relativeStrength": 0.4, "macroContext": -0.2, "newsContext": 0.3,
+                "analogue": {
+                    "sessionDate": "2026-09-03", "features": {"gap": 0.1},
+                    "predictionTime": "2026-09-03T12:00:00Z", "topK": 20,
+                },
+            })
+        finally:
+            app.dependency_overrides.clear()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["analogue_matches"][0]["session_date"], "2026-09-02")
+        self.assertIn("historical analogues favor bullish outcomes (100.0% up)", bias_repository.saved[1].evidence)

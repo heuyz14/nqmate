@@ -48,6 +48,14 @@ def get_analogue_repository() -> AnalogueRepository:
     return SupabaseAnalogueRepository.from_settings(Settings())
 
 
+class AnalogueQueryRequest(BaseModel):
+    sessionDate: date
+    features: dict[str, float]
+    predictionTime: datetime
+    topK: int = Field(default=20, ge=1, le=20)
+    metric: str = "euclidean"
+
+
 class BiasSnapshotRequest(BaseModel):
     overnightStructure: float = Field(ge=-1, le=1)
     gap: float = Field(ge=-1, le=1)
@@ -60,6 +68,7 @@ class BiasSnapshotRequest(BaseModel):
     analogueAvg30mReturn: float | None = None
     analogueAvg60mReturn: float | None = None
     analogueSampleSize: int | None = Field(default=None, ge=0)
+    analogue: AnalogueQueryRequest | None = None
 
 
 @app.get("/health", tags=["health"])
@@ -283,16 +292,38 @@ async def get_macro_reactions(
 async def generate_bias(
     request: BiasSnapshotRequest,
     repository: BiasRepository = Depends(get_bias_repository),
+    analogue_repository: AnalogueRepository = Depends(get_analogue_repository),
 ) -> dict[str, Any]:
+    analogue_matches = []
+    analogue_summary: dict[str, float] = {}
+    if request.analogue is not None:
+        if request.analogue.metric not in {"euclidean", "cosine"}:
+            raise HTTPException(status_code=422, detail="analogue metric must be euclidean or cosine")
+        matches = rank_analogues(
+            request.analogue.sessionDate.isoformat(), request.analogue.features,
+            analogue_repository.list(), request.analogue.predictionTime,
+            request.analogue.topK, request.analogue.metric,
+        )
+        analogue_matches = [
+            {"session_date": match.session_date, "distance": match.distance, "outcome_summary": match.outcome_summary}
+            for match in matches
+        ]
+        if matches:
+            analogue_summary = matches[0].outcome_summary
     snapshot = BiasSnapshot(
         request.overnightStructure, request.gap, request.technicalLocation,
         request.relativeStrength, request.macroContext, request.newsContext,
         request.minutesToHighImpactEvent,
-        request.analogueBullRate, request.analogueAvg30mReturn,
-        request.analogueAvg60mReturn, request.analogueSampleSize,
+        request.analogueBullRate if request.analogueBullRate is not None else analogue_summary.get("analogue_bull_rate"),
+        request.analogueAvg30mReturn if request.analogueAvg30mReturn is not None else analogue_summary.get("return_30m_mean"),
+        request.analogueAvg60mReturn if request.analogueAvg60mReturn is not None else analogue_summary.get("return_60m_mean"),
+        request.analogueSampleSize if request.analogueSampleSize is not None else int(analogue_summary["sample_size"]) if "sample_size" in analogue_summary else None,
     )
     result = score_bias(snapshot)
-    return repository.create(snapshot, result)
+    response = repository.create(snapshot, result)
+    if analogue_matches:
+        response["analogue_matches"] = analogue_matches
+    return response
 
 
 @app.get("/api/v1/bias/current", tags=["bias"])

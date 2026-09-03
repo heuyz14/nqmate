@@ -68,6 +68,7 @@ Phase 5 — Historical Analogues (Phase 4 implementation complete; BLS calendar 
 - Phase 5 vector population slice added: `jobs/populate_analogue_vectors.py` populated 171 stored 2026 session vectors using only pre-session fields; live similar-regimes verification returned ranked matches.
 - Phase 5 outcome slice added: deterministic session outcomes now calculate available 30m/60m returns, open-to-close return, ONH/ONL-first labels, and a trend-day baseline; analogue responses aggregate those outcomes without changing the point-in-time feature vector.
 - Phase 5 bias integration slice added: optional analogue bull-rate and return summaries enrich deterministic bias evidence/cases without changing Phase 4 score weights or catalyst guardrails.
+- Phase 5 end-to-end API slice added: `POST /bias/generate` can retrieve point-in-time analogues, feed their aggregate summary into evidence, and return ranked matches with the prediction.
 
 ## In Progress
 
@@ -75,8 +76,8 @@ Phase 5 historical analogue implementation is in progress. Phase 3 data APIs and
 
 ## Next
 
-1. Add an end-to-end analogue-to-bias API flow using retrieved summaries
-2. Add the analogue dashboard presentation
+1. Add the analogue dashboard presentation
+2. Add analogue API integration tests against populated Supabase vectors
 3. Recheck September market-session availability after the trading day closes
 
 ## Important Decisions
