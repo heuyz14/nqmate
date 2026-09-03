@@ -32,6 +32,8 @@ class AnalogueTests(unittest.TestCase):
         ]
         result = rank_analogues("2026-09-03", {"gap": 0.15}, history, now, top_k=2)
         self.assertEqual(result[0].outcome_summary["return_30m_mean"], 0.0)
+        self.assertEqual(result[0].outcome_summary["return_30m_min"], -1.0)
+        self.assertEqual(result[0].outcome_summary["return_30m_max"], 1.0)
         self.assertEqual(result[0].outcome_summary["onh_first_rate"], 0.5)
 
     def test_similar_regimes_endpoint_returns_bounded_matches(self) -> None:

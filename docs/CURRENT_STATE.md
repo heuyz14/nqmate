@@ -71,6 +71,7 @@ Phase 5 — Historical Analogues (Phase 4 implementation complete; BLS calendar 
 - Phase 5 end-to-end API slice added: `POST /bias/generate` can retrieve point-in-time analogues, feed their aggregate summary into evidence, and return ranked matches with the prediction.
 - Phase 5 dashboard slice added: `/regime` provides a responsive, accessible historical-regime query form and results table backed by `POST /regimes/similar`.
 - Phase 5 market-context slice added: `GET /market/nq/analogue-features` exposes the backend-calculated analogue vector, and `/regime` can load it before searching.
+- Phase 5 outcome visualization slice added: `/regime` displays historical 30m/60m/open-to-close ranges and ONH/ONL/trend-day read-through metrics; strategy-specific performance remains deferred to Phase 7.
 
 ## In Progress
 
@@ -79,7 +80,7 @@ Phase 5 historical analogue implementation is in progress. Phase 3 data APIs and
 ## Next
 
 1. Add analogue API integration tests against populated Supabase vectors
-2. Add analogue outcome charts and strategy context
+2. Recheck September market-session availability after the trading day closes
 3. Recheck September market-session availability after the trading day closes
 
 ## Important Decisions

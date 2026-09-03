@@ -19,7 +19,7 @@ Read when building dashboard pages, visual information hierarchy, chart overlays
 
 The main trading screen prioritizes current NQ, bias/confidence, catalyst, chart/context, bull/bear cases, high-impact news, and historical analogues. Do not overload it with raw model internals; diagnostics belong on `/models`.
 
-The initial `/regime` implementation is a focused historical-regime finder. It submits the six Phase 5 pre-session features and prediction timestamp to `POST /regimes/similar`, then presents ranked matches and aggregate outcome fields. The “Load stored features” action uses `GET /market/nq/analogue-features` so the backend remains the source of deterministic feature calculations; manual values remain available for research and incomplete sessions.
+The initial `/regime` implementation is a focused historical-regime finder. It submits the six Phase 5 pre-session features and prediction timestamp to `POST /regimes/similar`, then presents ranked matches, aggregate outcome fields, and zero-centered historical move ranges. The “Load stored features” action uses `GET /market/nq/analogue-features` so the backend remains the source of deterministic feature calculations; manual values remain available for research and incomplete sessions. Move ranges are historical evidence, not forecasts; strategy-specific performance belongs to the later strategy-memory phase.
 
 ## UX rules
 

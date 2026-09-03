@@ -18,8 +18,11 @@ def _scale(rows: Sequence[HistoricalSession], names: Sequence[str]) -> tuple[dic
 
 
 def _summary(matches: Sequence[HistoricalSession]) -> dict[str, float]:
+    def numeric_values(name: str) -> list[float]:
+        return [float(row.outcomes[name]) for row in matches if isinstance(row.outcomes.get(name), (int, float))]
+
     def numeric_mean(name: str) -> float:
-        values = [row.outcomes[name] for row in matches if isinstance(row.outcomes.get(name), (int, float))]
+        values = numeric_values(name)
         return round(mean(values), 10) if values else 0.0
 
     def boolean_rate(name: str) -> float:
@@ -28,11 +31,16 @@ def _summary(matches: Sequence[HistoricalSession]) -> dict[str, float]:
 
     returns = [row.outcomes["return_60m"] for row in matches if isinstance(row.outcomes.get("return_60m"), (int, float))]
 
+    def numeric_range(name: str) -> dict[str, float]:
+        values = numeric_values(name)
+        return {f"{name}_min": round(min(values), 10), f"{name}_max": round(max(values), 10)} if values else {f"{name}_min": 0.0, f"{name}_max": 0.0}
+
     return {"analogue_bull_rate": round(sum(value > 0 for value in returns) / len(returns), 10) if returns else 0.0,
             "return_30m_mean": numeric_mean("return_30m"), "return_60m_mean": numeric_mean("return_60m"),
             "open_close_mean": numeric_mean("open_close"), "onh_first_rate": boolean_rate("onh_first"),
             "onl_first_rate": boolean_rate("onl_first"), "trend_day_rate": boolean_rate("trend_day"),
-            "sample_size": float(len(matches))}
+            "sample_size": float(len(matches)), **numeric_range("return_30m"), **numeric_range("return_60m"),
+            **numeric_range("open_close")}
 
 
 def rank_analogues(current_session_date: str, current_features: dict[str, float], history: Sequence[HistoricalSession], prediction_time: datetime, top_k: int = 20, metric: str = "euclidean") -> list[AnalogueMatch]:

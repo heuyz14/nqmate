@@ -14,6 +14,12 @@ type Match = {
     onl_first_rate?: number;
     trend_day_rate?: number;
     sample_size?: number;
+    return_30m_min?: number;
+    return_30m_max?: number;
+    return_60m_min?: number;
+    return_60m_max?: number;
+    open_close_min?: number;
+    open_close_max?: number;
   };
 };
 
@@ -32,6 +38,22 @@ const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/a
 
 function percent(value?: number) {
   return value == null ? "—" : `${value >= 0 ? "+" : ""}${(value * 100).toFixed(2)}%`;
+}
+
+function OutcomeChart({ summary }: { summary: Match["outcome_summary"] }) {
+  const measures = [
+    ["30m", summary.return_30m_min, summary.return_30m_max, summary.return_30m_mean],
+    ["60m", summary.return_60m_min, summary.return_60m_max, summary.return_60m_mean],
+    ["Open → close", summary.open_close_min, summary.open_close_max, summary.open_close_mean],
+  ] as const;
+  return <div className="outcome-chart" aria-label="Historical analogue possible move ranges">
+    {measures.map(([label, min, max, average]) => {
+      const low = min ?? average ?? 0;
+      const high = max ?? average ?? 0;
+      const scale = Math.max(Math.abs(low), Math.abs(high), 0.0001);
+      return <div className="move-row" key={label}><div className="move-label"><span>{label}</span><strong>{percent(average)}</strong></div><div className="move-track"><span className="move-negative" style={{ width: `${Math.min(50, Math.abs(Math.min(0, low)) / scale * 50)}%` }} /><span className="move-positive" style={{ width: `${Math.min(50, Math.max(0, high) / scale * 50)}%` }} /></div><div className="move-range">{percent(min)} to {percent(max)}</div></div>;
+    })}
+  </div>;
 }
 
 export default function RegimePage() {
@@ -116,9 +138,9 @@ export default function RegimePage() {
         <section aria-labelledby="results-title">
           <div className="section-heading results-heading"><div><p className="eyebrow">MATCHES / {result.matches.length}</p><h2 id="results-title">Closest historical sessions</h2></div><span className="result-date">{result.session_date}</span></div>
           {result.matches.length === 0 ? <div className="state"><strong>No eligible sessions found.</strong><span>Try an earlier prediction time or confirm historical vectors are populated.</span></div> : (
-            <div className="table-wrap"><table><caption className="sr-only">Historical analogue matches and aggregate outcomes</caption><thead><tr><th scope="col">Rank</th><th scope="col">Session</th><th scope="col">Distance</th><th scope="col">Up at 60m</th><th scope="col">30m return</th><th scope="col">60m return</th><th scope="col">Open → close</th><th scope="col">Trend day</th></tr></thead><tbody>
+            <><div className="insight-grid"><div className="insight-panel"><p className="eyebrow">POSSIBLE MOVES</p><h3>Historical return range</h3><OutcomeChart summary={result.matches[0].outcome_summary} /><p className="footnote">Range shows the lowest to highest observed outcome among the selected analogues. It is historical evidence, not a forecast.</p></div><div className="insight-panel"><p className="eyebrow">READ-THROUGH</p><h3>What the matches suggest</h3><div className="read-through"><div><span>Up at 60m</span><strong>{result.matches[0].outcome_summary.analogue_bull_rate == null ? "—" : `${(result.matches[0].outcome_summary.analogue_bull_rate * 100).toFixed(0)}%`}</strong></div><div><span>ONH first</span><strong>{result.matches[0].outcome_summary.onh_first_rate == null ? "—" : `${(result.matches[0].outcome_summary.onh_first_rate * 100).toFixed(0)}%`}</strong></div><div><span>ONL first</span><strong>{result.matches[0].outcome_summary.onl_first_rate == null ? "—" : `${(result.matches[0].outcome_summary.onl_first_rate * 100).toFixed(0)}%`}</strong></div><div><span>Trend day</span><strong>{result.matches[0].outcome_summary.trend_day_rate == null ? "—" : `${(result.matches[0].outcome_summary.trend_day_rate * 100).toFixed(0)}%`}</strong></div></div><p className="footnote">Strategy-specific performance will appear after the Phase 7 strategy memory system is implemented.</p></div></div><div className="table-wrap"><table><caption className="sr-only">Historical analogue matches and aggregate outcomes</caption><thead><tr><th scope="col">Rank</th><th scope="col">Session</th><th scope="col">Distance</th><th scope="col">Up at 60m</th><th scope="col">30m return</th><th scope="col">60m return</th><th scope="col">Open → close</th><th scope="col">Trend day</th></tr></thead><tbody>
               {result.matches.map((match, index) => <tr key={match.session_date}><td className="muted">{String(index + 1).padStart(2, "0")}</td><td className="session-cell">{match.session_date}</td><td>{match.distance.toFixed(4)}</td><td>{match.outcome_summary.analogue_bull_rate == null ? "—" : `${(match.outcome_summary.analogue_bull_rate * 100).toFixed(0)}%`}</td><td>{percent(match.outcome_summary.return_30m_mean)}</td><td>{percent(match.outcome_summary.return_60m_mean)}</td><td>{percent(match.outcome_summary.open_close_mean)}</td><td>{match.outcome_summary.trend_day_rate == null ? "—" : `${(match.outcome_summary.trend_day_rate * 100).toFixed(0)}%`}</td></tr>)}
-            </tbody></table></div>
+            </tbody></table></div></>
           )}
         </section>
       )}

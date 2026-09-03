@@ -27,6 +27,18 @@ input:focus, button:focus, a:focus { outline: 2px solid var(--accent); outline-o
 .error { border-color: var(--danger); color: var(--danger); }
 .results-heading { align-items: end; }
 .table-wrap { border: 1px solid var(--line); overflow-x: auto; }
+.insight-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; margin-bottom: 18px; }
+.insight-panel { background: var(--panel); border: 1px solid var(--line); padding: 22px; }
+h3 { font-size: 16px; margin: 0 0 20px; }
+.move-row { margin: 15px 0; }
+.move-label, .read-through div { align-items: center; display: flex; justify-content: space-between; }
+.move-label span, .read-through span { color: var(--muted); font-size: 12px; }
+.move-label strong, .read-through strong { font-size: 14px; }
+.move-track { background: #1d2936; display: flex; height: 8px; justify-content: flex-end; margin: 8px 0 5px; overflow: hidden; }
+.move-negative { background: var(--danger); display: block; }
+.move-positive { background: #a7d7b1; display: block; }
+.move-range, .footnote { color: var(--muted); font-size: 11px; }
+.read-through { display: grid; gap: 15px; margin-bottom: 20px; }
 table { border-collapse: collapse; min-width: 820px; width: 100%; }
 th, td { border-bottom: 1px solid var(--line); padding: 14px 16px; text-align: right; white-space: nowrap; }
 th { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
@@ -35,5 +47,5 @@ tbody tr:last-child td { border-bottom: 0; }
 .session-cell { color: var(--accent); font-weight: 700; }
 .muted { color: var(--muted); }
 .sr-only { height: 1px; margin: -1px; overflow: hidden; position: absolute; width: 1px; clip: rect(0, 0, 0, 0); }
-@media (max-width: 760px) { .shell { padding: 32px 16px 48px; } .page-header, .section-heading { flex-direction: column; } .form-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 760px) { .shell { padding: 32px 16px 48px; } .page-header, .section-heading { flex-direction: column; } .form-grid { grid-template-columns: repeat(2, 1fr); } .insight-grid { grid-template-columns: 1fr; } }
 @media (max-width: 420px) { .form-grid { grid-template-columns: 1fr; } .query-panel { padding: 18px; } }
