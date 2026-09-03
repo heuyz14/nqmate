@@ -21,3 +21,8 @@ class BiasResult:
     confidence: float
     recommendation: str
     catalyst_risk: str | None
+    evidence: tuple[str, ...] = ()
+    bull_case: tuple[str, ...] = ()
+    bear_case: tuple[str, ...] = ()
+    invalidation: tuple[str, ...] = ()
+    uncertainty: tuple[str, ...] = ()

@@ -22,3 +22,11 @@ class BiasTests(unittest.TestCase):
     def test_inputs_must_be_normalized(self) -> None:
         with self.assertRaises(ValueError):
             score_bias(BiasSnapshot(2, 0, 0, 0, 0, 0, None))
+
+    def test_result_contains_deterministic_evidence_and_invalidation(self) -> None:
+        result = score_bias(BiasSnapshot(0.2, 0.1, 0.2, -0.1, 0.1, 0.1, None))
+        self.assertTrue(result.evidence)
+        self.assertTrue(result.bull_case)
+        self.assertTrue(result.bear_case)
+        self.assertTrue(result.invalidation)
+        self.assertTrue(result.uncertainty)

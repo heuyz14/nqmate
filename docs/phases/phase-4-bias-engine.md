@@ -18,6 +18,8 @@ Generate a reproducible, conservative V0 bias without ML.
 
 The initial implementation slice provides `BiasSnapshot` and deterministic `score_bias` in `apps/api/src/nqmate_api/bias/`. Inputs are normalized to `[-1, 1]`; weights are overnight .20, gap .10, technical location .20, relative strength .15, macro .20, and news .15. A high-impact event within 15 minutes caps confidence at .55 and returns `WAIT_FOR_RELEASE`.
 
+The current result also includes deterministic evidence factors, bull and bear cases, invalidation conditions, and uncertainty notes. These are generated from the supplied snapshot only and are not LLM-generated.
+
 # Acceptance Criteria
 
 Identical inputs produce the same score; high-impact events within 15 minutes cap confidence at .55 and recommend waiting; LLM output uses only supplied evidence and contains required fields.

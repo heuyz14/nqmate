@@ -55,6 +55,7 @@ Phase 4 — Bias Engine (Phase 3 implementation complete; BLS calendar live acce
 - Phase 3 event-reaction wiring added: `persist_sampled_reactions` connects sampled labels to calendar event IDs and persists them idempotently.
 - Phase 3 provider acceptance smoke tests passed: BLS returned 7 CPI observations, FRED/ALFRED returned observations, BEA returned 25 quarterly observations, and the reaction endpoint returned HTTP 200 against Supabase.
 - Phase 4 deterministic bias slice added: typed `BiasSnapshot`, weighted reproducible scoring, direction thresholds, normalized-input validation, and the 15-minute catalyst guardrail with `WAIT_FOR_RELEASE`.
+- Phase 4 evidence slice added: deterministic evidence factors, bull/bear cases, invalidation conditions, and uncertainty notes are included in `BiasResult`.
 
 ## In Progress
 
@@ -62,9 +63,9 @@ Phase 4 deterministic bias implementation is in progress. Phase 3 data APIs and 
 
 ## Next
 
-1. Add bias evidence, invalidation, and counter-evidence fields
-2. Add bias API and immutable prediction persistence
-3. Add evidence-constrained LLM explanation after deterministic scoring
+1. Add bias API and immutable prediction persistence
+2. Add evidence-constrained LLM explanation after deterministic scoring
+3. Add current/history retrieval and acceptance verification
 
 ## Important Decisions
 

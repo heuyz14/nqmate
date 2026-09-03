@@ -23,8 +23,14 @@ def score_bias(snapshot: BiasSnapshot) -> BiasResult:
     minutes = snapshot.minutes_to_high_impact_event
     catalyst_risk = None
     recommendation = "MONITOR"
+    evidence = tuple(name for name in _WEIGHTS if getattr(snapshot, name) != 0)
+    bull_case = tuple(name for name in _WEIGHTS if getattr(snapshot, name) > 0)
+    bear_case = tuple(name for name in _WEIGHTS if getattr(snapshot, name) < 0)
+    invalidation = ("score crosses the neutral threshold",)
+    uncertainty = ("score magnitude is limited",) if abs(score) < 0.35 else ()
     if minutes is not None and 0 <= minutes <= 15:
         catalyst_risk = "CRITICAL_EVENT_RISK"
         confidence = min(confidence, 0.55)
         recommendation = "WAIT_FOR_RELEASE"
-    return BiasResult(direction, score, confidence, recommendation, catalyst_risk)
+        uncertainty = uncertainty + ("high-impact catalyst is within 15 minutes",)
+    return BiasResult(direction, score, confidence, recommendation, catalyst_risk, evidence, bull_case, bear_case, invalidation, uncertainty)
