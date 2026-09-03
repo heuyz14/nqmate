@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Sequence
 
 from nqmate_api.analogues.models import AnalogueMatch, HistoricalSession
+from nqmate_api.market.models import MarketSession
 
 
 def _scale(rows: Sequence[HistoricalSession], names: Sequence[str]) -> tuple[dict[str, float], dict[str, float]]:
@@ -47,3 +48,15 @@ def rank_analogues(current_session_date: str, current_features: dict[str, float]
     selected = [item[1] for item in scored[:top_k]]
     summary = _summary(selected)
     return [AnalogueMatch(row.session_date, distance, summary) for distance, row in scored[:top_k]]
+
+
+def session_features(session: MarketSession) -> dict[str, float]:
+    """Build analogue inputs from fields known by the regular-session open."""
+    return {
+        "overnight_return": session.overnight_return or 0.0,
+        "overnight_range": session.overnight_range,
+        "gap_pct": session.gap_pct or 0.0,
+        "atr_14": session.atr_14 or 0.0,
+        "prior_day_high_distance": (session.overnight_high - session.prior_day_high) if session.prior_day_high is not None else 0.0,
+        "prior_day_low_distance": (session.overnight_low - session.prior_day_low) if session.prior_day_low is not None else 0.0,
+    }

@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 
 from nqmate_api.analogues.models import HistoricalSession
 from nqmate_api.analogues.service import rank_analogues
+from nqmate_api.analogues.service import session_features
 
 
 class AnalogueTests(unittest.TestCase):
@@ -48,3 +49,11 @@ class AnalogueTests(unittest.TestCase):
             app.dependency_overrides.clear()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["matches"][0]["session_date"], "2026-09-01")
+
+    def test_session_features_use_only_pre_session_fields(self) -> None:
+        from datetime import date
+        from nqmate_api.market.models import MarketContract, MarketSession
+        session = MarketSession(date(2026, 9, 1), 20000, 20200, 19900, 20100, 19950, 20100, 19800, 20000, 20250, 19750, 20000, 0, 0, 0.01, 300, 20, MarketContract("NQ", "NQU6", "NQ_CONT"))
+        features = session_features(session)
+        self.assertEqual(features["overnight_return"], 0.01)
+        self.assertNotIn("nq_close", features)
