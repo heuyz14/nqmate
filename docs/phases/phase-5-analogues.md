@@ -21,6 +21,8 @@ The initial implementation slice is `apps/api/src/nqmate_api/analogues/service.p
 
 The persistence/API slice adds migration `013_analogue_vectors.sql`, `SupabaseAnalogueRepository`, and `POST /api/v1/regimes/similar`.
 
+`jobs/populate_analogue_vectors.py` populates vectors for a date range from stored sessions. It intentionally excludes completed-session OHLC from the feature vector because those values are not known at the analogue prediction timestamp.
+
 # Acceptance Criteria
 
 For a current session, the endpoint returns 20 comparable sessions with reproducible distances and outcome aggregates without future data leakage.

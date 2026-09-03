@@ -65,6 +65,7 @@ Phase 5 — Historical Analogues (Phase 4 implementation complete; BLS calendar 
 - Phase 4 acceptance completed: deterministic bias, immutable persistence, evidence fields, history, catalyst guardrail, and evidence-constrained Gemini explanation are implemented and smoke-tested.
 - Phase 5 analogue slice added: reproducible StandardScaler-style Euclidean/cosine ranking with historical date/availability filtering, missing-feature exclusion, and 30m outcome aggregation foundation.
 - Phase 5 persistence/API slice added: migration `013_analogue_vectors.sql`, `SupabaseAnalogueRepository`, and `POST /api/v1/regimes/similar` expose bounded point-in-time analogue retrieval.
+- Phase 5 vector population slice added: `jobs/populate_analogue_vectors.py` populated 151 stored 2026 session vectors using only pre-session fields; live similar-regimes verification returned ranked matches.
 
 ## In Progress
 
@@ -72,8 +73,8 @@ Phase 5 historical analogue implementation is in progress. Phase 3 data APIs and
 
 ## Next
 
-1. Apply migration `013_analogue_vectors.sql` and populate historical vectors
-2. Add full outcome aggregation and bias evidence integration
+1. Add full outcome aggregation and bias evidence integration
+2. Add analogue API integration tests against populated vectors
 3. Recheck September market-session availability after the trading day closes
 
 ## Important Decisions
