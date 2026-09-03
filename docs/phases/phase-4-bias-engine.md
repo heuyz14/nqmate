@@ -40,4 +40,4 @@ ML probabilities, historical analogues, graph, strategy memory, and execution.
 
 # Next Phase
 
-[Phase 5 — Historical analogues](phase-5-analogues.md).
+[Phase 5 — Historical analogues](phase-5-analogues.md). Phase 4 acceptance is complete for deterministic scoring, persistence, history, catalyst guardrails, and evidence-constrained explanation.

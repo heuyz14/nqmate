@@ -6,7 +6,7 @@ Always read this file at session start. It is the concise handoff for what exist
 
 ## Current Phase
 
-Phase 4 — Bias Engine (Phase 3 implementation complete; BLS calendar live access remains network-dependent)
+Phase 5 — Historical Analogues (Phase 4 implementation complete; BLS calendar live access remains network-dependent)
 
 ## Completed
 
@@ -62,15 +62,17 @@ Phase 4 — Bias Engine (Phase 3 implementation complete; BLS calendar live acce
 - Phase 4 explanation slice added: `LLMProvider` and `GeminiBiasExplainer` accept only deterministic bias evidence and validate structured explanation output; 72 tests pass.
 - Phase 4 explanation persistence slice added: migration `012_bias_explanations.sql`, bounded `/api/v1/bias/history`, and linked `/api/v1/bias/{id}/explain` storage are implemented.
 - Migration `012_bias_explanations.sql` applied and verified; live deterministic bias generation and Gemini explanation smoke tests returned HTTP 200 with persisted IDs.
+- Phase 4 acceptance completed: deterministic bias, immutable persistence, evidence fields, history, catalyst guardrail, and evidence-constrained Gemini explanation are implemented and smoke-tested.
+- Phase 5 analogue slice added: reproducible StandardScaler-style Euclidean/cosine ranking with historical date/availability filtering, missing-feature exclusion, and 30m outcome aggregation foundation.
 
 ## In Progress
 
-Phase 4 deterministic bias implementation is in progress. Phase 3 data APIs and persistence are accepted; the BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
+Phase 5 historical analogue implementation is in progress. Phase 3 data APIs and persistence are accepted; the BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
 
 ## Next
 
-1. Complete Phase 4 acceptance verification
-2. Begin Phase 5 historical analogues
+1. Add historical feature-vector persistence and analogue API
+2. Add full outcome aggregation and bias evidence integration
 3. Recheck September market-session availability after the trading day closes
 
 ## Important Decisions
