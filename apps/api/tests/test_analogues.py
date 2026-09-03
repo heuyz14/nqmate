@@ -32,3 +32,19 @@ class AnalogueTests(unittest.TestCase):
         result = rank_analogues("2026-09-03", {"gap": 0.15}, history, now, top_k=2)
         self.assertEqual(result[0].outcome_summary["return_30m_mean"], 0.0)
         self.assertEqual(result[0].outcome_summary["onh_first_rate"], 0.5)
+
+    def test_similar_regimes_endpoint_returns_bounded_matches(self) -> None:
+        from fastapi.testclient import TestClient
+        from nqmate_api.main import app, get_analogue_repository
+
+        class FakeRepository:
+            def list(self, limit=500):
+                return [HistoricalSession("2026-09-01", {"gap": 0.1}, datetime(2026, 9, 2, tzinfo=timezone.utc), {})]
+
+        app.dependency_overrides[get_analogue_repository] = lambda: FakeRepository()
+        try:
+            response = TestClient(app).post("/api/v1/regimes/similar", json={"sessionDate": "2026-09-03", "features": {"gap": 0.1}, "predictionTime": "2026-09-03T12:00:00Z", "topK": 20})
+        finally:
+            app.dependency_overrides.clear()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["matches"][0]["session_date"], "2026-09-01")

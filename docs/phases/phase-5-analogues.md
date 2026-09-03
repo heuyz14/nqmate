@@ -19,6 +19,8 @@ Retrieve the 20 most similar historical sessions and summarize their outcomes.
 
 The initial implementation slice is `apps/api/src/nqmate_api/analogues/service.py`. It standardizes historical candidates only, excludes future dates and unavailable rows, supports Euclidean/cosine ranking, and returns bounded matches with initial 30m return/ONH-first summaries.
 
+The persistence/API slice adds migration `013_analogue_vectors.sql`, `SupabaseAnalogueRepository`, and `POST /api/v1/regimes/similar`.
+
 # Acceptance Criteria
 
 For a current session, the endpoint returns 20 comparable sessions with reproducible distances and outcome aggregates without future data leakage.

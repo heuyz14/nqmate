@@ -12,7 +12,7 @@ Base path: `/api/v1`.
 | News | `GET /news`, `/news/high-impact`, `/news/clusters`, `/news/{id}`; `POST /news/refresh` |
 | Macro | `GET /macro/calendar`, `/macro/upcoming`, `/macro/observations`, `/macro/events/{id}`, `/macro/events/{id}/reactions` |
 | Bias | `GET /bias/current`, `/bias/history`, `/bias/{id}`; `POST /bias/generate`, `/bias/{id}/explain` |
-| Regimes | `GET /regimes/current`, `/regimes/similar`, `/regimes/{id}` |
+| Regimes | `GET /regimes/current`, `/regimes/{id}`; `POST /regimes/similar` |
 | Strategies | `GET /strategies`; `POST /strategies`; `GET/PATCH /strategies/{id}`; `GET /strategies/{id}/performance` |
 | Knowledge | `POST /knowledge/query`; `GET /knowledge/session/{date}` |
 | Backtests | `POST /backtests`; `GET /backtests/{id}` |
@@ -30,3 +30,5 @@ News reads return normalized event records backed by `news_articles` and `news_e
 `/macro/calendar` returns persisted scheduled economic events filtered by ISO datetime range, with optional HIGH-impact filtering and a bounded limit. `/macro/upcoming` returns the next persisted HIGH-impact event within 14 days, raw `actual - forecast` surprise when both values exist, minutes until release, and the documented pre-event risk state.
 
 `/macro/observations` returns persisted official macro observations, optionally filtered by `series_id`, with a bounded limit.
+
+`POST /regimes/similar` accepts a current session date, feature vector, prediction timestamp, metric, and top-K bound, then returns point-in-time eligible historical matches.

@@ -17,6 +17,8 @@ from nqmate_api.bias.models import BiasSnapshot, BiasResult
 from nqmate_api.bias.llm import GeminiBiasExplainer, LLMProvider
 from nqmate_api.bias.repository import BiasRepository, SupabaseBiasRepository
 from nqmate_api.bias.service import score_bias
+from nqmate_api.analogues.repository import AnalogueRepository, SupabaseAnalogueRepository
+from nqmate_api.analogues.service import rank_analogues
 
 app = FastAPI(title="NQmate API", version="0.1.0")
 
@@ -39,6 +41,11 @@ def get_macro_repository() -> MacroRepository:
 @lru_cache(maxsize=1)
 def get_bias_repository() -> BiasRepository:
     return SupabaseBiasRepository.from_settings(Settings())
+
+
+@lru_cache(maxsize=1)
+def get_analogue_repository() -> AnalogueRepository:
+    return SupabaseAnalogueRepository.from_settings(Settings())
 
 
 class BiasSnapshotRequest(BaseModel):
@@ -290,6 +297,28 @@ async def get_current_bias(
     if prediction is None:
         raise HTTPException(status_code=404, detail="No bias prediction found")
     return prediction
+
+
+class SimilarRegimeRequest(BaseModel):
+    sessionDate: date
+    features: dict[str, float]
+    predictionTime: datetime
+    topK: int = Field(default=20, ge=1, le=20)
+    metric: str = "euclidean"
+
+
+@app.post("/api/v1/regimes/similar", tags=["regimes"])
+async def get_similar_regimes(
+    request: SimilarRegimeRequest,
+    repository: AnalogueRepository = Depends(get_analogue_repository),
+) -> dict[str, object]:
+    if request.metric not in {"euclidean", "cosine"}:
+        raise HTTPException(status_code=422, detail="metric must be euclidean or cosine")
+    matches = rank_analogues(request.sessionDate.isoformat(), request.features, repository.list(), request.predictionTime, request.topK, request.metric)
+    return {"session_date": request.sessionDate.isoformat(), "metric": request.metric, "matches": [
+        {"session_date": match.session_date, "distance": match.distance, "outcome_summary": match.outcome_summary}
+        for match in matches
+    ]}
 
 
 @app.get("/api/v1/bias/history", tags=["bias"])

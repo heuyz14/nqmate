@@ -64,6 +64,7 @@ Phase 5 — Historical Analogues (Phase 4 implementation complete; BLS calendar 
 - Migration `012_bias_explanations.sql` applied and verified; live deterministic bias generation and Gemini explanation smoke tests returned HTTP 200 with persisted IDs.
 - Phase 4 acceptance completed: deterministic bias, immutable persistence, evidence fields, history, catalyst guardrail, and evidence-constrained Gemini explanation are implemented and smoke-tested.
 - Phase 5 analogue slice added: reproducible StandardScaler-style Euclidean/cosine ranking with historical date/availability filtering, missing-feature exclusion, and 30m outcome aggregation foundation.
+- Phase 5 persistence/API slice added: migration `013_analogue_vectors.sql`, `SupabaseAnalogueRepository`, and `POST /api/v1/regimes/similar` expose bounded point-in-time analogue retrieval.
 
 ## In Progress
 
@@ -71,7 +72,7 @@ Phase 5 historical analogue implementation is in progress. Phase 3 data APIs and
 
 ## Next
 
-1. Add historical feature-vector persistence and analogue API
+1. Apply migration `013_analogue_vectors.sql` and populate historical vectors
 2. Add full outcome aggregation and bias evidence integration
 3. Recheck September market-session availability after the trading day closes
 
