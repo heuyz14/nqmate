@@ -39,3 +39,46 @@ class XGBoostClassifier:
         if self._model is None:
             raise RuntimeError("XGBoostClassifier must be fitted before prediction")
         return tuple(float(row[1]) for row in self._model.predict_proba(features))
+
+
+class SklearnGradientBoostingClassifier:
+    def __init__(self, random_state: int = 42) -> None:
+        self.random_state = random_state
+        self._model = None
+
+    def fit(self, features: Sequence[Sequence[float]], labels: Sequence[int]) -> "SklearnGradientBoostingClassifier":
+        try:
+            from sklearn.ensemble import GradientBoostingClassifier
+        except ImportError as error:
+            raise RuntimeError("scikit-learn is required; install the API ml extra") from error
+        self._model = GradientBoostingClassifier(random_state=self.random_state)
+        self._model.fit(features, labels)
+        return self
+
+    def predict_probability(self, features: Sequence[Sequence[float]]) -> tuple[float, ...]:
+        if self._model is None:
+            raise RuntimeError("SklearnGradientBoostingClassifier must be fitted before prediction")
+        return tuple(float(row[1]) for row in self._model.predict_proba(features))
+
+
+class LightGBMClassifier:
+    def __init__(self, random_state: int = 42) -> None:
+        self.random_state = random_state
+        self._model = None
+
+    def fit(self, features: Sequence[Sequence[float]], labels: Sequence[int]) -> "LightGBMClassifier":
+        try:
+            from lightgbm import LGBMClassifier
+        except ImportError as error:
+            raise RuntimeError("LightGBM is required; install the API ml extra") from error
+        self._model = LGBMClassifier(
+            n_estimators=100, learning_rate=0.05, max_depth=3,
+            random_state=self.random_state, verbosity=-1, n_jobs=1,
+        )
+        self._model.fit(features, labels)
+        return self
+
+    def predict_probability(self, features: Sequence[Sequence[float]]) -> tuple[float, ...]:
+        if self._model is None:
+            raise RuntimeError("LightGBMClassifier must be fitted before prediction")
+        return tuple(float(row[1]) for row in self._model.predict_proba(features))

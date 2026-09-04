@@ -1,6 +1,6 @@
 import unittest
 
-from nqmate_api.ml.boosted import XGBoostClassifier, XGBoostConfig
+from nqmate_api.ml.boosted import LightGBMClassifier, SklearnGradientBoostingClassifier, XGBoostClassifier, XGBoostConfig
 
 
 class XGBoostTests(unittest.TestCase):
@@ -16,3 +16,12 @@ class XGBoostTests(unittest.TestCase):
         probabilities = model.predict_probability(((0.0,), (3.0,)))
         self.assertEqual(len(probabilities), 2)
         self.assertTrue(all(0 <= probability <= 1 for probability in probabilities))
+
+    def test_other_boosting_adapters_return_probabilities(self) -> None:
+        for classifier in (SklearnGradientBoostingClassifier(), LightGBMClassifier()):
+            try:
+                probabilities = classifier.fit(((0.0,), (1.0,), (2.0,), (3.0,)), (0, 0, 1, 1)).predict_probability(((0.0,), (3.0,)))
+            except RuntimeError as error:
+                self.skipTest(str(error))
+            self.assertEqual(len(probabilities), 2)
+            self.assertTrue(all(0 <= probability <= 1 for probability in probabilities))

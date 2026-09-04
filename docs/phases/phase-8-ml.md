@@ -33,6 +33,8 @@ The XGBoost challenger adds `nqmate_api.ml.boosted` and the optional `ml` depend
 
 The evaluation runner now accepts horizon-specific stored outcomes and creates separate target/dataset/model identities. The first 60-minute run also covered 151 out-of-sample rows: always-long scored 56.29%, XGBoost 54.30%, majority 54.97%, and logistic 44.37%. XGBoost remains inactive because it did not beat the relevant simple baseline.
 
+The three-way boosting comparison found that for 30m, XGBoost scored 49.67%, scikit-learn Gradient Boosting 43.71%, and LightGBM 45.03%; none beat the 52.98% majority baseline. For 60m, scikit-learn Gradient Boosting scored 58.94%, XGBoost 54.30%, and LightGBM 54.30%; scikit-learn Gradient Boosting is the current best candidate over the 56.29% always-long baseline. It remains inactive pending multiple-window validation and calibration.
+
 # Acceptance Criteria
 
 Models beat relevant simple baselines out of sample across multiple windows without leakage; calibrated probabilities and metrics are visible; artifacts are immutable and reproducible. The baseline slice is the prerequisite measurement layer and does not claim Phase 8 acceptance by itself.

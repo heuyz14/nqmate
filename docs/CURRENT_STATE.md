@@ -98,6 +98,7 @@ Phase 8 — ML (baseline slice in progress; Phase 7 implementation complete; BLS
 - Phase 8 baseline run completed against stored 2026 history: 151 out-of-sample rows and four registered inactive models. Accuracy was majority 52.98%, always-long 52.98%, overnight-direction 49.67%, and logistic 49.01%; logistic did not beat the simple baseline.
 - Phase 8 XGBoost challenger added with optional `xgboost` and `scikit-learn` dependencies; the first walk-forward run scored 49.67% accuracy on the same 151 rows, below the majority baseline, and was registered inactive rather than promoted.
 - Phase 8 multi-horizon runner added: `jobs/evaluate_ml_baselines.py` now creates horizon-specific metadata for stored outcomes. The first 60-minute run covered 151 rows: always-long 56.29%, majority 54.97%, XGBoost 54.30%, and logistic 44.37%; no challenger was promoted.
+- Phase 8 three-way boosting comparison completed for 30m and 60m: scikit-learn Gradient Boosting is the current best candidate for 60m at 58.94% versus 56.29% always-long; XGBoost and LightGBM did not beat it. No model is active until multiple-window validation and calibration pass.
 
 ## In Progress
 
