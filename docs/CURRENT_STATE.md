@@ -100,6 +100,7 @@ Phase 8 — ML (baseline slice in progress; Phase 7 implementation complete; BLS
 - Phase 8 multi-horizon runner added: `jobs/evaluate_ml_baselines.py` now creates horizon-specific metadata for stored outcomes. The first 60-minute run covered 151 rows: always-long 56.29%, majority 54.97%, XGBoost 54.30%, and logistic 44.37%; no challenger was promoted.
 - Phase 8 three-way boosting comparison completed for 30m and 60m: scikit-learn Gradient Boosting is the current best candidate for 60m at 58.94% versus 56.29% always-long; XGBoost and LightGBM did not beat it. No model is active until multiple-window validation and calibration pass.
 - Phase 8 target-contract slice added at `apps/api/src/nqmate_api/ml/targets.py`: explicit 5m/15m/30m/60m/120m/240m/close direction target names and exact-time target matrix support are tested; missing future bars are excluded.
+- Phase 8 calibration slice added at `apps/api/src/nqmate_api/ml/calibration.py`: expected calibration error, multiple expanding walk-forward windows, and accuracy/Brier promotion gating are tested. The current 60m Gradient Boosting candidate remains inactive pending these checks.
 
 ## In Progress
 

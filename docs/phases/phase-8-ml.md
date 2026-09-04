@@ -37,6 +37,8 @@ The evaluation runner now accepts horizon-specific stored outcomes and creates s
 
 The three-way boosting comparison found that for 30m, XGBoost scored 49.67%, scikit-learn Gradient Boosting 43.71%, and LightGBM 45.03%; none beat the 52.98% majority baseline. For 60m, scikit-learn Gradient Boosting scored 58.94%, XGBoost 54.30%, and LightGBM 54.30%; scikit-learn Gradient Boosting is the current best candidate over the 56.29% always-long baseline. It remains inactive pending multiple-window validation and calibration.
 
+The calibration slice adds `nqmate_api.ml.calibration`. It provides expected calibration error, multiple expanding walk-forward windows, and a promotion gate requiring accuracy improvement plus no worse Brier score than the baseline. These safeguards prevent selecting the 60m candidate from one window alone.
+
 # Acceptance Criteria
 
 Models beat relevant simple baselines out of sample across multiple windows without leakage; calibrated probabilities and metrics are visible; artifacts are immutable and reproducible. The baseline slice is the prerequisite measurement layer and does not claim Phase 8 acceptance by itself.
