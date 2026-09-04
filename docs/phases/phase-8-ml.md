@@ -47,6 +47,8 @@ The first multi-window report used 10-row test windows with training sizes 20, 4
 
 The candle-horizon slice adds deterministic persistence for `5m`, `15m`, `1h`, `2h`, `4h`, and `1d` bars in `jobs/populate_market_timeframes.py`. It derives every requested candle only from stored `1min` bars, with `2h`/`4h` corresponding to the `120m`/`240m` ML horizons. The job is historical and resumable by date range; it does not add a live market feed.
 
+The post-population 5m and 15m evaluations each produced 151 out-of-sample rows. The 5m XGBoost and LightGBM challengers both scored 53.64% accuracy but were not activated; the 15m majority baseline scored 56.29%, so no challenger was promoted.
+
 # Acceptance Criteria
 
 Models beat relevant simple baselines out of sample across multiple windows without leakage; calibrated probabilities and metrics are visible; artifacts are immutable and reproducible. The baseline slice is the prerequisite measurement layer and does not claim Phase 8 acceptance by itself.

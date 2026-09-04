@@ -107,6 +107,7 @@ Phase 8 — ML (baseline slice in progress; Phase 7 implementation complete; BLS
 - Phase 8 historical outcomes expanded: analogue vectors now store 5m/15m/120m/240m returns when exact bars exist. Verification found 95 sessions with 5m/15m outcomes, 2 with 120m, and 0 with 240m. Initial 5m/15m challenger runs were registered inactive; no model was promoted.
 - Phase 8 candle-horizon slice added: `jobs/populate_market_timeframes.py` derives and persists canonical `5m`, `15m`, `1h`, `2h`, `4h`, and `1d` candles from stored 1-minute bars; `2h`/`4h` represent 120m/240m horizons and the API accepts those aliases.
 - Historical candle population completed for 2026-01-01 through 2026-09-02: Supabase verification found 47,258 `5m`, 15,755 `15m`, 3,940 `1h`, 2,056 `2h`, 1,066 `4h`, and 208 `1d` bars. The source remains the canonical stored 1-minute history.
+- Horizon evaluations rerun after candle population: 5m and 15m each produced 151 out-of-sample rows. At 5m, XGBoost and LightGBM reached 53.64% accuracy but remain inactive; at 15m, the majority baseline led at 56.29% and all challengers remain inactive.
 
 ## In Progress
 
