@@ -21,6 +21,8 @@ The baseline slice adds `nqmate_api.ml.baselines` and `nqmate_api.ml.validation`
 
 The dataset slice adds `nqmate_api.ml.dataset`. It creates exact-timestamp forward direction labels, skips missing future bars, and builds versioned feature matrices only from snapshots available at their feature timestamp. The target timestamp remains historical outcome information for training, never an input feature.
 
+The evaluation slice adds `nqmate_api.ml.metrics`. It calculates accuracy, precision, recall, Brier score, log loss, and ROC-AUC, then compares all four baselines on chronological out-of-sample folds. Missing overnight direction falls back to the training-fold majority rate and is never fabricated as a signal.
+
 # Acceptance Criteria
 
 Models beat relevant simple baselines out of sample across multiple windows without leakage; calibrated probabilities and metrics are visible; artifacts are immutable and reproducible. The baseline slice is the prerequisite measurement layer and does not claim Phase 8 acceptance by itself.
