@@ -109,6 +109,7 @@ Phase 8 — ML (baseline slice in progress; Phase 7 implementation complete; BLS
 - Historical candle population completed for 2026-01-01 through 2026-09-02: Supabase verification found 47,258 `5m`, 15,755 `15m`, 3,940 `1h`, 2,056 `2h`, 1,066 `4h`, and 208 `1d` bars. The source remains the canonical stored 1-minute history.
 - Horizon evaluations rerun after candle population: 5m and 15m each produced 151 out-of-sample rows. At 5m, XGBoost and LightGBM reached 53.64% accuracy but remain inactive; at 15m, the majority baseline led at 56.29% and all challengers remain inactive.
 - Versioned dataset-catalog slice added: `jobs/register_ml_datasets.py` registered 5m/15m/30m/60m/120m/close directional datasets from real analogue outcomes; 120m currently has 3 rows and 240m is omitted because no valid rows exist. Absent horizons are skipped rather than imputed.
+- Market candle retrieval corrected: the bars API now prefers persisted requested-timeframe rows and aggregates only canonical 1-minute rows, preventing double aggregation after derived candles are stored.
 
 ## In Progress
 

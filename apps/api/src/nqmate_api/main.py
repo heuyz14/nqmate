@@ -161,7 +161,12 @@ async def get_nq_bars(
         datetime.combine(start, time.min, timezone.utc),
         datetime.combine(end + timedelta(days=1), time.min, timezone.utc),
     )
-    output_bars = bars if timeframe == "1min" else aggregate_bars(bars, timeframe)
+    minute_bars = [bar for bar in bars if bar.timeframe == "1min"]
+    if timeframe == "1min":
+        output_bars = minute_bars
+    else:
+        persisted_bars = [bar for bar in bars if bar.timeframe == timeframe]
+        output_bars = persisted_bars or aggregate_bars(minute_bars, timeframe)
     return {
         "start": start.isoformat(),
         "end": end.isoformat(),

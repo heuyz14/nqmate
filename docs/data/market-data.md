@@ -30,6 +30,8 @@ Start with minute bars; avoid every-tick storage. `market_bars` contains `id`, `
 
 The 1-minute series is the canonical historical input. The derived candle job persists deterministic 5-minute, 15-minute, 1-hour, 2-hour, 4-hour, and daily candles from stored minute bars rather than requesting duplicate provider series. The 2-hour and 4-hour candles represent the 120-minute and 240-minute horizons used by ML. The API also accepts `120m` and `240m` aliases when calculating or retrieving candles. Weekly analysis should include an explicitly defined opening gap for each trading week, using point-in-time bars and preserving the relevant raw contract.
 
+When reading candles, the API uses persisted bars for the requested canonical timeframe and aggregates only `1min` bars for an unsupported alias or an unpopulated range. It never aggregates already-derived bars into another result.
+
 ## Required session fields
 
 `MarketSession` includes session date, NQ OHLC, overnight OHLC, prior-day high/low/close, gap points/percent, overnight return/range, ATR(14), and optional regime ID. Detailed calculations are defined in [features.md](../ml/features.md).
