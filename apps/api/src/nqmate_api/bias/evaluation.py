@@ -46,3 +46,27 @@ def confidence_calibration(records: Sequence[Mapping[str, Any]], bins: int = 10)
                            "mean_confidence": predicted, "observed_accuracy": observed,
                            "calibration_gap": abs(predicted - observed)})
     return result
+
+
+def feature_drift(
+    reference: Sequence[Mapping[str, Any]], current: Sequence[Mapping[str, Any]], watch_threshold: float = 1.0,
+    drift_threshold: float = 2.0,
+) -> dict[str, dict[str, float | str]]:
+    """Compare numeric input snapshots without treating missing values as drift."""
+    if watch_threshold <= 0 or drift_threshold <= watch_threshold:
+        raise ValueError("drift thresholds must be positive and ordered")
+    names = sorted({name for row in (*reference, *current) for name, value in row.items()
+                    if isinstance(value, (int, float))})
+    result: dict[str, dict[str, float | str]] = {}
+    for name in names:
+        before = [float(row[name]) for row in reference if isinstance(row.get(name), (int, float))]
+        after = [float(row[name]) for row in current if isinstance(row.get(name), (int, float))]
+        if not before or not after:
+            continue
+        baseline = mean(before)
+        latest = mean(after)
+        scale = max((max(before) - min(before)) / 2, 1e-9)
+        score = abs(latest - baseline) / scale
+        status = "DRIFT" if score >= drift_threshold else "WATCH" if score >= watch_threshold else "STABLE"
+        result[name] = {"reference_mean": baseline, "current_mean": latest, "score": score, "status": status}
+    return result

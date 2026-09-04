@@ -16,7 +16,7 @@ from nqmate_api.macro.repository import MacroRepository, SupabaseMacroRepository
 from nqmate_api.bias.models import BiasSnapshot, BiasResult
 from nqmate_api.bias.llm import GeminiBiasExplainer, LLMProvider
 from nqmate_api.bias.repository import BiasRepository, SupabaseBiasRepository
-from nqmate_api.bias.evaluation import confidence_calibration, summarize_prediction_outcomes
+from nqmate_api.bias.evaluation import confidence_calibration, feature_drift, summarize_prediction_outcomes
 from nqmate_api.bias.service import score_bias
 from nqmate_api.analogues.repository import AnalogueRepository, SupabaseAnalogueRepository
 from nqmate_api.analogues.service import rank_analogues, session_features
@@ -688,6 +688,22 @@ async def evaluate_bias_history(
                 records.append({"confidence": prediction.get("confidence"), "correct": outcome["correct"]})
     return {"prediction_count": len(predictions), "outcome_count": len(records),
             "confidence_calibration": confidence_calibration(records)}
+
+
+@app.get("/api/v1/bias/drift", tags=["bias"])
+async def get_bias_drift(
+    limit: int = 100,
+    repository: BiasRepository = Depends(get_bias_repository),
+) -> dict[str, Any]:
+    if limit < 4 or limit > 100:
+        raise HTTPException(status_code=422, detail="limit must be between 4 and 100")
+    predictions = list(repository.history(limit))
+    ordered = list(reversed(predictions))
+    midpoint = len(ordered) // 2
+    reference = [item.get("input_snapshot") or {} for item in ordered[:midpoint]]
+    current = [item.get("input_snapshot") or {} for item in ordered[midpoint:]]
+    return {"prediction_count": len(predictions), "reference_count": len(reference),
+            "current_count": len(current), "features": feature_drift(reference, current)}
 
 
 @app.get("/api/v1/macro/upcoming", tags=["macro"])

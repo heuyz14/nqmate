@@ -6,6 +6,20 @@ from nqmate_api.main import app, get_bias_repository, get_analogue_repository
 
 
 class BiasApiTests(unittest.TestCase):
+    def test_drift_endpoint_compares_prediction_snapshot_windows(self) -> None:
+        class FakeRepository:
+            def history(self, limit=50):
+                return [{"input_snapshot": {"gap": 0.0}}, {"input_snapshot": {"gap": 0.1}},
+                        {"input_snapshot": {"gap": 1.0}}, {"input_snapshot": {"gap": 1.1}}]
+
+        app.dependency_overrides[get_bias_repository] = lambda: FakeRepository()
+        try:
+            response = TestClient(app).get("/api/v1/bias/drift?limit=4")
+        finally:
+            app.dependency_overrides.clear()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["features"]["gap"]["status"], "DRIFT")
+
     def test_history_evaluation_endpoint_returns_confidence_calibration(self) -> None:
         class FakeRepository:
             def history(self, limit=50):

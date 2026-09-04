@@ -25,6 +25,8 @@ The diagnostics slice adds `nqmate_api.bias.evaluation` and `GET /api/v1/bias/{p
 
 The calibration slice adds `GET /api/v1/bias/evaluation`, which reads a bounded prediction history and attached outcomes to report fixed confidence-bin sample sizes, mean confidence, observed accuracy, and calibration gaps. Neutral predictions are excluded from correctness bins.
 
+The drift slice adds deterministic feature-window comparison and `GET /api/v1/bias/drift`. It compares numeric `input_snapshot` means between older and newer bounded prediction windows and reports `STABLE`, `WATCH`, or `DRIFT`; missing fields are skipped.
+
 # Acceptance Criteria
 
 An old prediction can be reconstructed from exact inputs and versions; confidence bins compare predicted and observed results; drift is visible; challenger promotion requires out-of-sample and calibration evidence.
