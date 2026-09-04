@@ -17,6 +17,7 @@ from nqmate_api.bias.models import BiasSnapshot, BiasResult
 from nqmate_api.bias.llm import GeminiBiasExplainer, LLMProvider
 from nqmate_api.bias.repository import BiasRepository, SupabaseBiasRepository
 from nqmate_api.bias.evaluation import confidence_calibration, feature_drift, summarize_prediction_outcomes
+from nqmate_api.ml.repository import MlRepository, SupabaseMlRepository
 from nqmate_api.bias.service import score_bias
 from nqmate_api.analogues.repository import AnalogueRepository, SupabaseAnalogueRepository
 from nqmate_api.analogues.service import rank_analogues, session_features
@@ -76,6 +77,11 @@ def get_outcome_repository() -> OutcomeRepository:
 @lru_cache(maxsize=1)
 def get_setup_repository() -> SetupRepository:
     return SupabaseSetupRepository.from_settings(Settings())
+
+
+@lru_cache(maxsize=1)
+def get_ml_repository() -> MlRepository:
+    return SupabaseMlRepository.from_settings(Settings())
 
 
 class AnalogueQueryRequest(BaseModel):
@@ -704,6 +710,18 @@ async def get_bias_drift(
     current = [item.get("input_snapshot") or {} for item in ordered[midpoint:]]
     return {"prediction_count": len(predictions), "reference_count": len(reference),
             "current_count": len(current), "features": feature_drift(reference, current)}
+
+
+@app.get("/api/v1/ml/models", tags=["ml"])
+async def list_ml_models(
+    target: str | None = None,
+    limit: int = 100,
+    repository: MlRepository = Depends(get_ml_repository),
+) -> dict[str, Any]:
+    if limit < 1 or limit > 100:
+        raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
+    models = list(repository.list_models(target))[:limit]
+    return {"target": target, "models": models}
 
 
 @app.get("/api/v1/macro/upcoming", tags=["macro"])

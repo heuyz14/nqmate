@@ -118,6 +118,7 @@ Phase 9 — Evaluation (Phase 8 implementation complete; no ML model promoted; B
 - Phase 9 drift slice added: `feature_drift` and `GET /api/v1/bias/drift` compare older/newer numeric prediction snapshots and report stable, watch, or drift states without mutating predictions.
 - Phase 9 champion/challenger slice added: `champion_challenger_report` and `jobs/report_model_comparisons.py` provide read-only baseline-gated registry comparisons; no model is auto-activated.
 - Champion/challenger reporting corrected to prefer majority over always-long and exclude duplicate/simple baselines from challenger output; the corrected 5m report found no eligible challenger because Brier scores failed the gate.
+- Phase 9 registry visibility slice added: bounded `GET /api/v1/ml/models` exposes stored model metadata and active state with optional target filtering; it is read-only.
 
 ## In Progress
 

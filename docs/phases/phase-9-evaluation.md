@@ -29,6 +29,8 @@ The drift slice adds deterministic feature-window comparison and `GET /api/v1/bi
 
 The champion/challenger slice adds `champion_challenger_report` and `jobs/report_model_comparisons.py`. It deterministically prefers the majority baseline, excludes all simple baselines from challenger output, and marks eligibility only when accuracy improves and Brier score does not regress. The report is read-only; activation remains manual and gated.
 
+The registry visibility slice adds bounded `GET /api/v1/ml/models`, optionally filtered by target. It exposes stored algorithm, version, metrics, dataset identity, and active state for dashboards and manual review; it does not activate or modify models.
+
 # Acceptance Criteria
 
 An old prediction can be reconstructed from exact inputs and versions; confidence bins compare predicted and observed results; drift is visible; challenger promotion requires out-of-sample and calibration evidence.

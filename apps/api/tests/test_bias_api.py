@@ -2,10 +2,23 @@ import unittest
 from fastapi.testclient import TestClient
 
 from nqmate_api.bias.models import BiasResult
-from nqmate_api.main import app, get_bias_repository, get_analogue_repository
+from nqmate_api.main import app, get_bias_repository, get_analogue_repository, get_ml_repository
 
 
 class BiasApiTests(unittest.TestCase):
+    def test_ml_model_registry_endpoint_is_bounded(self) -> None:
+        class FakeRepository:
+            def list_models(self, target=None):
+                return [{"name": "baseline-majority", "target": target or "direction_60m", "active": False}]
+
+        app.dependency_overrides[get_ml_repository] = lambda: FakeRepository()
+        try:
+            response = TestClient(app).get("/api/v1/ml/models?target=direction_60m")
+        finally:
+            app.dependency_overrides.clear()
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json()["models"][0]["active"])
+
     def test_drift_endpoint_compares_prediction_snapshot_windows(self) -> None:
         class FakeRepository:
             def history(self, limit=50):
