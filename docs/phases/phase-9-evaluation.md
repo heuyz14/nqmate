@@ -31,6 +31,8 @@ The champion/challenger slice adds `champion_challenger_report` and `jobs/report
 
 The registry visibility slice adds bounded `GET /api/v1/ml/models`, optionally filtered by target. It exposes stored algorithm, version, metrics, dataset identity, and active state for dashboards and manual review; it does not activate or modify models.
 
+The comparison API adds read-only `GET /api/v1/ml/models/comparison`, optionally filtered by target, using the same deterministic baseline and Brier-score gate as the CLI report.
+
 # Acceptance Criteria
 
 An old prediction can be reconstructed from exact inputs and versions; confidence bins compare predicted and observed results; drift is visible; challenger promotion requires out-of-sample and calibration evidence.

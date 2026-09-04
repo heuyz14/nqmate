@@ -6,6 +6,22 @@ from nqmate_api.main import app, get_bias_repository, get_analogue_repository, g
 
 
 class BiasApiTests(unittest.TestCase):
+    def test_ml_comparison_endpoint_returns_gated_candidates(self) -> None:
+        class FakeRepository:
+            def list_models(self, target=None):
+                return [
+                    {"name": "majority", "target": "direction_60m", "algorithm": "majority", "metrics": {"accuracy": 0.55, "brier_score": 0.25}},
+                    {"name": "xgb", "target": "direction_60m", "algorithm": "xgboost", "metrics": {"accuracy": 0.56, "brier_score": 0.24}},
+                ]
+
+        app.dependency_overrides[get_ml_repository] = lambda: FakeRepository()
+        try:
+            response = TestClient(app).get("/api/v1/ml/models/comparison?target=direction_60m")
+        finally:
+            app.dependency_overrides.clear()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["comparisons"]["direction_60m"][0]["eligible"])
+
     def test_ml_model_registry_endpoint_is_bounded(self) -> None:
         class FakeRepository:
             def list_models(self, target=None):

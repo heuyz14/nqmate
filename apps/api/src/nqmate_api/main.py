@@ -18,6 +18,7 @@ from nqmate_api.bias.llm import GeminiBiasExplainer, LLMProvider
 from nqmate_api.bias.repository import BiasRepository, SupabaseBiasRepository
 from nqmate_api.bias.evaluation import confidence_calibration, feature_drift, summarize_prediction_outcomes
 from nqmate_api.ml.repository import MlRepository, SupabaseMlRepository
+from nqmate_api.ml.calibration import champion_challenger_report
 from nqmate_api.bias.service import score_bias
 from nqmate_api.analogues.repository import AnalogueRepository, SupabaseAnalogueRepository
 from nqmate_api.analogues.service import rank_analogues, session_features
@@ -722,6 +723,14 @@ async def list_ml_models(
         raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
     models = list(repository.list_models(target))[:limit]
     return {"target": target, "models": models}
+
+
+@app.get("/api/v1/ml/models/comparison", tags=["ml"])
+async def compare_ml_models(
+    target: str | None = None,
+    repository: MlRepository = Depends(get_ml_repository),
+) -> dict[str, Any]:
+    return {"target": target, "comparisons": champion_challenger_report(repository.list_models(target))}
 
 
 @app.get("/api/v1/macro/upcoming", tags=["macro"])
