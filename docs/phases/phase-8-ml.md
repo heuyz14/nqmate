@@ -23,6 +23,8 @@ The dataset slice adds `nqmate_api.ml.dataset`. It creates exact-timestamp forwa
 
 The evaluation slice adds `nqmate_api.ml.metrics`. It calculates accuracy, precision, recall, Brier score, log loss, and ROC-AUC, then compares all four baselines on chronological out-of-sample folds. Missing overnight direction falls back to the training-fold majority rate and is never fabricated as a signal.
 
+The metadata slice adds `ml_datasets`, `ml_models`, migration `018_ml_metadata.sql`, and `nqmate_api.ml.repository`. Dataset versions are idempotent and model records use insert-only artifact registration so a trained artifact is never silently replaced. Records retain target, feature/dataset versions, training dates, metrics, hyperparameters, and artifact path.
+
 # Acceptance Criteria
 
 Models beat relevant simple baselines out of sample across multiple windows without leakage; calibrated probabilities and metrics are visible; artifacts are immutable and reproducible. The baseline slice is the prerequisite measurement layer and does not claim Phase 8 acceptance by itself.

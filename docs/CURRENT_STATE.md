@@ -93,6 +93,7 @@ Phase 8 — ML (baseline slice in progress; Phase 7 implementation complete; BLS
 - Phase 8 baseline slice added at `apps/api/src/nqmate_api/ml/`: majority-class, always-long, overnight-direction, and dependency-light logistic-regression baselines; point-in-time row filtering and chronological walk-forward splits are tested. This is a benchmark foundation, not final ML acceptance.
 - Phase 8 dataset slice added at `apps/api/src/nqmate_api/ml/dataset.py`: exact-timestamp forward direction targets, missing-horizon exclusion, versioned feature matrices, and feature-availability leakage checks are tested.
 - Phase 8 evaluation slice added at `apps/api/src/nqmate_api/ml/metrics.py`: deterministic accuracy, precision, recall, Brier, log-loss, and ROC-AUC metrics plus chronological out-of-sample comparison of the four baseline models are tested.
+- Phase 8 metadata slice added at `apps/api/src/nqmate_api/ml/`: dataset/model records, Supabase repository, and migration `018_ml_metadata.sql` are implemented; dataset versions are idempotent and model artifacts are insert-only. Migration 018 is ready for application.
 
 ## In Progress
 
@@ -100,7 +101,7 @@ Phase 5 acceptance is complete. Phase 6 implementation is complete for the avail
 
 ## Next
 
-1. Add model/dataset metadata persistence before XGBoost/LightGBM
+1. Apply migration `018_ml_metadata.sql` to Supabase
 2. Validate baseline metrics on the stored historical feature matrix
 
 ## Important Decisions
