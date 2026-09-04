@@ -4,6 +4,8 @@ Read when implementing or consuming the FastAPI REST contract. Pair with the rel
 
 # API Endpoints
 
+Browser requests are allowed from the local web origins `http://localhost:3000` and `http://127.0.0.1:3000` without credentials. Other origins are not enabled by default.
+
 Base path: `/api/v1`.
 
 | Area | Endpoints |

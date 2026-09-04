@@ -8,6 +8,14 @@ from nqmate_api.market.models import MarketBar, MarketContract, MarketSession
 
 
 class MarketApiTests(unittest.TestCase):
+    def test_api_allows_local_web_origin(self) -> None:
+        response = TestClient(app).options(
+            "/api/v1/strategies",
+            headers={"Origin": "http://localhost:3000", "Access-Control-Request-Method": "GET"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["access-control-allow-origin"], "http://localhost:3000")
+
     def test_bars_endpoint_does_not_reaggregate_persisted_timeframes(self) -> None:
         timestamp = datetime(2026, 9, 1, 13, 30, tzinfo=timezone.utc)
 
