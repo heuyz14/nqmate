@@ -677,6 +677,28 @@ async def evaluate_bias(
     }
 
 
+@app.get("/api/v1/bias/{prediction_id}/reconstruction", tags=["bias"])
+async def reconstruct_bias(
+    prediction_id: str,
+    repository: BiasRepository = Depends(get_bias_repository),
+) -> dict[str, Any]:
+    prediction = repository.get(prediction_id)
+    if prediction is None:
+        raise HTTPException(status_code=404, detail="Bias prediction not found")
+    return {
+        "prediction_id": prediction_id,
+        "input_snapshot": prediction.get("input_snapshot") or {},
+        "result": {key: prediction.get(key) for key in (
+            "direction", "score", "confidence", "recommendation", "catalyst_risk",
+            "evidence", "bull_case", "bear_case", "invalidation", "uncertainty",
+        )},
+        "model_version": prediction.get("model_version"),
+        "feature_version": prediction.get("feature_version"),
+        "created_at": prediction.get("created_at"),
+        "outcomes": repository.list_outcomes(prediction_id),
+    }
+
+
 @app.get("/api/v1/bias/evaluation", tags=["bias"])
 async def evaluate_bias_history(
     limit: int = 100,

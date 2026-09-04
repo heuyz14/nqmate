@@ -6,6 +6,24 @@ from nqmate_api.main import app, get_bias_repository, get_analogue_repository, g
 
 
 class BiasApiTests(unittest.TestCase):
+    def test_reconstruction_endpoint_returns_inputs_versions_and_outcomes(self) -> None:
+        class FakeRepository:
+            def get(self, prediction_id):
+                return {"id": prediction_id, "input_snapshot": {"gap": 0.2},
+                        "direction": "BULLISH", "model_version": "rules-v1", "feature_version": "bias-snapshot-v1"}
+
+            def list_outcomes(self, prediction_id):
+                return [{"horizon": "return_5m", "correct": True}]
+
+        app.dependency_overrides[get_bias_repository] = lambda: FakeRepository()
+        try:
+            response = TestClient(app).get("/api/v1/bias/p1/reconstruction")
+        finally:
+            app.dependency_overrides.clear()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["input_snapshot"]["gap"], 0.2)
+        self.assertEqual(response.json()["outcomes"][0]["horizon"], "return_5m")
+
     def test_ml_comparison_endpoint_returns_gated_candidates(self) -> None:
         class FakeRepository:
             def list_models(self, target=None):

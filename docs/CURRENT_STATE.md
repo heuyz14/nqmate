@@ -121,6 +121,7 @@ Phase 9 — Evaluation (Phase 8 implementation complete; no ML model promoted; B
 - Phase 9 registry visibility slice added: bounded `GET /api/v1/ml/models` exposes stored model metadata and active state with optional target filtering; it is read-only.
 - Phase 9 comparison API slice added: read-only `GET /api/v1/ml/models/comparison` exposes the same gated champion/challenger report as the CLI job.
 - Phase 9 grouped-diagnostics slice added: `grouped_outcome_metrics` reports accuracy and average return by explicit regime/event labels and skips missing labels.
+- Phase 9 reconstruction endpoint added: read-only `GET /api/v1/bias/{prediction_id}/reconstruction` returns the stored input snapshot, result, versions, creation time, and attached outcomes for auditability.
 
 ## In Progress
 

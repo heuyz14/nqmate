@@ -35,6 +35,8 @@ The comparison API adds read-only `GET /api/v1/ml/models/comparison`, optionally
 
 The grouped-diagnostics slice adds `grouped_outcome_metrics`, which summarizes accuracy and average return by an explicitly stored regime or event label and skips unlabeled outcomes. Persistence of those labels is deferred until the source fields are available.
 
+The reconstruction verification slice adds read-only `GET /api/v1/bias/{prediction_id}/reconstruction`, returning the exact persisted input snapshot, result fields, model/feature versions, creation time, and attached outcomes.
+
 # Acceptance Criteria
 
 An old prediction can be reconstructed from exact inputs and versions; confidence bins compare predicted and observed results; drift is visible; challenger promotion requires out-of-sample and calibration evidence.
