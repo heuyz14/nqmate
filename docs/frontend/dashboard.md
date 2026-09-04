@@ -21,6 +21,8 @@ The main trading screen prioritizes current NQ, bias/confidence, catalyst, chart
 
 The initial `/regime` implementation is a focused historical-regime finder. It submits the six Phase 5 pre-session features and prediction timestamp to `POST /regimes/similar`, then presents ranked matches, aggregate outcome fields, and zero-centered historical move ranges. The “Load stored features” action uses `GET /market/nq/analogue-features` so the backend remains the source of deterministic feature calculations; manual values remain available for research and incomplete sessions. Move ranges are historical evidence, not forecasts; strategy-specific performance belongs to the later strategy-memory phase.
 
+The initial `/strategies` implementation provides a structured strategy creation form, saved-strategy list, active state, rule detail, and outcome-backed performance metrics. It shows an explicit empty state when no strategies or completed outcomes exist; it does not invent performance.
+
 ## UX rules
 
 Use responsive Next.js/React/Tailwind UI and accessible controls. Every data-driven view needs loading, empty, and error states. Bias display must include direction, confidence, evidence, counter-signals, important levels, upcoming risks, and invalidation. Conservative catalyst guardrails must be visible.

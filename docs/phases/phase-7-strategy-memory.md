@@ -25,6 +25,8 @@ The performance foundation adds `strategies/performance.py`. It calculates sampl
 
 The outcome slice adds `strategies/outcomes.py`, `SupabaseOutcomeRepository`, migration `016_strategy_outcomes.sql`, and `GET /strategies/{id}/performance`. Outcomes are idempotent per setup and performance is derived from persisted completed outcomes.
 
+The dashboard slice adds `/strategies` with structured strategy creation, saved-strategy selection, rule detail, and outcome-backed performance metrics. Empty strategy/outcome states are explicit.
+
 # Acceptance Criteria
 
 Each strategy displays required conditions and reliable statistics with sample context; statistics update from completed sessions and never mutate historical predictions.

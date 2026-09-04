@@ -39,6 +39,19 @@ h3 { font-size: 16px; margin: 0 0 20px; }
 .move-positive { background: #a7d7b1; display: block; }
 .move-range, .footnote { color: var(--muted); font-size: 11px; }
 .read-through { display: grid; gap: 15px; margin-bottom: 20px; }
+.strategy-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.strategy-form { display: grid; gap: 14px; }
+.strategy-list { display: grid; gap: 8px; }
+.strategy-item { align-items: center; background: #0c131c; border: 1px solid var(--line); color: var(--text); cursor: pointer; display: flex; justify-content: space-between; padding: 14px; text-align: left; }
+.strategy-item.selected { border-color: var(--accent); }
+.strategy-item small { color: var(--muted); font-size: 10px; letter-spacing: .08em; }
+.detail-panel { margin-top: 18px; }
+.metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 10px 0 24px; }
+.metric-grid div { border-top: 1px solid var(--line); padding-top: 12px; }
+.metric-grid span { color: var(--muted); display: block; font-size: 11px; margin-bottom: 7px; }
+.metric-grid strong { font-size: 18px; }
+.rule-copy { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; line-height: 1.45; padding-top: 12px; }
+.rule-copy p { margin: 7px 0; }
 table { border-collapse: collapse; min-width: 820px; width: 100%; }
 th, td { border-bottom: 1px solid var(--line); padding: 14px 16px; text-align: right; white-space: nowrap; }
 th { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
@@ -48,4 +61,5 @@ tbody tr:last-child td { border-bottom: 0; }
 .muted { color: var(--muted); }
 .sr-only { height: 1px; margin: -1px; overflow: hidden; position: absolute; width: 1px; clip: rect(0, 0, 0, 0); }
 @media (max-width: 760px) { .shell { padding: 32px 16px 48px; } .page-header, .section-heading { flex-direction: column; } .form-grid { grid-template-columns: repeat(2, 1fr); } .insight-grid { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .strategy-layout, .metric-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 420px) { .form-grid { grid-template-columns: 1fr; } .query-panel { padding: 18px; } }
