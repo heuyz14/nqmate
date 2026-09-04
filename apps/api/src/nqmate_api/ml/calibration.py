@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from statistics import mean
-from typing import Sequence
+from typing import Any, Mapping, Sequence
 
 from nqmate_api.ml.baselines import LabeledRow, majority_probability
 from nqmate_api.ml.metrics import classification_metrics, evaluate_walk_forward
@@ -42,3 +42,33 @@ def evaluate_multiple_windows(rows: Sequence[LabeledRow], train_sizes: Sequence[
             continue
         result[train_size] = evaluate_walk_forward(rows, min_train_size=train_size, test_size=test_size, include_all_boosting=include_all_boosting)
     return result
+
+
+def champion_challenger_report(models: Sequence[Mapping[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    """Return baseline-gated registry comparisons without changing model state."""
+    grouped: dict[str, list[Mapping[str, Any]]] = {}
+    for model in models:
+        target = str(model.get("target", ""))
+        if target:
+            grouped.setdefault(target, []).append(model)
+    report: dict[str, list[dict[str, Any]]] = {}
+    for target, candidates in grouped.items():
+        baseline = next((item for item in candidates if item.get("algorithm") == "majority"), None)
+        if baseline is None:
+            baseline = next((item for item in candidates if item.get("algorithm") == "always_long"), None)
+        if baseline is None:
+            report[target] = []
+            continue
+        baseline_metrics = baseline.get("metrics") or {}
+        comparisons = []
+        for candidate in candidates:
+            if candidate.get("algorithm") in {"majority", "always_long"}:
+                continue
+            metrics = candidate.get("metrics") or {}
+            comparisons.append({
+                "name": candidate.get("name"), "algorithm": candidate.get("algorithm"),
+                "eligible": promotion_eligible(metrics, baseline_metrics),
+                "accuracy": metrics.get("accuracy"), "brier_score": metrics.get("brier_score"),
+            })
+        report[target] = sorted(comparisons, key=lambda item: float(item["accuracy"] or -1), reverse=True)
+    return report

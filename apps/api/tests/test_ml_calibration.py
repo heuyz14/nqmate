@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime, timedelta, timezone
 
 from nqmate_api.ml.baselines import LabeledRow
-from nqmate_api.ml.calibration import expected_calibration_error, evaluate_multiple_windows, promotion_eligible
+from nqmate_api.ml.calibration import champion_challenger_report, expected_calibration_error, evaluate_multiple_windows, promotion_eligible
 
 
 class MlCalibrationTests(unittest.TestCase):
@@ -25,3 +25,14 @@ class MlCalibrationTests(unittest.TestCase):
         rows = tuple(LabeledRow(base + timedelta(days=i), base + timedelta(days=i), (float(i),), i % 2, None) for i in range(12))
         result = evaluate_multiple_windows(rows, train_sizes=(4,), test_size=2, include_all_boosting=True)
         self.assertIn("lightgbm", result[4])
+
+    def test_champion_challenger_report_applies_brier_gate(self) -> None:
+        report = champion_challenger_report([
+            {"name": "majority", "target": "direction_60m", "algorithm": "majority", "metrics": {"accuracy": 0.55, "brier_score": 0.25}},
+            {"name": "xgb", "target": "direction_60m", "algorithm": "xgboost", "metrics": {"accuracy": 0.56, "brier_score": 0.24}},
+            {"name": "bad", "target": "direction_60m", "algorithm": "lightgbm", "metrics": {"accuracy": 0.57, "brier_score": 0.26}},
+        ])
+        by_name = {item["name"]: item for item in report["direction_60m"]}
+        self.assertTrue(by_name["xgb"]["eligible"])
+        self.assertFalse(by_name["bad"]["eligible"])
+        self.assertNotIn("majority", by_name)

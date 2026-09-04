@@ -27,6 +27,8 @@ The calibration slice adds `GET /api/v1/bias/evaluation`, which reads a bounded 
 
 The drift slice adds deterministic feature-window comparison and `GET /api/v1/bias/drift`. It compares numeric `input_snapshot` means between older and newer bounded prediction windows and reports `STABLE`, `WATCH`, or `DRIFT`; missing fields are skipped.
 
+The champion/challenger slice adds `champion_challenger_report` and `jobs/report_model_comparisons.py`. It deterministically prefers the majority baseline, excludes all simple baselines from challenger output, and marks eligibility only when accuracy improves and Brier score does not regress. The report is read-only; activation remains manual and gated.
+
 # Acceptance Criteria
 
 An old prediction can be reconstructed from exact inputs and versions; confidence bins compare predicted and observed results; drift is visible; challenger promotion requires out-of-sample and calibration evidence.
