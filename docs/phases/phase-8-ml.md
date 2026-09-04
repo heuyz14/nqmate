@@ -17,9 +17,11 @@ Train calibrated, versioned, walk-forward models that add measurable value beyon
 - Add multi-target outputs, graph/analogue features, and ensemble probabilities only after component validation.
 - Store model/dataset/feature/label versions and component predictions.
 
+The baseline slice adds `nqmate_api.ml.baselines` and `nqmate_api.ml.validation`. It provides deterministic majority-class, always-long, overnight-direction, and logistic-regression baselines plus chronological walk-forward splits and point-in-time row filtering. The logistic implementation is intentionally small and dependency-light; it is a benchmark, not the first serious production model.
+
 # Acceptance Criteria
 
-Models beat relevant simple baselines out of sample across multiple windows without leakage; calibrated probabilities and metrics are visible; artifacts are immutable and reproducible.
+Models beat relevant simple baselines out of sample across multiple windows without leakage; calibrated probabilities and metrics are visible; artifacts are immutable and reproducible. The baseline slice is the prerequisite measurement layer and does not claim Phase 8 acceptance by itself.
 
 # Tests
 
@@ -32,4 +34,3 @@ Deep learning, multimodal fusion, RL, live weight updates, and direct brokerage 
 # Next Phase
 
 [Phase 9 — Evaluation](phase-9-evaluation.md).
-

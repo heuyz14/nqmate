@@ -6,7 +6,7 @@ Always read this file at session start. It is the concise handoff for what exist
 
 ## Current Phase
 
-Phase 7 — Strategy Memory (implementation complete; migration 017 pending application; BLS calendar live access remains network-dependent)
+Phase 8 — ML (baseline slice in progress; Phase 7 implementation complete; BLS calendar live access remains network-dependent)
 
 ## Completed
 
@@ -89,16 +89,17 @@ Phase 7 — Strategy Memory (implementation complete; migration 017 pending appl
 - PB Blake / ICT deterministic evaluator added at `apps/api/src/nqmate_api/strategies/pb_blake.py`: enforces HTF context, liquidity-before-inversion sequence, point-in-time filtering, highest valid LTF inversion selection, and conservative `VALID`/`DEVELOPING`/`NO_SETUP` outcomes. It is wired to the explicit historical assessment endpoint; no live feed is required.
 - PB Blake historical input slice added at `apps/api/src/nqmate_api/strategies/pb_blake_data.py`: detects three-bar FVGs and post-liquidity close-through inversions from point-in-time historical bars for backtesting; HTF context and trade levels remain explicit inputs.
 - PB assessment API slice added at `POST /api/v1/strategies/{id}/assess`: evaluates normalized historical evidence, returns `VALID`/`DEVELOPING`/`NO_SETUP`, and persists only valid setup occurrences.
-- Strategy outcome regime support added with migration `017_strategy_outcome_regime.sql`; performance now reports best/worst regime from stored regime-labeled outcomes. Migration 017 still needs to be applied to Supabase before writing regime values.
+- Strategy outcome regime support added with migration `017_strategy_outcome_regime.sql`; migration 017 has been applied to Supabase and performance now reports best/worst regime from stored regime-labeled outcomes.
+- Phase 8 baseline slice added at `apps/api/src/nqmate_api/ml/`: majority-class, always-long, overnight-direction, and dependency-light logistic-regression baselines; point-in-time row filtering and chronological walk-forward splits are tested. This is a benchmark foundation, not final ML acceptance.
 
 ## In Progress
 
-Phase 5 acceptance is complete. Phase 6 implementation is complete for the available source boundaries, semantic relationships, deterministic regime classification, bounded graph retrieval, and outcome/strategy traversal contracts. Phase 7 implementation is complete for structured strategy CRUD, setup detection, performance calculation, regime-conditioned best/worst statistics, outcome persistence, the strategy dashboard, historical FVG/inversion detection, and the PB assessment endpoint; migrations `014`, `015`, and `016` are applied, and migration `017` is ready for application. Live strategy read verification found one active strategy. Setup/outcome data and graph relationships remain empty until historical assessments and outcomes are run. The literal Phase 6 strategy-evidence query remains empty until strategy performance relationships exist. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
+Phase 5 acceptance is complete. Phase 6 implementation is complete for the available source boundaries, semantic relationships, deterministic regime classification, bounded graph retrieval, and outcome/strategy traversal contracts. Phase 7 implementation is complete for structured strategy CRUD, setup detection, performance calculation, regime-conditioned best/worst statistics, outcome persistence, the strategy dashboard, historical FVG/inversion detection, and the PB assessment endpoint; migrations `014`–`017` are applied and live strategy read verification found one active strategy. Phase 8 has started with tested leakage-aware baselines; serious model training, calibration, registry, and out-of-sample acceptance remain ahead. Setup/outcome data and graph relationships remain empty until historical assessments and outcomes are run. The literal Phase 6 strategy-evidence query remains empty until strategy performance relationships exist. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
 
 ## Next
 
-1. Apply migration `017_strategy_outcome_regime.sql` to Supabase
-2. Begin [Phase 8 — ML](phases/phase-8-ml.md)
+1. Build the versioned historical feature/target matrix
+2. Add walk-forward baseline metrics and compare against simple baselines
 
 ## Important Decisions
 
