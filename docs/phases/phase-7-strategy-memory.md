@@ -17,6 +17,8 @@ Turn user strategies into structured, measurable, regime-aware memory.
 - Calculate sample count, win rate, expectancy, MFE, MAE, Sharpe-like ratio, calibration, and best/worst regimes.
 - Expose strategy performance and graph-backed research.
 
+The foundation slice adds `strategies/models.py`, validation, `SupabaseStrategyRepository`, migration `014_strategies.sql`, and `POST/GET /strategies`. Strategy rules are stored as structured JSON arrays and explicit entry/target/stop logic; performance statistics and graph relationships require completed setup/outcome records in later slices.
+
 # Acceptance Criteria
 
 Each strategy displays required conditions and reliable statistics with sample context; statistics update from completed sessions and never mutate historical predictions.
@@ -32,4 +34,3 @@ Online model retraining, deep learning, RL, and automated order execution.
 # Next Phase
 
 [Phase 8 — ML](phase-8-ml.md).
-

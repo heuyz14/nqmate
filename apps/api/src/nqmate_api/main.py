@@ -20,6 +20,9 @@ from nqmate_api.bias.service import score_bias
 from nqmate_api.analogues.repository import AnalogueRepository, SupabaseAnalogueRepository
 from nqmate_api.analogues.service import rank_analogues, session_features
 from nqmate_api.graph.repository import GraphRepository, Neo4jGraphRepository
+from nqmate_api.strategies.models import Strategy
+from nqmate_api.strategies.repository import StrategyRepository, SupabaseStrategyRepository
+from nqmate_api.strategies.service import validate_strategy
 
 app = FastAPI(title="NQmate API", version="0.1.0")
 
@@ -52,6 +55,11 @@ def get_analogue_repository() -> AnalogueRepository:
 @lru_cache(maxsize=1)
 def get_graph_repository() -> GraphRepository:
     return Neo4jGraphRepository.from_settings(Settings())
+
+
+@lru_cache(maxsize=1)
+def get_strategy_repository() -> StrategyRepository:
+    return SupabaseStrategyRepository.from_settings(Settings())
 
 
 class AnalogueQueryRequest(BaseModel):
@@ -415,6 +423,44 @@ async def query_strategy_evidence(
         "catalyst_regime": catalyst_regime,
     }.items() if value is not None}
     return {"filters": filters, "strategies": repository.query_strategy_evidence(filters, limit)}
+
+
+class StrategyRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    description: str = Field(default="", max_length=2000)
+    allowedRegimes: list[str] = Field(default_factory=list, max_length=20)
+    requiredConditions: list[str] = Field(default_factory=list, max_length=50)
+    confirmationConditions: list[str] = Field(default_factory=list, max_length=50)
+    invalidationConditions: list[str] = Field(default_factory=list, max_length=50)
+    entryLogic: str = Field(min_length=1, max_length=2000)
+    targetLogic: str = Field(min_length=1, max_length=2000)
+    stopLogic: str = Field(min_length=1, max_length=2000)
+    active: bool = True
+
+
+@app.post("/api/v1/strategies", tags=["strategies"])
+async def create_strategy(
+    request: StrategyRequest,
+    repository: StrategyRepository = Depends(get_strategy_repository),
+) -> dict[str, Any]:
+    strategy = Strategy(
+        request.name, request.description, tuple(request.allowedRegimes), tuple(request.requiredConditions),
+        tuple(request.confirmationConditions), tuple(request.invalidationConditions), request.entryLogic,
+        request.targetLogic, request.stopLogic, request.active,
+    )
+    try:
+        validate_strategy(strategy)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    return repository.create(strategy)
+
+
+@app.get("/api/v1/strategies", tags=["strategies"])
+async def list_strategies(
+    active: bool | None = None,
+    repository: StrategyRepository = Depends(get_strategy_repository),
+) -> dict[str, object]:
+    return {"strategies": repository.list(active)}
 
 
 @app.get("/api/v1/bias/history", tags=["bias"])

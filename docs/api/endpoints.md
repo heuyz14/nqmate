@@ -39,6 +39,8 @@ News reads return normalized event records backed by `news_articles` and `news_e
 
 `GET /knowledge/strategy-evidence` uses the same filters to traverse `Strategy-[:PERFORMS_WELL_IN]->MarketRegime` and returns bounded strategy statistics. It returns an empty list until Phase 7 strategy memory creates strategy records.
 
+`POST /strategies` validates and stores structured strategy rules. `GET /strategies` returns saved strategies and accepts an optional `active` filter. Migration `014_strategies.sql` must be applied before using the live endpoints.
+
 `POST /bias/generate` also accepts optional `analogueBullRate`, `analogueAvg30mReturn`, `analogueAvg60mReturn`, and `analogueSampleSize` fields. These values enrich deterministic evidence and cases but do not alter the Phase 4 rules score or confidence calculation.
 
 The same request may include an `analogue` object containing `sessionDate`, `features`, `predictionTime`, `topK`, and `metric`. The API retrieves eligible matches, uses their aggregate summary for the bias evidence, and includes the ranked `analogue_matches` in the response when matches are found.
