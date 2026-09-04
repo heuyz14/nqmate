@@ -1,6 +1,6 @@
 import unittest
 
-from nqmate_api.bias.evaluation import confidence_calibration, feature_drift, summarize_prediction_outcomes
+from nqmate_api.bias.evaluation import confidence_calibration, feature_drift, grouped_outcome_metrics, summarize_prediction_outcomes
 
 
 class BiasEvaluationTests(unittest.TestCase):
@@ -27,3 +27,12 @@ class BiasEvaluationTests(unittest.TestCase):
     def test_feature_drift_classifies_large_shift(self) -> None:
         result = feature_drift(({"gap": 0.0}, {"gap": 0.1}), ({"gap": 1.0}, {"gap": 1.1}))
         self.assertEqual(result["gap"]["status"], "DRIFT")
+
+    def test_grouped_metrics_skip_missing_labels(self) -> None:
+        result = grouped_outcome_metrics([
+            {"regime": "TREND_UP", "correct": True, "realized_return": 0.01},
+            {"regime": "TREND_UP", "correct": False, "realized_return": -0.02},
+            {"correct": True, "realized_return": 0.03},
+        ], "regime")
+        self.assertEqual(result["TREND_UP"]["sample_size"], 2)
+        self.assertEqual(result["TREND_UP"]["accuracy"], 0.5)

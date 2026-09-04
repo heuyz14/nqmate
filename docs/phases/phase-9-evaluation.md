@@ -33,6 +33,8 @@ The registry visibility slice adds bounded `GET /api/v1/ml/models`, optionally f
 
 The comparison API adds read-only `GET /api/v1/ml/models/comparison`, optionally filtered by target, using the same deterministic baseline and Brier-score gate as the CLI report.
 
+The grouped-diagnostics slice adds `grouped_outcome_metrics`, which summarizes accuracy and average return by an explicitly stored regime or event label and skips unlabeled outcomes. Persistence of those labels is deferred until the source fields are available.
+
 # Acceptance Criteria
 
 An old prediction can be reconstructed from exact inputs and versions; confidence bins compare predicted and observed results; drift is visible; challenger promotion requires out-of-sample and calibration evidence.

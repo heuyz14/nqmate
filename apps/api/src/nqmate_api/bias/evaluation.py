@@ -70,3 +70,25 @@ def feature_drift(
         status = "DRIFT" if score >= drift_threshold else "WATCH" if score >= watch_threshold else "STABLE"
         result[name] = {"reference_mean": baseline, "current_mean": latest, "score": score, "status": status}
     return result
+
+
+def grouped_outcome_metrics(
+    outcomes: Sequence[Mapping[str, Any]], group_key: str,
+) -> dict[str, dict[str, float | None]]:
+    """Summarize attached outcomes by an explicitly stored regime/event label."""
+    groups: dict[str, list[Mapping[str, Any]]] = {}
+    for outcome in outcomes:
+        group = outcome.get(group_key)
+        if group is None:
+            continue
+        groups.setdefault(str(group), []).append(outcome)
+    result: dict[str, dict[str, float | None]] = {}
+    for group, items in sorted(groups.items()):
+        correctness = [bool(item["correct"]) for item in items if isinstance(item.get("correct"), bool)]
+        returns = [float(item["realized_return"]) for item in items if isinstance(item.get("realized_return"), (int, float))]
+        result[group] = {
+            "sample_size": float(len(items)),
+            "accuracy": mean(correctness) if correctness else None,
+            "average_return": mean(returns) if returns else None,
+        }
+    return result
