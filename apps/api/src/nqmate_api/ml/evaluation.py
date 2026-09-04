@@ -7,6 +7,7 @@ from typing import Sequence
 from nqmate_api.analogues.models import HistoricalSession
 from nqmate_api.ml.baselines import LabeledRow
 from nqmate_api.ml.metrics import evaluate_walk_forward
+from nqmate_api.ml.models import DatasetRecord
 
 
 def target_name(outcome_name: str) -> str:
@@ -31,6 +32,28 @@ def rows_from_sessions(sessions: Sequence[HistoricalSession], outcome_name: str)
         timestamp = datetime.combine(session_date, time(9, 30), ZoneInfo("America/New_York")).astimezone(timezone.utc)
         rows.append(LabeledRow(timestamp, session.available_at, values, int(float(outcome) > 0), session.features.get("overnight_return")))
     return tuple(sorted(rows, key=lambda row: row.feature_timestamp))
+
+
+def dataset_records_for_sessions(
+    sessions: Sequence[HistoricalSession], start: date, end: date, feature_version: str = "analogue-v1"
+) -> tuple[DatasetRecord, ...]:
+    """Describe available point-in-time feature/target rows without imputing labels."""
+    outcomes = ("return_5m", "return_15m", "return_30m", "return_60m", "return_120m", "return_240m", "open_close")
+    records: list[DatasetRecord] = []
+    for outcome_name in outcomes:
+        rows = rows_from_sessions(sessions, outcome_name)
+        if not rows:
+            continue
+        target = target_name(outcome_name)
+        records.append(DatasetRecord(
+            version=f"analogue-{target}-{start.isoformat()}-{end.isoformat()}-v1",
+            target=target,
+            feature_version=feature_version,
+            row_count=len(rows),
+            start_date=start.isoformat(),
+            end_date=end.isoformat(),
+        ))
+    return tuple(records)
 
 
 def evaluate_sessions(sessions: Sequence[HistoricalSession], outcome_name: str = "return_30m", min_train_size: int = 20) -> dict[str, dict[str, float | None]]:

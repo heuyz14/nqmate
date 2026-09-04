@@ -108,6 +108,7 @@ Phase 8 — ML (baseline slice in progress; Phase 7 implementation complete; BLS
 - Phase 8 candle-horizon slice added: `jobs/populate_market_timeframes.py` derives and persists canonical `5m`, `15m`, `1h`, `2h`, `4h`, and `1d` candles from stored 1-minute bars; `2h`/`4h` represent 120m/240m horizons and the API accepts those aliases.
 - Historical candle population completed for 2026-01-01 through 2026-09-02: Supabase verification found 47,258 `5m`, 15,755 `15m`, 3,940 `1h`, 2,056 `2h`, 1,066 `4h`, and 208 `1d` bars. The source remains the canonical stored 1-minute history.
 - Horizon evaluations rerun after candle population: 5m and 15m each produced 151 out-of-sample rows. At 5m, XGBoost and LightGBM reached 53.64% accuracy but remain inactive; at 15m, the majority baseline led at 56.29% and all challengers remain inactive.
+- Versioned dataset-catalog slice added: `jobs/register_ml_datasets.py` registered 5m/15m/30m/60m/120m/close directional datasets from real analogue outcomes; 120m currently has 3 rows and 240m is omitted because no valid rows exist. Absent horizons are skipped rather than imputed.
 
 ## In Progress
 
@@ -115,7 +116,7 @@ Phase 5 acceptance is complete. Phase 6 implementation is complete for the avail
 
 ## Next
 
-1. Verify candle gaps by timeframe and populate the versioned feature/target matrix for the newly defined horizons where historical bars exist
+1. Verify candle gaps by timeframe and run `jobs/register_ml_datasets.py` for the desired date range
 2. Add calibration and multi-window promotion checks before any model activation
 
 ## Important Decisions

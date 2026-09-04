@@ -49,6 +49,8 @@ The candle-horizon slice adds deterministic persistence for `5m`, `15m`, `1h`, `
 
 The post-population 5m and 15m evaluations each produced 151 out-of-sample rows. The 5m XGBoost and LightGBM challengers both scored 53.64% accuracy but were not activated; the 15m majority baseline scored 56.29%, so no challenger was promoted.
 
+The dataset-catalog slice adds `dataset_records_for_sessions` and `jobs/register_ml_datasets.py`. It registers one immutable dataset identity per supported directional horizon when real point-in-time rows exist; missing sparse horizons are omitted rather than imputed. This is metadata registration for evaluation, not model activation.
+
 # Acceptance Criteria
 
 Models beat relevant simple baselines out of sample across multiple windows without leakage; calibrated probabilities and metrics are visible; artifacts are immutable and reproducible. The baseline slice is the prerequisite measurement layer and does not claim Phase 8 acceptance by itself.
