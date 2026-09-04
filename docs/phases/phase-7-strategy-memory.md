@@ -27,7 +27,9 @@ The outcome slice adds `strategies/outcomes.py`, `SupabaseOutcomeRepository`, mi
 
 The dashboard slice adds `/strategies` with structured strategy creation, saved-strategy selection, rule detail, and outcome-backed performance metrics. Empty strategy/outcome states are explicit.
 
-The PB Blake / ICT evaluator adds `strategies/pb_blake.py` and tests. It accepts already-normalized HTF context, a liquidity event, post-event lower-timeframe inversions, and explicit entry/stop/targets. It preserves event order, filters observations after the requested analysis timestamp, selects the highest valid inversion among 1m/2m/3m/5m, and returns `VALID`, `DEVELOPING`, or `NO_SETUP`. It fails closed for invalid sequence, unreasonable stops, or sub-1R targets; it does not fetch data, infer missing FVGs, or force a trade.
+The PB Blake / ICT evaluator adds `strategies/pb_blake.py` and tests. It accepts already-normalized HTF context, a liquidity event, post-event lower-timeframe inversions, and explicit entry/stop/targets. It preserves event order, filters observations after the requested analysis timestamp, selects the highest valid inversion among 1m/2m/3m/5m, and returns `VALID`, `DEVELOPING`, or `NO_SETUP`. It fails closed for invalid sequence, unreasonable stops, or sub-1R targets; it does not fetch data or force a trade.
+
+The historical input slice adds `strategies/pb_blake_data.py` and tests. It detects three-bar FVGs and the first close-through inversion on normalized historical bars, requiring each bar to have been available at its timestamp. A bearish FVG close-through produces a long inversion; a bullish FVG close-through produces a short inversion. Higher-timeframe context, liquidity, entry, stops, and targets remain explicit inputs rather than invented by this detector.
 
 # Acceptance Criteria
 

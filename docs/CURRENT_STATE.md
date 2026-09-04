@@ -87,6 +87,7 @@ Phase 7 — Strategy Memory (foundation in progress; Phase 6 implementation comp
 - Phase 7 strategy dashboard slice added: `/strategies` provides structured strategy creation, saved-strategy selection, rule detail, and outcome-backed performance metrics with explicit empty states; migration `016` is applied and the outcome table is reachable.
 - Live strategy memory now contains one active `PB Blake / ICT-style Intraday Setup` record with six required HTF/liquidity/LTF conditions, four optional confirmations, and explicit no-trade invalidations. The current detector fails closed on its unsupported conditions until full multi-timeframe logic is implemented.
 - PB Blake / ICT deterministic evaluator added at `apps/api/src/nqmate_api/strategies/pb_blake.py`: enforces HTF context, liquidity-before-inversion sequence, point-in-time filtering, highest valid LTF inversion selection, and conservative `VALID`/`DEVELOPING`/`NO_SETUP` outcomes. It is currently a pure domain function and is not yet wired to a live multi-timeframe data assembler.
+- PB Blake historical input slice added at `apps/api/src/nqmate_api/strategies/pb_blake_data.py`: detects three-bar FVGs and post-liquidity close-through inversions from point-in-time historical bars for backtesting; HTF context and trade levels remain explicit inputs.
 
 ## In Progress
 
@@ -94,7 +95,7 @@ Phase 5 acceptance is complete. Phase 6 implementation is complete for the avail
 
 ## Next
 
-1. Assemble point-in-time HTF and 1m/2m/3m/5m inputs and persist PB Blake assessments without forcing trades
+1. Assemble HTF context, liquidity, and trade levels around the PB historical FVG/inversion inputs and persist assessments without forcing trades
 2. Recheck September market-session availability after the trading day closes
 
 ## Important Decisions
