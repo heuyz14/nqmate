@@ -19,6 +19,8 @@ Turn user strategies into structured, measurable, regime-aware memory.
 
 The foundation slice adds `strategies/models.py`, validation, `SupabaseStrategyRepository`, migration `014_strategies.sql`, and `POST/GET/PATCH/DELETE /strategies`. Strategy rules are stored as structured JSON arrays and explicit entry/target/stop logic; DELETE is a soft deactivation, and performance statistics/graph relationships require completed setup/outcome records in later slices. Migration `014` has been applied; no strategies are currently stored.
 
+The setup-detection slice adds `strategies/setups.py`, `SupabaseSetupRepository`, migration `015_strategy_setups.sql`, and `jobs/detect_setups.py`. The initial deterministic registry supports `price_above_overnight_midpoint`, `onh_break`, and `onl_break`; unknown conditions produce no setup.
+
 # Acceptance Criteria
 
 Each strategy displays required conditions and reliable statistics with sample context; statistics update from completed sessions and never mutate historical predictions.

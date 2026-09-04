@@ -41,6 +41,8 @@ News reads return normalized event records backed by `news_articles` and `news_e
 
 `POST /strategies` validates and stores structured strategy rules. `GET /strategies` returns saved strategies and accepts an optional `active` filter. `GET /strategies/{id}` reads one strategy, `PATCH /strategies/{id}` replaces its structured rules, and `DELETE /strategies/{id}` safely deactivates it without deleting history. Migration `014_strategies.sql` is applied; the current strategy count is 0.
 
+`jobs/detect_setups.py` detects supported strategy conditions from stored session bars and upserts occurrences into `strategy_setups`. Apply migration `015_strategy_setups.sql` before running it; unsupported conditions fail closed.
+
 `POST /bias/generate` also accepts optional `analogueBullRate`, `analogueAvg30mReturn`, `analogueAvg60mReturn`, and `analogueSampleSize` fields. These values enrich deterministic evidence and cases but do not alter the Phase 4 rules score or confidence calculation.
 
 The same request may include an `analogue` object containing `sessionDate`, `features`, `predictionTime`, `topK`, and `metric`. The API retrieves eligible matches, uses their aggregate summary for the bias evidence, and includes the ranked `analogue_matches` in the response when matches are found.
