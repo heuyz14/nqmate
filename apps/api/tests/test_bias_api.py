@@ -118,7 +118,7 @@ class BiasApiTests(unittest.TestCase):
 
     def test_generate_bias_validates_snapshot_and_persists_prediction(self) -> None:
         class FakeRepository:
-            def create(self, snapshot, result):
+            def create(self, snapshot, result, session_date=None):
                 self.saved = (snapshot, result)
                 return {"id": "prediction-1", "direction": result.direction, "score": result.score}
 
@@ -151,7 +151,7 @@ class BiasApiTests(unittest.TestCase):
         from nqmate_api.analogues.models import HistoricalSession
 
         class FakeBiasRepository:
-            def create(self, snapshot, result):
+            def create(self, snapshot, result, session_date=None):
                 self.saved = (snapshot, result)
                 return {"id": "prediction-2", "direction": result.direction}
 

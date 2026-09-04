@@ -377,7 +377,10 @@ async def generate_bias(
         request.analogueSampleSize if request.analogueSampleSize is not None else int(analogue_summary["sample_size"]) if "sample_size" in analogue_summary else None,
     )
     result = score_bias(snapshot)
-    response = repository.create(snapshot, result)
+    if request.analogue is not None:
+        response = repository.create(snapshot, result, session_date=request.analogue.sessionDate)
+    else:
+        response = repository.create(snapshot, result)
     if analogue_matches:
         response["analogue_matches"] = analogue_matches
     return response

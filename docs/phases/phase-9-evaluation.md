@@ -39,6 +39,8 @@ The reconstruction verification slice adds read-only `GET /api/v1/bias/{predicti
 
 The observability slice adds `observability_summary` and bounded `GET /api/v1/bias/observability`, reporting prediction/outcome coverage, reconstruction completeness, and model/feature version sets without returning secrets or mutating records.
 
+The automatic attachment slice adds migration `021_prediction_session_date.sql` and `jobs/attach_completed_prediction_outcomes.py`. Predictions generated with an explicit analogue session context retain that session date, allowing the job to attach completed historical outcomes idempotently. Predictions without explicit session context remain safely unattached.
+
 The dashboard slice adds the responsive `/evaluation` page. It reads the evaluation, drift, registry, and champion/challenger APIs and presents coverage metrics, confidence calibration, drift statuses, and manual promotion state with loading, error, and empty states.
 
 # Acceptance Criteria

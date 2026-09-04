@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+from datetime import date
 from typing import Any, Protocol, Sequence
 
 from supabase import Client, create_client
@@ -12,7 +13,7 @@ from nqmate_api.config import Settings
 
 
 class BiasRepository(Protocol):
-    def create(self, snapshot: BiasSnapshot, result: BiasResult) -> dict[str, Any]: ...
+    def create(self, snapshot: BiasSnapshot, result: BiasResult, session_date: date | None = None) -> dict[str, Any]: ...
     def latest(self) -> dict[str, Any] | None: ...
     def history(self, limit: int = 50) -> Sequence[dict[str, Any]]: ...
     def get(self, prediction_id: str) -> dict[str, Any] | None: ...
@@ -31,7 +32,7 @@ class SupabaseBiasRepository:
             raise ValueError("Supabase configuration is required")
         return cls(create_client(settings.supabase_url, settings.supabase_service_key))
 
-    def create(self, snapshot: BiasSnapshot, result: BiasResult) -> dict[str, Any]:
+    def create(self, snapshot: BiasSnapshot, result: BiasResult, session_date: date | None = None) -> dict[str, Any]:
         response = self.client.table("bias_predictions").insert({
             "direction": result.direction, "score": result.score, "confidence": result.confidence,
             "recommendation": result.recommendation, "catalyst_risk": result.catalyst_risk,
@@ -39,6 +40,7 @@ class SupabaseBiasRepository:
             "bear_case": list(result.bear_case), "invalidation": list(result.invalidation),
             "uncertainty": list(result.uncertainty), "model_version": "rules-v1",
             "feature_version": "bias-snapshot-v1", "input_snapshot": asdict(snapshot),
+            "session_date": session_date.isoformat() if session_date else None,
         }).execute()
         return (response.data or [{}])[0]
 
