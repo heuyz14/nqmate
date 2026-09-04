@@ -23,6 +23,8 @@ The setup-detection slice adds `strategies/setups.py`, `SupabaseSetupRepository`
 
 The performance foundation adds `strategies/performance.py`. It calculates sample size, win rate, mean/median return, expectancy, MFE/MAE means when supplied, and a Sharpe-like ratio from completed outcome records. Missing outcome fields are not imputed.
 
+The outcome slice adds `strategies/outcomes.py`, `SupabaseOutcomeRepository`, migration `016_strategy_outcomes.sql`, and `GET /strategies/{id}/performance`. Outcomes are idempotent per setup and performance is derived from persisted completed outcomes.
+
 # Acceptance Criteria
 
 Each strategy displays required conditions and reliable statistics with sample context; statistics update from completed sessions and never mutate historical predictions.

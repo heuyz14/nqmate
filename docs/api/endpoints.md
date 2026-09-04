@@ -39,9 +39,11 @@ News reads return normalized event records backed by `news_articles` and `news_e
 
 `GET /knowledge/strategy-evidence` uses the same filters to traverse `Strategy-[:PERFORMS_WELL_IN]->MarketRegime` and returns bounded strategy statistics. It returns an empty list until Phase 7 strategy memory creates strategy records.
 
-`POST /strategies` validates and stores structured strategy rules. `GET /strategies` returns saved strategies and accepts an optional `active` filter. `GET /strategies/{id}` reads one strategy, `PATCH /strategies/{id}` replaces its structured rules, and `DELETE /strategies/{id}` safely deactivates it without deleting history. Migration `014_strategies.sql` is applied; the current strategy count is 0.
+`POST /strategies` validates and stores structured strategy rules. `GET /strategies` returns saved strategies and accepts an optional `active` filter. `GET /strategies/{id}` reads one strategy, `PATCH /strategies/{id}` replaces its structured rules, and `DELETE /strategies/{id}` safely deactivates it without deleting history. `GET /strategies/{id}/performance` returns deterministic statistics from completed strategy outcomes. Migrations `014_strategies.sql` and `015_strategy_setups.sql` are applied; the current strategy count is 0.
 
 `jobs/detect_setups.py` detects supported strategy conditions from stored session bars and upserts occurrences into `strategy_setups`. Apply migration `015_strategy_setups.sql` before running it; unsupported conditions fail closed.
+
+`strategy_outcomes` is the completed-outcome source for performance statistics. Migration `016_strategy_outcomes.sql` is required before outcome writes or live performance reads.
 
 `POST /bias/generate` also accepts optional `analogueBullRate`, `analogueAvg30mReturn`, `analogueAvg60mReturn`, and `analogueSampleSize` fields. These values enrich deterministic evidence and cases but do not alter the Phase 4 rules score or confidence calculation.
 

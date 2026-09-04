@@ -23,6 +23,8 @@ from nqmate_api.graph.repository import GraphRepository, Neo4jGraphRepository
 from nqmate_api.strategies.models import Strategy
 from nqmate_api.strategies.repository import StrategyRepository, SupabaseStrategyRepository
 from nqmate_api.strategies.service import validate_strategy
+from nqmate_api.strategies.outcomes_repository import OutcomeRepository, SupabaseOutcomeRepository
+from nqmate_api.strategies.performance import calculate_performance
 
 app = FastAPI(title="NQmate API", version="0.1.0")
 
@@ -60,6 +62,11 @@ def get_graph_repository() -> GraphRepository:
 @lru_cache(maxsize=1)
 def get_strategy_repository() -> StrategyRepository:
     return SupabaseStrategyRepository.from_settings(Settings())
+
+
+@lru_cache(maxsize=1)
+def get_outcome_repository() -> OutcomeRepository:
+    return SupabaseOutcomeRepository.from_settings(Settings())
 
 
 class AnalogueQueryRequest(BaseModel):
@@ -465,6 +472,17 @@ async def list_strategies(
     repository: StrategyRepository = Depends(get_strategy_repository),
 ) -> dict[str, object]:
     return {"strategies": repository.list(active)}
+
+
+@app.get("/api/v1/strategies/{strategy_id}/performance", tags=["strategies"])
+async def get_strategy_performance(
+    strategy_id: str,
+    strategy_repository: StrategyRepository = Depends(get_strategy_repository),
+    outcome_repository: OutcomeRepository = Depends(get_outcome_repository),
+) -> dict[str, object]:
+    if strategy_repository.get(strategy_id) is None:
+        raise HTTPException(status_code=404, detail="Strategy not found")
+    return {"strategy_id": strategy_id, "statistics": calculate_performance(outcome_repository.list_for_strategy(strategy_id))}
 
 
 @app.get("/api/v1/strategies/{strategy_id}", tags=["strategies"])
