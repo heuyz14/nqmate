@@ -4,6 +4,12 @@ Read when building dashboard pages, visual information hierarchy, chart overlays
 
 # Frontend Dashboard
 
+## Evaluation desk
+
+The `/evaluation` page is the Phase 9 evaluation desk. It reads the bounded ML registry, champion/challenger comparison, confidence calibration, and prediction drift endpoints and presents model state, calibration bins, drift status, and promotion evidence. It is read-only and must clearly distinguish historical evidence from an active model.
+
+The page uses `NEXT_PUBLIC_API_BASE_URL` and falls back to `http://localhost:8000/api/v1` for local development. Loading, API error, no-outcome, no-snapshot, and no-model states are explicit. It must not display secrets or imply that an eligible challenger is active.
+
 ## Pages
 
 - `/dashboard`: bias/confidence, NQ location, overnight structure, key levels, next catalyst, news risk, analogues, and a candlestick chart with PDH/PDL/ONH/ONL/VWAP.

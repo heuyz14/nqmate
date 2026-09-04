@@ -50,6 +50,15 @@ h3 { font-size: 16px; margin: 0 0 20px; }
 .metric-grid div { border-top: 1px solid var(--line); padding-top: 12px; }
 .metric-grid span { color: var(--muted); display: block; font-size: 11px; margin-bottom: 7px; }
 .metric-grid strong { font-size: 18px; }
+.calibration-list, .drift-list { display: grid; gap: 18px; }
+.calibration-row, .drift-row { border-top: 1px solid var(--line); padding-top: 12px; }
+.calibration-row > div, .drift-row > div { align-items: center; display: flex; justify-content: space-between; }
+.calibration-row span, .drift-row span { color: var(--muted); font-size: 12px; }
+.calibration-row strong, .drift-row strong { font-size: 13px; }
+.calibration-row small, .drift-row small { color: var(--muted); display: block; font-size: 11px; margin-top: 8px; }
+.calibration-track { background: #1d2936; height: 8px; margin-top: 9px; position: relative; }
+.calibration-track span { background: var(--accent); display: block; height: 100%; }
+.calibration-track i { background: #a7d7b1; border-radius: 50%; height: 12px; position: absolute; top: -2px; transform: translateX(-50%); width: 12px; }
 .rule-copy { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; line-height: 1.45; padding-top: 12px; }
 .rule-copy p { margin: 7px 0; }
 table { border-collapse: collapse; min-width: 820px; width: 100%; }

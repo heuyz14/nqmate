@@ -39,6 +39,8 @@ The reconstruction verification slice adds read-only `GET /api/v1/bias/{predicti
 
 The observability slice adds `observability_summary` and bounded `GET /api/v1/bias/observability`, reporting prediction/outcome coverage, reconstruction completeness, and model/feature version sets without returning secrets or mutating records.
 
+The dashboard slice adds the responsive `/evaluation` page. It reads the evaluation, drift, registry, and champion/challenger APIs and presents coverage metrics, confidence calibration, drift statuses, and manual promotion state with loading, error, and empty states.
+
 # Acceptance Criteria
 
 An old prediction can be reconstructed from exact inputs and versions; confidence bins compare predicted and observed results; drift is visible; challenger promotion requires out-of-sample and calibration evidence.
