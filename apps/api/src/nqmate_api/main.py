@@ -16,7 +16,7 @@ from nqmate_api.macro.repository import MacroRepository, SupabaseMacroRepository
 from nqmate_api.bias.models import BiasSnapshot, BiasResult
 from nqmate_api.bias.llm import GeminiBiasExplainer, LLMProvider
 from nqmate_api.bias.repository import BiasRepository, SupabaseBiasRepository
-from nqmate_api.bias.evaluation import confidence_calibration, feature_drift, summarize_prediction_outcomes
+from nqmate_api.bias.evaluation import confidence_calibration, feature_drift, observability_summary, summarize_prediction_outcomes
 from nqmate_api.ml.repository import MlRepository, SupabaseMlRepository
 from nqmate_api.ml.calibration import champion_challenger_report
 from nqmate_api.bias.service import score_bias
@@ -697,6 +697,19 @@ async def reconstruct_bias(
         "created_at": prediction.get("created_at"),
         "outcomes": repository.list_outcomes(prediction_id),
     }
+
+
+@app.get("/api/v1/bias/observability", tags=["bias"])
+async def get_bias_observability(
+    limit: int = 100,
+    repository: BiasRepository = Depends(get_bias_repository),
+) -> dict[str, Any]:
+    if limit < 1 or limit > 100:
+        raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
+    predictions = list(repository.history(limit))
+    outcome_counts = {str(item["id"]): len(repository.list_outcomes(str(item["id"])))
+                      for item in predictions if item.get("id")}
+    return observability_summary(predictions, outcome_counts)
 
 
 @app.get("/api/v1/bias/evaluation", tags=["bias"])

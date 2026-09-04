@@ -1,6 +1,6 @@
 import unittest
 
-from nqmate_api.bias.evaluation import confidence_calibration, feature_drift, grouped_outcome_metrics, summarize_prediction_outcomes
+from nqmate_api.bias.evaluation import confidence_calibration, feature_drift, grouped_outcome_metrics, observability_summary, summarize_prediction_outcomes
 
 
 class BiasEvaluationTests(unittest.TestCase):
@@ -36,3 +36,12 @@ class BiasEvaluationTests(unittest.TestCase):
         ], "regime")
         self.assertEqual(result["TREND_UP"]["sample_size"], 2)
         self.assertEqual(result["TREND_UP"]["accuracy"], 0.5)
+
+    def test_observability_reports_coverage(self) -> None:
+        result = observability_summary(
+            [{"id": "p1", "model_version": "rules-v1", "feature_version": "f1", "input_snapshot": {}}],
+            {"p1": 2},
+        )
+        self.assertEqual(result["outcome_count"], 2)
+        self.assertEqual(result["predictions_with_outcomes"], 1)
+        self.assertEqual(result["missing_reconstruction_count"], 1)

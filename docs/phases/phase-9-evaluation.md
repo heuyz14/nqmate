@@ -37,6 +37,8 @@ The grouped-diagnostics slice adds `grouped_outcome_metrics`, which summarizes a
 
 The reconstruction verification slice adds read-only `GET /api/v1/bias/{prediction_id}/reconstruction`, returning the exact persisted input snapshot, result fields, model/feature versions, creation time, and attached outcomes.
 
+The observability slice adds `observability_summary` and bounded `GET /api/v1/bias/observability`, reporting prediction/outcome coverage, reconstruction completeness, and model/feature version sets without returning secrets or mutating records.
+
 # Acceptance Criteria
 
 An old prediction can be reconstructed from exact inputs and versions; confidence bins compare predicted and observed results; drift is visible; challenger promotion requires out-of-sample and calibration evidence.

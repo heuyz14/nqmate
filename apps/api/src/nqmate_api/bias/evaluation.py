@@ -92,3 +92,19 @@ def grouped_outcome_metrics(
             "average_return": mean(returns) if returns else None,
         }
     return result
+
+
+def observability_summary(predictions: Sequence[Mapping[str, Any]], outcome_counts: Mapping[str, int]) -> dict[str, Any]:
+    """Summarize evaluation coverage and version observability without secrets."""
+    model_versions = sorted({str(item["model_version"]) for item in predictions if item.get("model_version")})
+    feature_versions = sorted({str(item["feature_version"]) for item in predictions if item.get("feature_version")})
+    reconstructed = sum(bool(item.get("input_snapshot")) for item in predictions)
+    return {
+        "prediction_count": len(predictions),
+        "outcome_count": sum(outcome_counts.values()),
+        "predictions_with_outcomes": sum(1 for item in predictions if outcome_counts.get(str(item.get("id")), 0) > 0),
+        "reconstructed_prediction_count": reconstructed,
+        "missing_reconstruction_count": len(predictions) - reconstructed,
+        "model_versions": model_versions,
+        "feature_versions": feature_versions,
+    }
