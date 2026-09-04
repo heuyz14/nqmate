@@ -87,7 +87,7 @@ def session_outcomes(session: MarketSession, bars: Sequence[MarketBar]) -> dict[
         return {}
     base = regular[0].open
     outcomes: dict[str, float | bool] = {"open_close": regular[-1].close / base - 1}
-    for minutes in (30, 60):
+    for minutes in (5, 15, 30, 60, 120, 240):
         target = regular[0].timestamp + timedelta(minutes=minutes)
         bar = next((item for item in regular if item.timestamp >= target), None)
         if bar is not None:

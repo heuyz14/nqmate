@@ -71,6 +71,8 @@ class AnalogueTests(unittest.TestCase):
             MarketBar("NQ", start + timedelta(minutes=60), "1min", 20100, 20120, 19900, 20050, 1, "massive", start, start),
         ]
         outcomes = session_outcomes(session, bars)
+        self.assertAlmostEqual(outcomes["return_5m"], 0.005)
+        self.assertAlmostEqual(outcomes["return_15m"], 0.005)
         self.assertAlmostEqual(outcomes["return_30m"], 0.005)
         self.assertAlmostEqual(outcomes["return_60m"], 0.0025)
         self.assertTrue(outcomes["onh_first"])
