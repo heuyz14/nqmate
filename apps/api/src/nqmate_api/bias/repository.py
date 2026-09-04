@@ -6,6 +6,7 @@ from typing import Any, Protocol, Sequence
 from supabase import Client, create_client
 
 from nqmate_api.bias.models import BiasResult, BiasSnapshot
+from nqmate_api.bias.outcomes import PredictionOutcome
 from nqmate_api.bias.llm import BiasExplanation
 from nqmate_api.config import Settings
 
@@ -16,6 +17,8 @@ class BiasRepository(Protocol):
     def history(self, limit: int = 50) -> Sequence[dict[str, Any]]: ...
     def get(self, prediction_id: str) -> dict[str, Any] | None: ...
     def create_explanation(self, prediction_id: str, explanation: BiasExplanation) -> dict[str, Any]: ...
+    def create_outcome(self, outcome: PredictionOutcome) -> dict[str, Any]: ...
+    def list_outcomes(self, prediction_id: str) -> Sequence[dict[str, Any]]: ...
 
 
 class SupabaseBiasRepository:
@@ -62,3 +65,20 @@ class SupabaseBiasRepository:
             "invalidation": list(explanation.invalidation), "risks": list(explanation.risks),
         }).execute()
         return (response.data or [{}])[0]
+
+    def create_outcome(self, outcome: PredictionOutcome) -> dict[str, Any]:
+        response = self.client.table("bias_prediction_outcomes").upsert({
+            "prediction_id": outcome.prediction_id,
+            "session_date": outcome.session_date.isoformat(),
+            "horizon": outcome.horizon,
+            "realized_return": outcome.realized_return,
+            "realized_direction": outcome.realized_direction,
+            "correct": outcome.correct,
+            "observed_at": outcome.observed_at.isoformat(),
+        }, on_conflict="prediction_id,horizon").execute()
+        return (response.data or [{}])[0]
+
+    def list_outcomes(self, prediction_id: str) -> Sequence[dict[str, Any]]:
+        return self.client.table("bias_prediction_outcomes").select("*").eq(
+            "prediction_id", prediction_id
+        ).order("horizon").execute().data or []

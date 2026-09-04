@@ -19,6 +19,8 @@ Close the learning loop with reconstructable prediction outcomes, calibration, m
 
 The reconstruction slice adds migration `019_prediction_reconstruction.sql` and stores the exact deterministic `BiasSnapshot` in each new bias prediction as `input_snapshot`, alongside the model and feature versions. Apply migration 019 before creating predictions against the hosted database.
 
+The outcome-attachment slice adds migration `020_prediction_outcomes.sql`, `nqmate_api.bias.outcomes`, and `jobs/attach_prediction_outcomes.py`. It attaches only numeric realized outcomes from an explicitly selected historical session, idempotently by prediction and horizon. It never infers a session date from prediction creation time or imputes a missing horizon. Apply migration 020 before using the job.
+
 # Acceptance Criteria
 
 An old prediction can be reconstructed from exact inputs and versions; confidence bins compare predicted and observed results; drift is visible; challenger promotion requires out-of-sample and calibration evidence.
