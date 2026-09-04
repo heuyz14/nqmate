@@ -31,6 +31,8 @@ The first stored baseline run covered 151 out-of-sample rows from the available 
 
 The XGBoost challenger adds `nqmate_api.ml.boosted` and the optional `ml` dependency extra. It uses the same chronological folds and metadata registry as the baselines. On the first 151-row run it scored 49.67% accuracy, below the majority baseline, so it remains inactive and is not promoted.
 
+The target-contract slice adds `nqmate_api.ml.targets`. It explicitly names 5m, 15m, 30m, 60m, 120m, 240m, and close direction targets and builds exact-time forward target matrices from canonical bars. Missing future timestamps remain absent.
+
 The evaluation runner now accepts horizon-specific stored outcomes and creates separate target/dataset/model identities. The first 60-minute run also covered 151 out-of-sample rows: always-long scored 56.29%, XGBoost 54.30%, majority 54.97%, and logistic 44.37%. XGBoost remains inactive because it did not beat the relevant simple baseline.
 
 The three-way boosting comparison found that for 30m, XGBoost scored 49.67%, scikit-learn Gradient Boosting 43.71%, and LightGBM 45.03%; none beat the 52.98% majority baseline. For 60m, scikit-learn Gradient Boosting scored 58.94%, XGBoost 54.30%, and LightGBM 54.30%; scikit-learn Gradient Boosting is the current best candidate over the 56.29% always-long baseline. It remains inactive pending multiple-window validation and calibration.
