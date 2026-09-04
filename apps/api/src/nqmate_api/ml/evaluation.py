@@ -29,4 +29,4 @@ def evaluate_sessions(sessions: Sequence[HistoricalSession], outcome_name: str =
     rows = rows_from_sessions(sessions, outcome_name)
     if len(rows) <= min_train_size:
         return {}
-    return evaluate_walk_forward(rows, min_train_size=min_train_size)
+    return evaluate_walk_forward(rows, min_train_size=min_train_size, include_xgboost=True)
