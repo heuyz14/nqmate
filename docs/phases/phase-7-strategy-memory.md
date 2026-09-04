@@ -17,7 +17,7 @@ Turn user strategies into structured, measurable, regime-aware memory.
 - Calculate sample count, win rate, expectancy, MFE, MAE, Sharpe-like ratio, calibration, and best/worst regimes.
 - Expose strategy performance and graph-backed research.
 
-The foundation slice adds `strategies/models.py`, validation, `SupabaseStrategyRepository`, migration `014_strategies.sql`, and `POST/GET /strategies`. Strategy rules are stored as structured JSON arrays and explicit entry/target/stop logic; performance statistics and graph relationships require completed setup/outcome records in later slices.
+The foundation slice adds `strategies/models.py`, validation, `SupabaseStrategyRepository`, migration `014_strategies.sql`, and `POST/GET/PATCH/DELETE /strategies`. Strategy rules are stored as structured JSON arrays and explicit entry/target/stop logic; DELETE is a soft deactivation, and performance statistics/graph relationships require completed setup/outcome records in later slices. Migration `014` has been applied; no strategies are currently stored.
 
 # Acceptance Criteria
 

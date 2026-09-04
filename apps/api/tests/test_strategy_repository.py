@@ -15,3 +15,16 @@ class StrategyRepositoryTests(unittest.TestCase):
         payload = client.table.return_value.insert.call_args.args[0]
         self.assertEqual(payload["name"], "Test")
         self.assertEqual(payload["required_conditions"], ["gap"])
+
+    def test_update_targets_one_strategy_and_deactivate_is_soft(self) -> None:
+        client = MagicMock()
+        repository = SupabaseStrategyRepository(client)
+        strategy = Strategy("Updated", "Description", (), (), (), (), "entry", "target", "stop", True)
+
+        repository.update("strategy-1", strategy)
+        update_payload = client.table.return_value.update.call_args.args[0]
+        self.assertEqual(update_payload["name"], "Updated")
+        self.assertEqual(client.table.return_value.update.return_value.eq.call_args.args, ("id", "strategy-1"))
+
+        repository.deactivate("strategy-1")
+        self.assertEqual(client.table.return_value.update.call_args.args[0], {"active": False})

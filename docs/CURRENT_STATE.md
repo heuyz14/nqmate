@@ -79,15 +79,16 @@ Phase 7 — Strategy Memory (foundation in progress; Phase 6 implementation comp
 - Phase 6 source-record slice added: `jobs/sync_graph_sources.py` synchronizes normalized news, macro calendar events, and bias predictions; live verification found 23 `NewsEvent`, 13 `MacroEvent`, and 2 `Company` nodes. No predictions existed in the selected historical window.
 - Phase 6 traversal slice added: `GET /knowledge/regimes` returns bounded graph-backed sessions filtered by independent ontology dimensions; live verification returned 20 `GAP_UP` sessions.
 - Phase 6 completion slice added: prediction-to-outcome relationship and strategy-evidence traversal contracts are implemented; strategy results remain empty until Phase 7 strategy memory creates records.
-- Phase 7 strategy foundation added: structured strategy model/validation, Supabase repository, migration `014_strategies.sql`, and `POST/GET /strategies` are implemented; migration application is pending.
+- Phase 7 strategy foundation added: structured strategy model/validation, Supabase repository, migration `014_strategies.sql`, and `POST/GET /strategies` are implemented.
+- Phase 7 CRUD slice added: `GET/PATCH/DELETE /strategies/{id}` now support retrieval, replacement, and soft deactivation; migration `014` is applied and the live table currently contains 0 strategies.
 
 ## In Progress
 
-Phase 5 acceptance is complete. Phase 6 implementation is complete for the available source boundaries, semantic relationships, deterministic regime classification, bounded graph retrieval, and outcome/strategy traversal contracts. Phase 7 currently covers strategy-rule storage only; migration `014_strategies.sql` must be applied before live CRUD verification, and setup detection/performance statistics remain. The literal Phase 6 strategy-evidence query remains empty until strategy records and performance relationships exist. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
+Phase 5 acceptance is complete. Phase 6 implementation is complete for the available source boundaries, semantic relationships, deterministic regime classification, bounded graph retrieval, and outcome/strategy traversal contracts. Phase 7 currently covers structured strategy CRUD; migration `014` is applied and live read verification found 0 strategies. Setup detection and performance statistics remain. The literal Phase 6 strategy-evidence query remains empty until strategy records and performance relationships exist. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
 
 ## Next
 
-1. Apply migration `014_strategies.sql` and verify strategy CRUD
+1. Add setup detection and strategy/session associations
 2. Recheck September market-session availability after the trading day closes
 
 ## Important Decisions

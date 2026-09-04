@@ -39,7 +39,7 @@ News reads return normalized event records backed by `news_articles` and `news_e
 
 `GET /knowledge/strategy-evidence` uses the same filters to traverse `Strategy-[:PERFORMS_WELL_IN]->MarketRegime` and returns bounded strategy statistics. It returns an empty list until Phase 7 strategy memory creates strategy records.
 
-`POST /strategies` validates and stores structured strategy rules. `GET /strategies` returns saved strategies and accepts an optional `active` filter. Migration `014_strategies.sql` must be applied before using the live endpoints.
+`POST /strategies` validates and stores structured strategy rules. `GET /strategies` returns saved strategies and accepts an optional `active` filter. `GET /strategies/{id}` reads one strategy, `PATCH /strategies/{id}` replaces its structured rules, and `DELETE /strategies/{id}` safely deactivates it without deleting history. Migration `014_strategies.sql` is applied; the current strategy count is 0.
 
 `POST /bias/generate` also accepts optional `analogueBullRate`, `analogueAvg30mReturn`, `analogueAvg60mReturn`, and `analogueSampleSize` fields. These values enrich deterministic evidence and cases but do not alter the Phase 4 rules score or confidence calculation.
 

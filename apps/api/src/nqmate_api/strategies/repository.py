@@ -11,6 +11,9 @@ from nqmate_api.strategies.models import Strategy
 class StrategyRepository(Protocol):
     def create(self, strategy: Strategy) -> dict[str, Any]: ...
     def list(self, active: bool | None = None) -> Sequence[dict[str, Any]]: ...
+    def get(self, strategy_id: str) -> dict[str, Any] | None: ...
+    def update(self, strategy_id: str, strategy: Strategy) -> dict[str, Any]: ...
+    def deactivate(self, strategy_id: str) -> dict[str, Any]: ...
 
 
 class SupabaseStrategyRepository:
@@ -38,3 +41,21 @@ class SupabaseStrategyRepository:
         if active is not None:
             query = query.eq("active", active)
         return query.execute().data or []
+
+    def get(self, strategy_id: str) -> dict[str, Any] | None:
+        response = self.client.table("strategies").select("*").eq("id", strategy_id).maybe_single().execute()
+        return response.data if response and response.data else None
+
+    def update(self, strategy_id: str, strategy: Strategy) -> dict[str, Any]:
+        response = self.client.table("strategies").update({
+            "name": strategy.name, "description": strategy.description,
+            "allowed_regimes": list(strategy.allowed_regimes), "required_conditions": list(strategy.required_conditions),
+            "confirmation_conditions": list(strategy.confirmation_conditions), "invalidation_conditions": list(strategy.invalidation_conditions),
+            "entry_logic": strategy.entry_logic, "target_logic": strategy.target_logic,
+            "stop_logic": strategy.stop_logic, "active": strategy.active,
+        }).eq("id", strategy_id).execute()
+        return (response.data or [{}])[0]
+
+    def deactivate(self, strategy_id: str) -> dict[str, Any]:
+        response = self.client.table("strategies").update({"active": False}).eq("id", strategy_id).execute()
+        return (response.data or [{}])[0]

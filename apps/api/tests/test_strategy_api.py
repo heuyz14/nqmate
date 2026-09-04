@@ -31,3 +31,21 @@ class StrategyApiTests(unittest.TestCase):
             "name": "Incomplete", "entryLogic": "", "targetLogic": "target", "stopLogic": "stop",
         })
         self.assertEqual(response.status_code, 422)
+
+    def test_strategy_can_be_retrieved_updated_and_deactivated(self) -> None:
+        class FakeRepository:
+            def get(self, strategy_id): return {"id": strategy_id, "name": "Test", "active": True}
+            def update(self, strategy_id, strategy): return {"id": strategy_id, "name": strategy.name}
+            def deactivate(self, strategy_id): return {"id": strategy_id, "active": False}
+
+        app.dependency_overrides[get_strategy_repository] = lambda: FakeRepository()
+        try:
+            client = TestClient(app)
+            self.assertEqual(client.get("/api/v1/strategies/strategy-1").status_code, 200)
+            response = client.patch("/api/v1/strategies/strategy-1", json={
+                "name": "Updated", "entryLogic": "entry", "targetLogic": "target", "stopLogic": "stop",
+            })
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(client.delete("/api/v1/strategies/strategy-1").json()["active"], False)
+        finally:
+            app.dependency_overrides.clear()

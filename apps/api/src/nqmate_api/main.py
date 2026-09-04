@@ -438,16 +438,20 @@ class StrategyRequest(BaseModel):
     active: bool = True
 
 
+def _strategy_from_request(request: StrategyRequest) -> Strategy:
+    return Strategy(
+        request.name, request.description, tuple(request.allowedRegimes), tuple(request.requiredConditions),
+        tuple(request.confirmationConditions), tuple(request.invalidationConditions), request.entryLogic,
+        request.targetLogic, request.stopLogic, request.active,
+    )
+
+
 @app.post("/api/v1/strategies", tags=["strategies"])
 async def create_strategy(
     request: StrategyRequest,
     repository: StrategyRepository = Depends(get_strategy_repository),
 ) -> dict[str, Any]:
-    strategy = Strategy(
-        request.name, request.description, tuple(request.allowedRegimes), tuple(request.requiredConditions),
-        tuple(request.confirmationConditions), tuple(request.invalidationConditions), request.entryLogic,
-        request.targetLogic, request.stopLogic, request.active,
-    )
+    strategy = _strategy_from_request(request)
     try:
         validate_strategy(strategy)
     except ValueError as error:
@@ -461,6 +465,37 @@ async def list_strategies(
     repository: StrategyRepository = Depends(get_strategy_repository),
 ) -> dict[str, object]:
     return {"strategies": repository.list(active)}
+
+
+@app.get("/api/v1/strategies/{strategy_id}", tags=["strategies"])
+async def get_strategy(strategy_id: str, repository: StrategyRepository = Depends(get_strategy_repository)) -> dict[str, Any]:
+    strategy = repository.get(strategy_id)
+    if strategy is None:
+        raise HTTPException(status_code=404, detail="Strategy not found")
+    return strategy
+
+
+@app.patch("/api/v1/strategies/{strategy_id}", tags=["strategies"])
+async def update_strategy(
+    strategy_id: str,
+    request: StrategyRequest,
+    repository: StrategyRepository = Depends(get_strategy_repository),
+) -> dict[str, Any]:
+    strategy = _strategy_from_request(request)
+    try:
+        validate_strategy(strategy)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    if repository.get(strategy_id) is None:
+        raise HTTPException(status_code=404, detail="Strategy not found")
+    return repository.update(strategy_id, strategy)
+
+
+@app.delete("/api/v1/strategies/{strategy_id}", tags=["strategies"])
+async def deactivate_strategy(strategy_id: str, repository: StrategyRepository = Depends(get_strategy_repository)) -> dict[str, Any]:
+    if repository.get(strategy_id) is None:
+        raise HTTPException(status_code=404, detail="Strategy not found")
+    return repository.deactivate(strategy_id)
 
 
 @app.get("/api/v1/bias/history", tags=["bias"])
