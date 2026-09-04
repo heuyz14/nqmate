@@ -41,13 +41,15 @@ The three-way boosting comparison found that for 30m, XGBoost scored 49.67%, sci
 
 The calibration slice adds `nqmate_api.ml.calibration`. It provides expected calibration error, multiple expanding walk-forward windows, and a promotion gate requiring accuracy improvement plus no worse Brier score than the baseline. These safeguards prevent selecting the 60m candidate from one window alone.
 
-The multi-window runner adds `jobs/evaluate_ml_windows.py`. It evaluates the stored 60m target with configurable expanding training sizes and test windows, including all boosting implementations, and prints JSON for review without activating or overwriting model records.
+The multi-window runner adds `jobs/evaluate_ml_windows.py`. It evaluates any stored directional target with configurable expanding training sizes and test windows, including all boosting implementations, and prints JSON for review without activating or overwriting model records.
 
 The first multi-window report used 10-row test windows with training sizes 20, 40, and 60. scikit-learn Gradient Boosting led accuracy in every window (59.44%, 61.80%, and 63.92%), but its Brier scores (0.321, 0.296, and 0.270) were worse than the majority baseline (about 0.248). It therefore fails the calibration-aware promotion gate and remains inactive.
 
 The candle-horizon slice adds deterministic persistence for `5m`, `15m`, `1h`, `2h`, `4h`, and `1d` bars in `jobs/populate_market_timeframes.py`. It derives every requested candle only from stored `1min` bars, with `2h`/`4h` corresponding to the `120m`/`240m` ML horizons. The job is historical and resumable by date range; it does not add a live market feed.
 
 The post-population 5m and 15m evaluations each produced 151 out-of-sample rows. The 5m XGBoost and LightGBM challengers both scored 53.64% accuracy but were not activated; the 15m majority baseline scored 56.29%, so no challenger was promoted.
+
+Phase 8 implementation is complete. Multi-window checks for 5m, 15m, 30m, and 60m found no candidate that satisfies both out-of-sample improvement and the Brier-score promotion gate. Therefore zero models are active; promotion, drift, and broader evaluation continue under [Phase 9](phase-9-evaluation.md).
 
 The dataset-catalog slice adds `dataset_records_for_sessions` and `jobs/register_ml_datasets.py`. It registers one immutable dataset identity per supported directional horizon when real point-in-time rows exist; missing sparse horizons are omitted rather than imputed. This is metadata registration for evaluation, not model activation.
 

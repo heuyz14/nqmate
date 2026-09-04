@@ -6,7 +6,7 @@ Always read this file at session start. It is the concise handoff for what exist
 
 ## Current Phase
 
-Phase 8 — ML (baseline slice in progress; Phase 7 implementation complete; BLS calendar live access remains network-dependent)
+Phase 9 — Evaluation (Phase 8 implementation complete; no ML model promoted; BLS calendar live access remains network-dependent)
 
 ## Completed
 
@@ -110,15 +110,16 @@ Phase 8 — ML (baseline slice in progress; Phase 7 implementation complete; BLS
 - Horizon evaluations rerun after candle population: 5m and 15m each produced 151 out-of-sample rows. At 5m, XGBoost and LightGBM reached 53.64% accuracy but remain inactive; at 15m, the majority baseline led at 56.29% and all challengers remain inactive.
 - Versioned dataset-catalog slice added: `jobs/register_ml_datasets.py` registered 5m/15m/30m/60m/120m/close directional datasets from real analogue outcomes; 120m currently has 3 rows and 240m is omitted because no valid rows exist. Absent horizons are skipped rather than imputed.
 - Market candle retrieval corrected: the bars API now prefers persisted requested-timeframe rows and aggregates only canonical 1-minute rows, preventing double aggregation after derived candles are stored.
+- Phase 8 implementation closed: the multi-window runner now accepts any directional outcome. 5m, 15m, 30m, and 60m checks found no candidate satisfying both out-of-sample improvement and the Brier-score gate, so no model was activated.
 
 ## In Progress
 
-Phase 5 acceptance is complete. Phase 6 implementation is complete for the available source boundaries, semantic relationships, deterministic regime classification, bounded graph retrieval, and outcome/strategy traversal contracts. Phase 7 implementation is complete for structured strategy CRUD, setup detection, performance calculation, regime-conditioned best/worst statistics, outcome persistence, the strategy dashboard, historical FVG/inversion detection, and the PB assessment endpoint; migrations `014`–`017` are applied and live strategy read verification found one active strategy. Phase 8 has started with tested leakage-aware baselines; serious model training, calibration, registry, and out-of-sample acceptance remain ahead. Setup/outcome data and graph relationships remain empty until historical assessments and outcomes are run. The literal Phase 6 strategy-evidence query remains empty until strategy performance relationships exist. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
+Phase 5 acceptance is complete. Phase 6 implementation is complete for the available source boundaries, semantic relationships, deterministic regime classification, bounded graph retrieval, and outcome/strategy traversal contracts. Phase 7 implementation is complete for structured strategy CRUD, setup detection, performance calculation, regime-conditioned best/worst statistics, outcome persistence, the strategy dashboard, historical FVG/inversion detection, and the PB assessment endpoint; migrations `014`–`017` are applied and live strategy read verification found one active strategy. Phase 8 implementation is complete with leakage-aware baselines, multi-horizon targets, boosting comparisons, calibration metrics, dataset/model metadata, historical candle horizons, and multi-window validation; no model passed the promotion gate. Phase 9 is now the active evaluation phase. Setup/outcome data and graph relationships remain empty until historical assessments and outcomes are run. The literal Phase 6 strategy-evidence query remains empty until strategy performance relationships exist. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
 
 ## Next
 
-1. Verify candle gaps by timeframe and run `jobs/register_ml_datasets.py` for the desired date range
-2. Add calibration and multi-window promotion checks before any model activation
+1. Build Phase 9 prediction-outcome attachment and evaluation diagnostics
+2. Add drift, confidence/regime breakdowns, and controlled champion/challenger reporting
 
 ## Important Decisions
 
