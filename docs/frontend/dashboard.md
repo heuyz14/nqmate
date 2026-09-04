@@ -8,6 +8,8 @@ Read when building dashboard pages, visual information hierarchy, chart overlays
 
 The `/evaluation` page is the Phase 9 evaluation desk. It reads the bounded ML registry, champion/challenger comparison, confidence calibration, and prediction drift endpoints and presents model state, attached versus scored outcomes, calibration bins, drift status, and promotion evidence. It is read-only and must clearly distinguish historical evidence from an active model.
 
+The `/dashboard` page is the primary completed-session market desk. It displays a 5-minute SVG candle view, PDH/PDL/ONH/ONL/overnight midpoint levels, deterministic session metrics, stored bias evidence, and cached high-impact news. It is explicitly historical and does not imply live market data or automated execution.
+
 The page uses `NEXT_PUBLIC_API_BASE_URL` and falls back to `http://localhost:8000/api/v1` for local development. Loading, API error, no-outcome, no-snapshot, and no-model states are explicit. It must not display secrets or imply that an eligible challenger is active.
 
 ## Pages

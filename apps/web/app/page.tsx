@@ -6,6 +6,7 @@ export default function HomePage() {
       <p><a href="/regime">Open historical regime finder</a></p>
       <p><a href="/strategies">Open strategy memory</a></p>
       <p><a href="/evaluation">Open evaluation desk</a></p>
+      <p><a href="/dashboard">Open market dashboard</a></p>
     </main>
   );
 }
