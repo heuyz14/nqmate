@@ -1,6 +1,6 @@
 import unittest
 
-from nqmate_api.bias.evaluation import summarize_prediction_outcomes
+from nqmate_api.bias.evaluation import confidence_calibration, summarize_prediction_outcomes
 
 
 class BiasEvaluationTests(unittest.TestCase):
@@ -15,3 +15,11 @@ class BiasEvaluationTests(unittest.TestCase):
         self.assertAlmostEqual(result["horizons"]["return_5m"]["average_return"], -0.005)
         self.assertEqual(result["horizons"]["return_15m"]["evaluated_size"], 0)
         self.assertIsNone(result["horizons"]["return_15m"]["accuracy"])
+
+    def test_confidence_calibration_compares_probability_and_accuracy(self) -> None:
+        result = confidence_calibration([
+            {"confidence": 0.8, "correct": True}, {"confidence": 0.8, "correct": False},
+        ])
+        self.assertEqual(result[0]["sample_size"], 2)
+        self.assertAlmostEqual(result[0]["observed_accuracy"], 0.5)
+        self.assertAlmostEqual(result[0]["calibration_gap"], 0.3)

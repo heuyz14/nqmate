@@ -16,7 +16,7 @@ from nqmate_api.macro.repository import MacroRepository, SupabaseMacroRepository
 from nqmate_api.bias.models import BiasSnapshot, BiasResult
 from nqmate_api.bias.llm import GeminiBiasExplainer, LLMProvider
 from nqmate_api.bias.repository import BiasRepository, SupabaseBiasRepository
-from nqmate_api.bias.evaluation import summarize_prediction_outcomes
+from nqmate_api.bias.evaluation import confidence_calibration, summarize_prediction_outcomes
 from nqmate_api.bias.service import score_bias
 from nqmate_api.analogues.repository import AnalogueRepository, SupabaseAnalogueRepository
 from nqmate_api.analogues.service import rank_analogues, session_features
@@ -668,6 +668,26 @@ async def evaluate_bias(
         "feature_version": prediction.get("feature_version"),
         "evaluation": summarize_prediction_outcomes(repository.list_outcomes(prediction_id)),
     }
+
+
+@app.get("/api/v1/bias/evaluation", tags=["bias"])
+async def evaluate_bias_history(
+    limit: int = 100,
+    repository: BiasRepository = Depends(get_bias_repository),
+) -> dict[str, Any]:
+    if limit < 1 or limit > 100:
+        raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
+    records: list[dict[str, Any]] = []
+    predictions = repository.history(limit)
+    for prediction in predictions:
+        prediction_id = prediction.get("id")
+        if not prediction_id:
+            continue
+        for outcome in repository.list_outcomes(str(prediction_id)):
+            if isinstance(outcome.get("correct"), bool):
+                records.append({"confidence": prediction.get("confidence"), "correct": outcome["correct"]})
+    return {"prediction_count": len(predictions), "outcome_count": len(records),
+            "confidence_calibration": confidence_calibration(records)}
 
 
 @app.get("/api/v1/macro/upcoming", tags=["macro"])

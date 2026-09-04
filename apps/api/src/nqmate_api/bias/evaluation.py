@@ -24,3 +24,25 @@ def summarize_prediction_outcomes(outcomes: Sequence[Mapping[str, Any]]) -> dict
             "win_rate": mean(value > 0 for value in returns) if returns else None,
         }
     return {"sample_size": float(len(outcomes)), "horizons": horizons}
+
+
+def confidence_calibration(records: Sequence[Mapping[str, Any]], bins: int = 10) -> list[dict[str, float]]:
+    """Compare stored confidence with observed correctness in fixed bins."""
+    if bins < 1:
+        raise ValueError("bins must be positive")
+    result: list[dict[str, float]] = []
+    for index in range(bins):
+        lower, upper = index / bins, (index + 1) / bins
+        members = [item for item in records
+                   if isinstance(item.get("confidence"), (int, float))
+                   and isinstance(item.get("correct"), bool)
+                   and lower <= float(item["confidence"]) < upper
+                   or (index == bins - 1 and isinstance(item.get("confidence"), (int, float))
+                       and isinstance(item.get("correct"), bool) and float(item["confidence"]) == upper)]
+        if members:
+            observed = mean(bool(item["correct"]) for item in members)
+            predicted = mean(float(item["confidence"]) for item in members)
+            result.append({"lower": lower, "upper": upper, "sample_size": float(len(members)),
+                           "mean_confidence": predicted, "observed_accuracy": observed,
+                           "calibration_gap": abs(predicted - observed)})
+    return result

@@ -114,6 +114,7 @@ Phase 9 — Evaluation (Phase 8 implementation complete; no ML model promoted; B
 - Phase 9 reconstruction slice added: migration `019_prediction_reconstruction.sql` and bias repository persistence now retain the exact deterministic input snapshot with model/feature versions; migration 019 is applied.
 - Phase 9 outcome-attachment slice added: migration `020_prediction_outcomes.sql`, deterministic directional correctness logic, repository persistence, and `jobs/attach_prediction_outcomes.py` are implemented; migration 020 is applied and requires an explicit prediction ID plus historical session date.
 - Phase 9 diagnostics slice added: deterministic per-horizon outcome summaries and `GET /api/v1/bias/{prediction_id}/evaluation` expose coverage, accuracy, average return, and win rate without mutating predictions.
+- Phase 9 calibration slice added: `GET /api/v1/bias/evaluation` reports bounded confidence-bin calibration from attached directional outcomes; neutral/unscored outcomes are excluded.
 
 ## In Progress
 

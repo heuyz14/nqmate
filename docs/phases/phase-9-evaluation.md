@@ -23,6 +23,8 @@ The outcome-attachment slice adds migration `020_prediction_outcomes.sql`, `nqma
 
 The diagnostics slice adds `nqmate_api.bias.evaluation` and `GET /api/v1/bias/{prediction_id}/evaluation`. It reports sample coverage, accuracy for directional predictions, average realized return, and positive-return rate by horizon without mutating the prediction.
 
+The calibration slice adds `GET /api/v1/bias/evaluation`, which reads a bounded prediction history and attached outcomes to report fixed confidence-bin sample sizes, mean confidence, observed accuracy, and calibration gaps. Neutral predictions are excluded from correctness bins.
+
 # Acceptance Criteria
 
 An old prediction can be reconstructed from exact inputs and versions; confidence bins compare predicted and observed results; drift is visible; challenger promotion requires out-of-sample and calibration evidence.
