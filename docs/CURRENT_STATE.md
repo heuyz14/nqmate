@@ -108,6 +108,7 @@ Phase 5 acceptance is complete. Phase 6 implementation is complete for the avail
 - No automated trade execution in V1.
 - Prevent look-ahead bias with point-in-time data.
 - Deep learning is post-V1; XGBoost/LightGBM is the first serious ML model after the baseline.
+- V1 is backtest and completed-session research focused; a real-time intraday NQ feed is not required. Do not add live-bar infrastructure unless the scope is explicitly changed.
 
 ## Blockers
 
