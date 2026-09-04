@@ -91,6 +91,7 @@ Phase 8 — ML (baseline slice in progress; Phase 7 implementation complete; BLS
 - PB assessment API slice added at `POST /api/v1/strategies/{id}/assess`: evaluates normalized historical evidence, returns `VALID`/`DEVELOPING`/`NO_SETUP`, and persists only valid setup occurrences.
 - Strategy outcome regime support added with migration `017_strategy_outcome_regime.sql`; migration 017 has been applied to Supabase and performance now reports best/worst regime from stored regime-labeled outcomes.
 - Phase 8 baseline slice added at `apps/api/src/nqmate_api/ml/`: majority-class, always-long, overnight-direction, and dependency-light logistic-regression baselines; point-in-time row filtering and chronological walk-forward splits are tested. This is a benchmark foundation, not final ML acceptance.
+- Phase 8 dataset slice added at `apps/api/src/nqmate_api/ml/dataset.py`: exact-timestamp forward direction targets, missing-horizon exclusion, versioned feature matrices, and feature-availability leakage checks are tested.
 
 ## In Progress
 
@@ -98,8 +99,8 @@ Phase 5 acceptance is complete. Phase 6 implementation is complete for the avail
 
 ## Next
 
-1. Build the versioned historical feature/target matrix
-2. Add walk-forward baseline metrics and compare against simple baselines
+1. Add walk-forward baseline metrics and compare against simple baselines
+2. Add model/dataset metadata persistence before XGBoost/LightGBM
 
 ## Important Decisions
 
