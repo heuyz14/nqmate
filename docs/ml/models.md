@@ -28,3 +28,4 @@ Preserve the roadmap for NQ-specific news impact, embeddings, similar-news retri
 
 `ml_models` stores ID, name, target, algorithm/version, training dates, feature/dataset versions, metrics, hyperparameters, artifact path, creation time, and active state. Never replace artifacts in place. Later protected endpoints include model/prediction/feature/calibration/performance reads and `/ml/train`/`/ml/backtest`; training must not be public frontend functionality.
 
+General directional models and strategy-specific models are separate concerns. The current Phase 8 models use session/pre-session features and directional session outcomes; they are not used by the PB strategy evaluator. A PB model may be added later only after enough valid PB setup occurrences and strategy outcomes exist, with its own target and dataset version.

@@ -9,11 +9,23 @@ from nqmate_api.ml.boosted import LightGBMClassifier, SklearnGradientBoostingCla
 from nqmate_api.ml.validation import walk_forward_splits
 
 
+def _expected_calibration_error(labels: Sequence[int], probabilities: Sequence[float], bins: int = 10) -> float | None:
+    if not labels:
+        return None
+    total = 0.0
+    for index in range(bins):
+        lower, upper = index / bins, (index + 1) / bins
+        members = [(label, probability) for label, probability in zip(labels, probabilities) if lower <= probability < upper or (index == bins - 1 and probability == upper)]
+        if members:
+            total += len(members) / len(labels) * abs(mean(label for label, _ in members) - mean(probability for _, probability in members))
+    return total
+
+
 def classification_metrics(labels: Sequence[int], probabilities: Sequence[float]) -> dict[str, float | None]:
     if len(labels) != len(probabilities):
         raise ValueError("labels and probabilities must be aligned")
     if not labels:
-        return {"sample_size": 0.0, "accuracy": None, "precision": None, "recall": None, "brier_score": None, "log_loss": None, "roc_auc": None}
+        return {"sample_size": 0.0, "accuracy": None, "precision": None, "recall": None, "brier_score": None, "log_loss": None, "roc_auc": None, "expected_calibration_error": None}
     predicted = [int(probability >= 0.5) for probability in probabilities]
     true_positive = sum(actual == predicted_value == 1 for actual, predicted_value in zip(labels, predicted))
     false_positive = sum(actual == 0 and predicted_value == 1 for actual, predicted_value in zip(labels, predicted))
@@ -32,6 +44,7 @@ def classification_metrics(labels: Sequence[int], probabilities: Sequence[float]
         "brier_score": mean((probability - label) ** 2 for label, probability in zip(labels, probabilities)),
         "log_loss": mean(-(label * log(max(probability, 1e-15)) + (1 - label) * log(max(1 - probability, 1e-15))) for label, probability in zip(labels, probabilities)),
         "roc_auc": (wins + 0.5 * ties) / (positives * negatives) if positives and negatives else None,
+        "expected_calibration_error": _expected_calibration_error(labels, probabilities),
     }
 
 

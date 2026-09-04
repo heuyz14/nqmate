@@ -11,6 +11,7 @@ class MlMetricsTests(unittest.TestCase):
         self.assertEqual(metrics["accuracy"], 1.0)
         self.assertAlmostEqual(metrics["brier_score"], 0.045)
         self.assertIsNotNone(metrics["roc_auc"])
+        self.assertAlmostEqual(metrics["expected_calibration_error"], 0.2)
 
     def test_walk_forward_compares_all_baselines(self) -> None:
         base = datetime(2026, 1, 1, tzinfo=timezone.utc)

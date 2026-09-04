@@ -10,7 +10,7 @@ Use expanding or rolling time splits, for example train months 1–6 and validat
 
 ## Metrics
 
-Track accuracy, precision, recall, ROC-AUC, Brier score, log loss, conditional return, MFE, and MAE. Accuracy alone is insufficient. Evaluate across multiple windows, regimes, event types, and cost/slippage assumptions.
+Track accuracy, precision, recall, ROC-AUC, Brier score, log loss, expected calibration error, conditional return, MFE, and MAE. Accuracy alone is insufficient. Evaluate across multiple windows, regimes, event types, and cost/slippage assumptions.
 
 ## Calibration
 
@@ -23,4 +23,3 @@ Every feature must satisfy `available_at <= prediction_time`; use point-in-time 
 ## Drift and promotion
 
 Monitor feature/prediction distributions, accuracy, Brier score, conditional return, and SHAP distributions. Classify drift as NORMAL, WATCH, or DEGRADED; do not auto-retrain solely on drift. Start with monthly or manual retraining. A challenger promotes only if it beats the champion out of sample across multiple windows, does not materially degrade calibration, and passes leakage tests. Never update weights during a trading session.
-
