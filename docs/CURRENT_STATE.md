@@ -112,7 +112,8 @@ Phase 9 — Evaluation (Phase 8 implementation complete; no ML model promoted; B
 - Market candle retrieval corrected: the bars API now prefers persisted requested-timeframe rows and aggregates only canonical 1-minute rows, preventing double aggregation after derived candles are stored.
 - Phase 8 implementation closed: the multi-window runner now accepts any directional outcome. 5m, 15m, 30m, and 60m checks found no candidate satisfying both out-of-sample improvement and the Brier-score gate, so no model was activated.
 - Phase 9 reconstruction slice added: migration `019_prediction_reconstruction.sql` and bias repository persistence now retain the exact deterministic input snapshot with model/feature versions; migration 019 is applied.
-- Phase 9 outcome-attachment slice added: migration `020_prediction_outcomes.sql`, deterministic directional correctness logic, repository persistence, and `jobs/attach_prediction_outcomes.py` are implemented; migration 020 is pending application and requires an explicit prediction ID plus historical session date.
+- Phase 9 outcome-attachment slice added: migration `020_prediction_outcomes.sql`, deterministic directional correctness logic, repository persistence, and `jobs/attach_prediction_outcomes.py` are implemented; migration 020 is applied and requires an explicit prediction ID plus historical session date.
+- Phase 9 diagnostics slice added: deterministic per-horizon outcome summaries and `GET /api/v1/bias/{prediction_id}/evaluation` expose coverage, accuracy, average return, and win rate without mutating predictions.
 
 ## In Progress
 

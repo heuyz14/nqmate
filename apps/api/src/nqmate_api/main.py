@@ -16,6 +16,7 @@ from nqmate_api.macro.repository import MacroRepository, SupabaseMacroRepository
 from nqmate_api.bias.models import BiasSnapshot, BiasResult
 from nqmate_api.bias.llm import GeminiBiasExplainer, LLMProvider
 from nqmate_api.bias.repository import BiasRepository, SupabaseBiasRepository
+from nqmate_api.bias.evaluation import summarize_prediction_outcomes
 from nqmate_api.bias.service import score_bias
 from nqmate_api.analogues.repository import AnalogueRepository, SupabaseAnalogueRepository
 from nqmate_api.analogues.service import rank_analogues, session_features
@@ -651,6 +652,22 @@ async def explain_bias(
     )
     explanation = provider.explain(result)
     return repository.create_explanation(prediction_id, explanation)
+
+
+@app.get("/api/v1/bias/{prediction_id}/evaluation", tags=["bias"])
+async def evaluate_bias(
+    prediction_id: str,
+    repository: BiasRepository = Depends(get_bias_repository),
+) -> dict[str, Any]:
+    prediction = repository.get(prediction_id)
+    if prediction is None:
+        raise HTTPException(status_code=404, detail="Bias prediction not found")
+    return {
+        "prediction_id": prediction_id,
+        "model_version": prediction.get("model_version"),
+        "feature_version": prediction.get("feature_version"),
+        "evaluation": summarize_prediction_outcomes(repository.list_outcomes(prediction_id)),
+    }
 
 
 @app.get("/api/v1/macro/upcoming", tags=["macro"])

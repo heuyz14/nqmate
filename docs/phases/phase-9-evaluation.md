@@ -21,6 +21,8 @@ The reconstruction slice adds migration `019_prediction_reconstruction.sql` and 
 
 The outcome-attachment slice adds migration `020_prediction_outcomes.sql`, `nqmate_api.bias.outcomes`, and `jobs/attach_prediction_outcomes.py`. It attaches only numeric realized outcomes from an explicitly selected historical session, idempotently by prediction and horizon. It never infers a session date from prediction creation time or imputes a missing horizon. Apply migration 020 before using the job.
 
+The diagnostics slice adds `nqmate_api.bias.evaluation` and `GET /api/v1/bias/{prediction_id}/evaluation`. It reports sample coverage, accuracy for directional predictions, average realized return, and positive-return rate by horizon without mutating the prediction.
+
 # Acceptance Criteria
 
 An old prediction can be reconstructed from exact inputs and versions; confidence bins compare predicted and observed results; drift is visible; challenger promotion requires out-of-sample and calibration evidence.

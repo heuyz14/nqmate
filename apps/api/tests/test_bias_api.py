@@ -6,6 +6,22 @@ from nqmate_api.main import app, get_bias_repository, get_analogue_repository
 
 
 class BiasApiTests(unittest.TestCase):
+    def test_evaluation_endpoint_returns_versioned_horizon_summary(self) -> None:
+        class FakeRepository:
+            def get(self, prediction_id):
+                return {"id": prediction_id, "model_version": "rules-v1", "feature_version": "bias-snapshot-v1"}
+
+            def list_outcomes(self, prediction_id):
+                return [{"horizon": "return_5m", "realized_return": 0.01, "correct": True}]
+
+        app.dependency_overrides[get_bias_repository] = lambda: FakeRepository()
+        try:
+            response = TestClient(app).get("/api/v1/bias/p1/evaluation")
+        finally:
+            app.dependency_overrides.clear()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["evaluation"]["horizons"]["return_5m"]["accuracy"], 1.0)
+
     def test_generate_bias_validates_snapshot_and_persists_prediction(self) -> None:
         class FakeRepository:
             def create(self, snapshot, result):
