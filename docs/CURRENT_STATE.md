@@ -123,7 +123,7 @@ Phase 9 — Evaluation (Phase 8 implementation complete; no ML model promoted; B
 - Phase 9 grouped-diagnostics slice added: `grouped_outcome_metrics` reports accuracy and average return by explicit regime/event labels and skips missing labels.
 - Phase 9 reconstruction endpoint added: read-only `GET /api/v1/bias/{prediction_id}/reconstruction` returns the stored input snapshot, result, versions, creation time, and attached outcomes for auditability.
 - Phase 9 observability slice added: bounded `GET /api/v1/bias/observability` reports prediction/outcome coverage, reconstruction completeness, and model/feature version sets without mutating data.
-- Phase 9 automatic-attachment slice added: migration `021_prediction_session_date.sql` stores explicit session dates on context-linked predictions, and `jobs/attach_completed_prediction_outcomes.py` attaches available outcomes without date guessing; migration 021 is pending application.
+- Phase 9 automatic-attachment slice added: migration `021_prediction_session_date.sql` stores explicit session dates on context-linked predictions, and `jobs/attach_completed_prediction_outcomes.py` attaches available outcomes without date guessing; migration 021 is applied. The first run attached 0 outcomes because existing predictions predate session-date persistence and were safely skipped.
 - Phase 9 dashboard slice added: responsive `/evaluation` page displays coverage, calibration, drift, model registry, and gated promotion evidence with explicit loading/error/empty states; Next.js production build passes.
 
 ## In Progress
