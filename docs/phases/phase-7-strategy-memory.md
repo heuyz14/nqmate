@@ -21,6 +21,8 @@ The foundation slice adds `strategies/models.py`, validation, `SupabaseStrategyR
 
 The setup-detection slice adds `strategies/setups.py`, `SupabaseSetupRepository`, migration `015_strategy_setups.sql`, and `jobs/detect_setups.py`. The initial deterministic registry supports `price_above_overnight_midpoint`, `onh_break`, and `onl_break`; unknown conditions produce no setup.
 
+The performance foundation adds `strategies/performance.py`. It calculates sample size, win rate, mean/median return, expectancy, MFE/MAE means when supplied, and a Sharpe-like ratio from completed outcome records. Missing outcome fields are not imputed.
+
 # Acceptance Criteria
 
 Each strategy displays required conditions and reliable statistics with sample context; statistics update from completed sessions and never mutate historical predictions.
