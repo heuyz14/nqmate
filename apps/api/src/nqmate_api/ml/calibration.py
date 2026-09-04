@@ -33,12 +33,12 @@ def promotion_eligible(candidate: dict[str, float | None], baseline: dict[str, f
     )
 
 
-def evaluate_multiple_windows(rows: Sequence[LabeledRow], train_sizes: Sequence[int], test_size: int = 1) -> dict[int, dict[str, dict[str, float | None]]]:
+def evaluate_multiple_windows(rows: Sequence[LabeledRow], train_sizes: Sequence[int], test_size: int = 1, include_all_boosting: bool = False) -> dict[int, dict[str, dict[str, float | None]]]:
     result: dict[int, dict[str, dict[str, float | None]]] = {}
     for train_size in train_sizes:
         splits = walk_forward_splits(rows, min_train_size=train_size, test_size=test_size)
         window_rows = tuple(item for split in splits for item in (*split[0], *split[1]))
         if len(window_rows) <= train_size:
             continue
-        result[train_size] = evaluate_walk_forward(rows, min_train_size=train_size, test_size=test_size)
+        result[train_size] = evaluate_walk_forward(rows, min_train_size=train_size, test_size=test_size, include_all_boosting=include_all_boosting)
     return result

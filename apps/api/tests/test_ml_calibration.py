@@ -19,3 +19,9 @@ class MlCalibrationTests(unittest.TestCase):
         result = evaluate_multiple_windows(rows, train_sizes=(4, 6), test_size=2)
         self.assertEqual(tuple(result), (4, 6))
         self.assertEqual(result[4]["majority"]["sample_size"], 14.0)
+
+    def test_multiple_windows_can_include_boosting_models(self) -> None:
+        base = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        rows = tuple(LabeledRow(base + timedelta(days=i), base + timedelta(days=i), (float(i),), i % 2, None) for i in range(12))
+        result = evaluate_multiple_windows(rows, train_sizes=(4,), test_size=2, include_all_boosting=True)
+        self.assertIn("lightgbm", result[4])

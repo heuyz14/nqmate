@@ -39,6 +39,10 @@ The three-way boosting comparison found that for 30m, XGBoost scored 49.67%, sci
 
 The calibration slice adds `nqmate_api.ml.calibration`. It provides expected calibration error, multiple expanding walk-forward windows, and a promotion gate requiring accuracy improvement plus no worse Brier score than the baseline. These safeguards prevent selecting the 60m candidate from one window alone.
 
+The multi-window runner adds `jobs/evaluate_ml_windows.py`. It evaluates the stored 60m target with configurable expanding training sizes and test windows, including all boosting implementations, and prints JSON for review without activating or overwriting model records.
+
+The first multi-window report used 10-row test windows with training sizes 20, 40, and 60. scikit-learn Gradient Boosting led accuracy in every window (59.44%, 61.80%, and 63.92%), but its Brier scores (0.321, 0.296, and 0.270) were worse than the majority baseline (about 0.248). It therefore fails the calibration-aware promotion gate and remains inactive.
+
 # Acceptance Criteria
 
 Models beat relevant simple baselines out of sample across multiple windows without leakage; calibrated probabilities and metrics are visible; artifacts are immutable and reproducible. The baseline slice is the prerequisite measurement layer and does not claim Phase 8 acceptance by itself.
