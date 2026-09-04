@@ -17,6 +17,8 @@ Close the learning loop with reconstructable prediction outcomes, calibration, m
 - Add observability for prediction ID, timestamps, providers, counts, similar sessions, model/prompt versions, runtime, and errors.
 - Add champion/challenger comparisons and controlled monthly/manual retraining promotion checks.
 
+The reconstruction slice adds migration `019_prediction_reconstruction.sql` and stores the exact deterministic `BiasSnapshot` in each new bias prediction as `input_snapshot`, alongside the model and feature versions. Apply migration 019 before creating predictions against the hosted database.
+
 # Acceptance Criteria
 
 An old prediction can be reconstructed from exact inputs and versions; confidence bins compare predicted and observed results; drift is visible; challenger promotion requires out-of-sample and calibration evidence.
@@ -32,4 +34,3 @@ Deep-learning adoption, RL, autonomous execution, and live in-session model upda
 # Next Phase
 
 Post-V1 research: [deep-learning.md](../ml/deep-learning.md), followed by multimodal research and experimental RL under its stated safeguards.
-

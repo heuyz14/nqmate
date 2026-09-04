@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import asdict
 from typing import Any, Protocol, Sequence
 
 from supabase import Client, create_client
@@ -34,7 +35,7 @@ class SupabaseBiasRepository:
             "evidence": list(result.evidence), "bull_case": list(result.bull_case),
             "bear_case": list(result.bear_case), "invalidation": list(result.invalidation),
             "uncertainty": list(result.uncertainty), "model_version": "rules-v1",
-            "feature_version": "bias-snapshot-v1",
+            "feature_version": "bias-snapshot-v1", "input_snapshot": asdict(snapshot),
         }).execute()
         return (response.data or [{}])[0]
 
