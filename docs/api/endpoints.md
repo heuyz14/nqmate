@@ -13,7 +13,7 @@ Base path: `/api/v1`.
 | Macro | `GET /macro/calendar`, `/macro/upcoming`, `/macro/observations`, `/macro/events/{id}`, `/macro/events/{id}/reactions` |
 | Bias | `GET /bias/current`, `/bias/history`, `/bias/{id}`; `POST /bias/generate`, `/bias/{id}/explain` |
 | Regimes | `GET /regimes/current`, `/regimes/{id}`; `POST /regimes/similar` |
-| Strategies | `GET /strategies`; `POST /strategies`; `GET/PATCH /strategies/{id}`; `GET /strategies/{id}/performance` |
+| Strategies | `GET /strategies`; `POST /strategies`; `GET/PATCH /strategies/{id}`; `POST /strategies/{id}/assess`; `GET /strategies/{id}/performance` |
 | Knowledge | `POST /knowledge/query`; `GET /knowledge/session/{date}`, `/knowledge/regimes`, `/knowledge/strategy-evidence` |
 | Backtests | `POST /backtests`; `GET /backtests/{id}` |
 | ML (later) | `GET /ml/models`, `/ml/models/{id}`, `/ml/predictions/current`, `/ml/predictions/history`, `/ml/features/current`, `/ml/features/importance`, `/ml/calibration`, `/ml/performance`; protected `POST /ml/train`, `/ml/backtest` |
@@ -39,9 +39,9 @@ News reads return normalized event records backed by `news_articles` and `news_e
 
 `GET /knowledge/strategy-evidence` uses the same filters to traverse `Strategy-[:PERFORMS_WELL_IN]->MarketRegime` and returns bounded strategy statistics. It returns an empty list until Phase 7 strategy memory creates strategy records.
 
-`POST /strategies` validates and stores structured strategy rules. `GET /strategies` returns saved strategies and accepts an optional `active` filter. `GET /strategies/{id}` reads one strategy, `PATCH /strategies/{id}` replaces its structured rules, and `DELETE /strategies/{id}` safely deactivates it without deleting history. `GET /strategies/{id}/performance` returns deterministic statistics from completed strategy outcomes. Migrations `014_strategies.sql` and `015_strategy_setups.sql` are applied; the current strategy count is 0.
+`POST /strategies` validates and stores structured strategy rules. `GET /strategies` returns saved strategies and accepts an optional `active` filter. `GET /strategies/{id}` reads one strategy, `PATCH /strategies/{id}` replaces its structured rules, and `DELETE /strategies/{id}` safely deactivates it without deleting history. `POST /strategies/{id}/assess` evaluates an explicit historical PB Blake / ICT evidence packet and persists only `VALID` setup occurrences; `DEVELOPING` and `NO_SETUP` results are returned without creating setups. `GET /strategies/{id}/performance` returns deterministic statistics from completed strategy outcomes. Migrations `014_strategies.sql`, `015_strategy_setups.sql`, and `016_strategy_outcomes.sql` are applied.
 
-`jobs/detect_setups.py` detects supported strategy conditions from stored session bars and upserts occurrences into `strategy_setups`. Apply migration `015_strategy_setups.sql` before running it; unsupported conditions fail closed.
+`jobs/detect_setups.py` detects supported strategy conditions from stored session bars and upserts occurrences into `strategy_setups`. Apply migration `015_strategy_setups.sql` before running it; unsupported conditions fail closed. PB historical evidence can be assessed through `POST /strategies/{id}/assess`.
 
 `strategy_outcomes` is the completed-outcome source for performance statistics. Migration `016_strategy_outcomes.sql` is required before outcome writes or live performance reads.
 

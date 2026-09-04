@@ -2,7 +2,7 @@ import unittest
 
 from fastapi.testclient import TestClient
 
-from nqmate_api.main import app, get_strategy_repository, get_outcome_repository
+from nqmate_api.main import app, get_strategy_repository, get_outcome_repository, get_setup_repository
 
 
 class StrategyApiTests(unittest.TestCase):
@@ -65,3 +65,29 @@ class StrategyApiTests(unittest.TestCase):
             app.dependency_overrides.clear()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["statistics"]["sample_size"], 2.0)
+
+    def test_pb_assessment_persists_only_a_valid_setup(self) -> None:
+        class FakeStrategyRepository:
+            def get(self, strategy_id): return {"id": strategy_id, "active": True}
+
+        class FakeSetupRepository:
+            def __init__(self): self.saved = None
+            def upsert(self, occurrence): self.saved = occurrence; return {"id": "setup-1"}
+
+        setup_repository = FakeSetupRepository()
+        app.dependency_overrides[get_strategy_repository] = lambda: FakeStrategyRepository()
+        app.dependency_overrides[get_setup_repository] = lambda: setup_repository
+        try:
+            response = TestClient(app).post("/api/v1/strategies/strategy-1/assess", json={
+                "sessionDate": "2026-09-04", "analyzedAt": "2026-09-04T14:10:00Z",
+                "contexts": [{"timeframe": "1H", "direction": "bullish", "keyLevelValid": True}],
+                "liquidity": {"sweptLevel": "PDL", "price": 100, "sweptAt": "2026-09-04T14:00:00Z"},
+                "inversions": [{"timeframe": "5m", "direction": "LONG", "lower": 101, "upper": 103, "confirmedAt": "2026-09-04T14:05:00Z"}],
+                "entry": 101, "stop": 99, "targets": [105],
+            })
+        finally:
+            app.dependency_overrides.clear()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["status"], "VALID")
+        self.assertEqual(response.json()["inversionTimeframe"], "5m")
+        self.assertIsNotNone(setup_repository.saved)

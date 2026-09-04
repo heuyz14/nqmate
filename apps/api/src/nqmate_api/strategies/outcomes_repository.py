@@ -28,6 +28,7 @@ class SupabaseOutcomeRepository:
             "setup_id": outcome.setup_id, "strategy_id": outcome.strategy_id,
             "session_date": outcome.session_date, "observed_at": outcome.observed_at.isoformat(),
             "return_pct": outcome.return_pct, "mfe": outcome.mfe, "mae": outcome.mae,
+            "regime": outcome.regime,
         }, on_conflict="setup_id").execute()
         return (response.data or [{}])[0]
 

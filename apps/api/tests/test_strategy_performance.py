@@ -18,3 +18,13 @@ class StrategyPerformanceTests(unittest.TestCase):
         self.assertEqual(stats["sample_size"], 1.0)
         self.assertIsNone(stats["mfe_mean"])
         self.assertIsNone(stats["mae_mean"])
+
+    def test_reports_best_and_worst_regime_by_mean_return(self) -> None:
+        stats = calculate_performance([
+            {"return_pct": 0.02, "regime": "TREND_UP"},
+            {"return_pct": 0.01, "regime": "TREND_UP"},
+            {"return_pct": -0.03, "regime": "RANGE"},
+        ])
+
+        self.assertEqual(stats["best_regime"], "TREND_UP")
+        self.assertEqual(stats["worst_regime"], "RANGE")

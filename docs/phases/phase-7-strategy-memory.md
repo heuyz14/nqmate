@@ -31,9 +31,11 @@ The PB Blake / ICT evaluator adds `strategies/pb_blake.py` and tests. It accepts
 
 The historical input slice adds `strategies/pb_blake_data.py` and tests. It detects three-bar FVGs and the first close-through inversion on normalized historical bars, requiring each bar to have been available at its timestamp. A bearish FVG close-through produces a long inversion; a bullish FVG close-through produces a short inversion. Higher-timeframe context, liquidity, entry, stops, and targets remain explicit inputs rather than invented by this detector.
 
+The PB assessment API slice adds `POST /api/v1/strategies/{id}/assess`. It accepts a point-in-time, normalized PB evidence packet and persists only valid setup occurrences; developing and no-setup assessments remain non-trade results. This endpoint is suitable for a backtest runner and intentionally does not claim that missing HTF context, liquidity, or trade levels exist.
+
 # Acceptance Criteria
 
-Each strategy displays required conditions and reliable statistics with sample context; statistics update from completed sessions and never mutate historical predictions.
+Each strategy displays required conditions and reliable statistics with sample context, including best and worst regimes when regime-labeled outcomes exist; statistics update from completed sessions and never mutate historical predictions. The PB assessment endpoint returns a conservative status and persists only valid setup occurrences.
 
 # Tests
 
@@ -45,4 +47,4 @@ Online model retraining, deep learning, RL, and automated order execution.
 
 # Next Phase
 
-Complete the PB evaluator’s data-assembly and persistence integration, then continue with [Phase 8 — ML](phase-8-ml.md).
+[Phase 8 — ML](phase-8-ml.md), after applying migration `017_strategy_outcome_regime.sql`.

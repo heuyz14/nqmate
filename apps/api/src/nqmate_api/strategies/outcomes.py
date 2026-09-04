@@ -13,3 +13,4 @@ class StrategyOutcome:
     return_pct: float | None
     mfe: float | None = None
     mae: float | None = None
+    regime: str | None = None

@@ -25,6 +25,9 @@ from nqmate_api.strategies.repository import StrategyRepository, SupabaseStrateg
 from nqmate_api.strategies.service import validate_strategy
 from nqmate_api.strategies.outcomes_repository import OutcomeRepository, SupabaseOutcomeRepository
 from nqmate_api.strategies.performance import calculate_performance
+from nqmate_api.strategies.setups import SetupOccurrence
+from nqmate_api.strategies.setups_repository import SetupRepository, SupabaseSetupRepository
+from nqmate_api.strategies.pb_blake import HtfContext, Inversion, LiquidityEvent, assess_pb_setup
 
 app = FastAPI(title="NQmate API", version="0.1.0")
 
@@ -67,6 +70,11 @@ def get_strategy_repository() -> StrategyRepository:
 @lru_cache(maxsize=1)
 def get_outcome_repository() -> OutcomeRepository:
     return SupabaseOutcomeRepository.from_settings(Settings())
+
+
+@lru_cache(maxsize=1)
+def get_setup_repository() -> SetupRepository:
+    return SupabaseSetupRepository.from_settings(Settings())
 
 
 class AnalogueQueryRequest(BaseModel):
@@ -445,6 +453,37 @@ class StrategyRequest(BaseModel):
     active: bool = True
 
 
+class PbContextRequest(BaseModel):
+    timeframe: str
+    direction: str
+    keyLevelValid: bool
+
+
+class PbLiquidityRequest(BaseModel):
+    sweptLevel: str
+    price: float
+    sweptAt: datetime
+
+
+class PbInversionRequest(BaseModel):
+    timeframe: str
+    direction: str
+    lower: float
+    upper: float
+    confirmedAt: datetime
+
+
+class PbAssessmentRequest(BaseModel):
+    sessionDate: date
+    analyzedAt: datetime
+    contexts: list[PbContextRequest] = Field(default_factory=list, max_length=20)
+    liquidity: PbLiquidityRequest | None = None
+    inversions: list[PbInversionRequest] = Field(default_factory=list, max_length=100)
+    entry: float | None = None
+    stop: float | None = None
+    targets: list[float] = Field(default_factory=list, max_length=10)
+
+
 def _strategy_from_request(request: StrategyRequest) -> Strategy:
     return Strategy(
         request.name, request.description, tuple(request.allowedRegimes), tuple(request.requiredConditions),
@@ -472,6 +511,59 @@ async def list_strategies(
     repository: StrategyRepository = Depends(get_strategy_repository),
 ) -> dict[str, object]:
     return {"strategies": repository.list(active)}
+
+
+@app.post("/api/v1/strategies/{strategy_id}/assess", tags=["strategies"])
+async def assess_strategy(
+    strategy_id: str,
+    request: PbAssessmentRequest,
+    strategy_repository: StrategyRepository = Depends(get_strategy_repository),
+    setup_repository: SetupRepository = Depends(get_setup_repository),
+) -> dict[str, object]:
+    strategy = strategy_repository.get(strategy_id)
+    if strategy is None:
+        raise HTTPException(status_code=404, detail="Strategy not found")
+    liquidity = LiquidityEvent(
+        request.liquidity.sweptLevel, request.liquidity.price, request.liquidity.sweptAt
+    ) if request.liquidity else None
+    result = assess_pb_setup(
+        tuple(HtfContext(item.timeframe, item.direction, item.keyLevelValid) for item in request.contexts),
+        liquidity,
+        tuple(Inversion(item.timeframe, item.direction, item.lower, item.upper, item.confirmedAt) for item in request.inversions),
+        request.entry, request.stop, request.targets, request.analyzedAt,
+    )
+    persisted = None
+    if result.status == "VALID" and result.inversion_timeframe:
+        confirmation_candidates = [
+            item.confirmedAt for item in request.inversions
+            if item.timeframe == result.inversion_timeframe
+            and item.direction in {"LONG", "SHORT"}
+            and (liquidity is None or item.confirmedAt > liquidity.swept_at)
+            and item.confirmedAt <= request.analyzedAt
+        ]
+        confirmation = max(
+            confirmation_candidates,
+            default=request.analyzedAt,
+        )
+        persisted = setup_repository.upsert(SetupOccurrence(
+            strategy_id, request.sessionDate.isoformat(), confirmation,
+            ("pb_blake_valid", f"inversion_{result.inversion_timeframe}"),
+        ))
+    return {
+        "strategyId": strategy_id,
+        "sessionDate": request.sessionDate.isoformat(),
+        "analyzedAt": request.analyzedAt.isoformat(),
+        "status": result.status,
+        "direction": result.direction,
+        "inversionTimeframe": result.inversion_timeframe,
+        "entry": result.entry,
+        "stop": result.stop,
+        "stopDistance": result.stop_distance,
+        "targets": list(result.targets),
+        "riskRewards": list(result.risk_rewards),
+        "missing": list(result.missing),
+        "persistedSetup": persisted,
+    }
 
 
 @app.get("/api/v1/strategies/{strategy_id}/performance", tags=["strategies"])
