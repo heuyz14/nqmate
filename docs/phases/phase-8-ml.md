@@ -31,6 +31,8 @@ The first stored baseline run covered 151 out-of-sample rows from the available 
 
 The XGBoost challenger adds `nqmate_api.ml.boosted` and the optional `ml` dependency extra. It uses the same chronological folds and metadata registry as the baselines. On the first 151-row run it scored 49.67% accuracy, below the majority baseline, so it remains inactive and is not promoted.
 
+The evaluation runner now accepts horizon-specific stored outcomes and creates separate target/dataset/model identities. The first 60-minute run also covered 151 out-of-sample rows: always-long scored 56.29%, XGBoost 54.30%, majority 54.97%, and logistic 44.37%. XGBoost remains inactive because it did not beat the relevant simple baseline.
+
 # Acceptance Criteria
 
 Models beat relevant simple baselines out of sample across multiple windows without leakage; calibrated probabilities and metrics are visible; artifacts are immutable and reproducible. The baseline slice is the prerequisite measurement layer and does not claim Phase 8 acceptance by itself.

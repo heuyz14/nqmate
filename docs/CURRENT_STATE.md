@@ -97,6 +97,7 @@ Phase 8 — ML (baseline slice in progress; Phase 7 implementation complete; BLS
 - Phase 8 historical baseline runner added at `jobs/evaluate_ml_baselines.py`: stored analogue vectors/outcomes can be converted into 30-minute direction rows, evaluated with chronological folds, and registered as inactive baseline metadata records. It requires at least the configured training-window size of complete rows.
 - Phase 8 baseline run completed against stored 2026 history: 151 out-of-sample rows and four registered inactive models. Accuracy was majority 52.98%, always-long 52.98%, overnight-direction 49.67%, and logistic 49.01%; logistic did not beat the simple baseline.
 - Phase 8 XGBoost challenger added with optional `xgboost` and `scikit-learn` dependencies; the first walk-forward run scored 49.67% accuracy on the same 151 rows, below the majority baseline, and was registered inactive rather than promoted.
+- Phase 8 multi-horizon runner added: `jobs/evaluate_ml_baselines.py` now creates horizon-specific metadata for stored outcomes. The first 60-minute run covered 151 rows: always-long 56.29%, majority 54.97%, XGBoost 54.30%, and logistic 44.37%; no challenger was promoted.
 
 ## In Progress
 
@@ -104,7 +105,7 @@ Phase 5 acceptance is complete. Phase 6 implementation is complete for the avail
 
 ## Next
 
-1. Expand the versioned feature/target matrix to required horizons
+1. Expand the versioned feature/target matrix to required horizons beyond stored 30m/60m outcomes
 2. Add calibration and multi-window promotion checks before any model activation
 
 ## Important Decisions

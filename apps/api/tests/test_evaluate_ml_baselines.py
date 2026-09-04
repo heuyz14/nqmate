@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime, timezone
 
 from nqmate_api.analogues.models import HistoricalSession
-from nqmate_api.ml.evaluation import rows_from_sessions
+from nqmate_api.ml.evaluation import rows_from_sessions, target_name
 
 
 class EvaluateMlBaselineTests(unittest.TestCase):
@@ -22,3 +22,7 @@ class EvaluateMlBaselineTests(unittest.TestCase):
             datetime(2026, 1, 2, 14, 30, tzinfo=timezone.utc), {},
         )]
         self.assertEqual(rows_from_sessions(sessions, "return_30m"), ())
+
+    def test_target_name_is_horizon_specific(self) -> None:
+        self.assertEqual(target_name("return_60m"), "direction_60m")
+        self.assertEqual(target_name("open_close"), "direction_close")

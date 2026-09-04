@@ -9,6 +9,14 @@ from nqmate_api.ml.baselines import LabeledRow
 from nqmate_api.ml.metrics import evaluate_walk_forward
 
 
+def target_name(outcome_name: str) -> str:
+    if outcome_name.startswith("return_") and outcome_name.endswith("m"):
+        return f"direction_{outcome_name[7:]}"
+    if outcome_name == "open_close":
+        return "direction_close"
+    raise ValueError("unsupported direction outcome name")
+
+
 def rows_from_sessions(sessions: Sequence[HistoricalSession], outcome_name: str) -> tuple[LabeledRow, ...]:
     rows: list[LabeledRow] = []
     for session in sessions:
@@ -26,6 +34,7 @@ def rows_from_sessions(sessions: Sequence[HistoricalSession], outcome_name: str)
 
 
 def evaluate_sessions(sessions: Sequence[HistoricalSession], outcome_name: str = "return_30m", min_train_size: int = 20) -> dict[str, dict[str, float | None]]:
+    target_name(outcome_name)
     rows = rows_from_sessions(sessions, outcome_name)
     if len(rows) <= min_train_size:
         return {}
