@@ -25,6 +25,10 @@ The evaluation slice adds `nqmate_api.ml.metrics`. It calculates accuracy, preci
 
 The metadata slice adds `ml_datasets`, `ml_models`, migration `018_ml_metadata.sql`, and `nqmate_api.ml.repository`. Dataset versions are idempotent and model records use insert-only artifact registration so a trained artifact is never silently replaced. Records retain target, feature/dataset versions, training dates, metrics, hyperparameters, and artifact path.
 
+The historical baseline runner adds `jobs/evaluate_ml_baselines.py` and `nqmate_api.ml.evaluation`. It reads stored analogue vectors/outcomes, builds 30-minute direction rows from pre-session numeric features, evaluates chronological folds, and registers the dataset plus inactive baseline model metadata. It returns no results when there are not enough rows for the requested training window.
+
+The first stored baseline run covered 151 out-of-sample rows from the available 2026 analogue history. The majority baseline scored 52.98% accuracy; always-long scored 52.98%; overnight-direction scored 49.67%; and the dependency-light logistic baseline scored 49.01%. These are benchmark results only; no model is promoted based on this run.
+
 # Acceptance Criteria
 
 Models beat relevant simple baselines out of sample across multiple windows without leakage; calibrated probabilities and metrics are visible; artifacts are immutable and reproducible. The baseline slice is the prerequisite measurement layer and does not claim Phase 8 acceptance by itself.

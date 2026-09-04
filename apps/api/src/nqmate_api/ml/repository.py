@@ -40,7 +40,7 @@ class SupabaseMlRepository:
             "hyperparameters": record.hyperparameters, "artifact_path": record.artifact_path,
             "training_start": record.training_start, "training_end": record.training_end,
             "active": record.active,
-        }, on_conflict="name").execute()
+        }).execute()
         return (response.data or [{}])[0]
 
     def list_models(self, target: str | None = None) -> Sequence[dict[str, Any]]:

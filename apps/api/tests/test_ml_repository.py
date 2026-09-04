@@ -19,3 +19,4 @@ class MlRepositoryTests(unittest.TestCase):
         SupabaseMlRepository(client).create_model(model)
         payload = client.table.return_value.insert.call_args.args[0]
         self.assertEqual(payload["artifact_path"], "artifacts/logistic-v1.json")
+        self.assertEqual(client.table.return_value.insert.call_args.kwargs, {})

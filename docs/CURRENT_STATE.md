@@ -93,7 +93,9 @@ Phase 8 — ML (baseline slice in progress; Phase 7 implementation complete; BLS
 - Phase 8 baseline slice added at `apps/api/src/nqmate_api/ml/`: majority-class, always-long, overnight-direction, and dependency-light logistic-regression baselines; point-in-time row filtering and chronological walk-forward splits are tested. This is a benchmark foundation, not final ML acceptance.
 - Phase 8 dataset slice added at `apps/api/src/nqmate_api/ml/dataset.py`: exact-timestamp forward direction targets, missing-horizon exclusion, versioned feature matrices, and feature-availability leakage checks are tested.
 - Phase 8 evaluation slice added at `apps/api/src/nqmate_api/ml/metrics.py`: deterministic accuracy, precision, recall, Brier, log-loss, and ROC-AUC metrics plus chronological out-of-sample comparison of the four baseline models are tested.
-- Phase 8 metadata slice added at `apps/api/src/nqmate_api/ml/`: dataset/model records, Supabase repository, and migration `018_ml_metadata.sql` are implemented; dataset versions are idempotent and model artifacts are insert-only. Migration 018 is ready for application.
+- Phase 8 metadata slice added at `apps/api/src/nqmate_api/ml/`: dataset/model records, Supabase repository, and migration `018_ml_metadata.sql` are implemented; dataset versions are idempotent and model artifacts are insert-only. Migration 018 is applied.
+- Phase 8 historical baseline runner added at `jobs/evaluate_ml_baselines.py`: stored analogue vectors/outcomes can be converted into 30-minute direction rows, evaluated with chronological folds, and registered as inactive baseline metadata records. It requires at least the configured training-window size of complete rows.
+- Phase 8 baseline run completed against stored 2026 history: 151 out-of-sample rows and four registered inactive models. Accuracy was majority 52.98%, always-long 52.98%, overnight-direction 49.67%, and logistic 49.01%; logistic did not beat the simple baseline.
 
 ## In Progress
 
@@ -101,8 +103,8 @@ Phase 5 acceptance is complete. Phase 6 implementation is complete for the avail
 
 ## Next
 
-1. Apply migration `018_ml_metadata.sql` to Supabase
-2. Validate baseline metrics on the stored historical feature matrix
+1. Run `jobs/evaluate_ml_baselines.py` against the stored historical feature matrix
+2. Add XGBoost/LightGBM as challengers only after baseline results are recorded
 
 ## Important Decisions
 
