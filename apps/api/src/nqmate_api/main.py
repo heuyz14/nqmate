@@ -723,15 +723,18 @@ async def evaluate_bias_history(
     if limit < 1 or limit > 100:
         raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
     records: list[dict[str, Any]] = []
+    attached_outcome_count = 0
     predictions = repository.history(limit)
     for prediction in predictions:
         prediction_id = prediction.get("id")
         if not prediction_id:
             continue
         for outcome in repository.list_outcomes(str(prediction_id)):
+            attached_outcome_count += 1
             if isinstance(outcome.get("correct"), bool):
                 records.append({"confidence": prediction.get("confidence"), "correct": outcome["correct"]})
-    return {"prediction_count": len(predictions), "outcome_count": len(records),
+    return {"prediction_count": len(predictions), "outcome_count": attached_outcome_count,
+            "scored_outcome_count": len(records),
             "confidence_calibration": confidence_calibration(records)}
 
 
