@@ -96,6 +96,7 @@ Phase 8 — ML (baseline slice in progress; Phase 7 implementation complete; BLS
 - Phase 8 metadata slice added at `apps/api/src/nqmate_api/ml/`: dataset/model records, Supabase repository, and migration `018_ml_metadata.sql` are implemented; dataset versions are idempotent and model artifacts are insert-only. Migration 018 is applied.
 - Phase 8 historical baseline runner added at `jobs/evaluate_ml_baselines.py`: stored analogue vectors/outcomes can be converted into 30-minute direction rows, evaluated with chronological folds, and registered as inactive baseline metadata records. It requires at least the configured training-window size of complete rows.
 - Phase 8 baseline run completed against stored 2026 history: 151 out-of-sample rows and four registered inactive models. Accuracy was majority 52.98%, always-long 52.98%, overnight-direction 49.67%, and logistic 49.01%; logistic did not beat the simple baseline.
+- Phase 8 XGBoost challenger added with optional `xgboost` and `scikit-learn` dependencies; the first walk-forward run scored 49.67% accuracy on the same 151 rows, below the majority baseline, and was registered inactive rather than promoted.
 
 ## In Progress
 
@@ -103,8 +104,8 @@ Phase 5 acceptance is complete. Phase 6 implementation is complete for the avail
 
 ## Next
 
-1. Run `jobs/evaluate_ml_baselines.py` against the stored historical feature matrix
-2. Add XGBoost/LightGBM as challengers only after baseline results are recorded
+1. Expand the versioned feature/target matrix to required horizons
+2. Add calibration and multi-window promotion checks before any model activation
 
 ## Important Decisions
 

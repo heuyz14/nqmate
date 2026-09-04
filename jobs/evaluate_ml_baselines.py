@@ -24,9 +24,13 @@ async def run(start: date, end: date, min_train_size: int = 20) -> dict[str, dic
         version=dataset_version, target="direction_30m", feature_version="analogue-v1",
         row_count=len(rows), start_date=start.isoformat(), end_date=end.isoformat(),
     ))
+    existing_names = {str(row.get("name")) for row in registry.list_models("direction_30m")}
     for name, values in metrics.items():
+        model_name = f"baseline-{name}-direction-30m-{end.isoformat()}"
+        if model_name in existing_names:
+            continue
         registry.create_model(ModelRecord(
-            name=f"baseline-{name}-direction-30m-{end.isoformat()}", target="direction_30m",
+            name=model_name, target="direction_30m",
             algorithm=name, algorithm_version="builtin-v1", feature_version="analogue-v1",
             dataset_version=dataset_version, metrics=values,
             hyperparameters={"min_train_size": min_train_size}, artifact_path=f"builtin://{name}",

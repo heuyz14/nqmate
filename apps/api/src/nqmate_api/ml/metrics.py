@@ -5,6 +5,7 @@ from statistics import mean
 from typing import Sequence
 
 from nqmate_api.ml.baselines import LabeledRow, always_long_probability, fit_logistic, majority_probability, overnight_direction_probability, predict_logistic
+from nqmate_api.ml.boosted import XGBoostClassifier
 from nqmate_api.ml.validation import walk_forward_splits
 
 
@@ -40,8 +41,9 @@ def _merge_predictions(labels: list[int], predictions: list[float], values: Sequ
         predictions.extend(test_predictions)
 
 
-def evaluate_walk_forward(rows: Sequence[LabeledRow], min_train_size: int, test_size: int = 1) -> dict[str, dict[str, float | None]]:
-    predictions: dict[str, list[tuple[Sequence[int], Sequence[float]]]] = {name: [] for name in ("majority", "always_long", "overnight_direction", "logistic")}
+def evaluate_walk_forward(rows: Sequence[LabeledRow], min_train_size: int, test_size: int = 1, include_xgboost: bool = False) -> dict[str, dict[str, float | None]]:
+    names = ("majority", "always_long", "overnight_direction", "logistic", "xgboost") if include_xgboost else ("majority", "always_long", "overnight_direction", "logistic")
+    predictions: dict[str, list[tuple[Sequence[int], Sequence[float]]]] = {name: [] for name in names}
     for train, test in walk_forward_splits(rows, min_train_size, test_size):
         train_labels = tuple(row.target for row in train)
         test_labels = [row.target for row in test]
@@ -51,6 +53,13 @@ def evaluate_walk_forward(rows: Sequence[LabeledRow], min_train_size: int, test_
         predictions["overnight_direction"].append((test_labels, [value if value is not None else majority_probability(train_labels) for value in overnight]))
         model = fit_logistic(tuple(row.features for row in train), train_labels)
         predictions["logistic"].append((test_labels, predict_logistic(model, tuple(row.features for row in test))))
+        if include_xgboost:
+            if len(set(train_labels)) < 2:
+                boosted_predictions = [majority_probability(train_labels)] * len(test)
+            else:
+                boosted = XGBoostClassifier().fit(tuple(row.features for row in train), train_labels)
+                boosted_predictions = boosted.predict_probability(tuple(row.features for row in test))
+            predictions["xgboost"].append((test_labels, boosted_predictions))
     result: dict[str, dict[str, float | None]] = {}
     for name, folds in predictions.items():
         labels: list[int] = []

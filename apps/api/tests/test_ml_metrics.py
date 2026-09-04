@@ -21,3 +21,9 @@ class MlMetricsTests(unittest.TestCase):
         result = evaluate_walk_forward(rows, min_train_size=4, test_size=2)
         self.assertEqual(set(result), {"majority", "always_long", "overnight_direction", "logistic"})
         self.assertEqual(result["logistic"]["sample_size"], 6.0)
+
+    def test_walk_forward_can_include_xgboost_challenger(self) -> None:
+        base = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        rows = tuple(LabeledRow(base + timedelta(days=index), base + timedelta(days=index), (float(index),), index % 2, None) for index in range(8))
+        result = evaluate_walk_forward(rows, min_train_size=4, test_size=2, include_xgboost=True)
+        self.assertEqual(result["xgboost"]["sample_size"], 6.0)

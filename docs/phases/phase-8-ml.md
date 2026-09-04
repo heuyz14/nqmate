@@ -29,6 +29,8 @@ The historical baseline runner adds `jobs/evaluate_ml_baselines.py` and `nqmate_
 
 The first stored baseline run covered 151 out-of-sample rows from the available 2026 analogue history. The majority baseline scored 52.98% accuracy; always-long scored 52.98%; overnight-direction scored 49.67%; and the dependency-light logistic baseline scored 49.01%. These are benchmark results only; no model is promoted based on this run.
 
+The XGBoost challenger adds `nqmate_api.ml.boosted` and the optional `ml` dependency extra. It uses the same chronological folds and metadata registry as the baselines. On the first 151-row run it scored 49.67% accuracy, below the majority baseline, so it remains inactive and is not promoted.
+
 # Acceptance Criteria
 
 Models beat relevant simple baselines out of sample across multiple windows without leakage; calibrated probabilities and metrics are visible; artifacts are immutable and reproducible. The baseline slice is the prerequisite measurement layer and does not claim Phase 8 acceptance by itself.
