@@ -151,8 +151,12 @@ async def get_nq_bars(
 ) -> dict[str, object]:
     if end <= start:
         raise HTTPException(status_code=422, detail="end must be after start")
-    if timeframe not in {"1min", "1h", "4h", "1d"}:
-        raise HTTPException(status_code=422, detail="timeframe must be 1min, 1h, 4h, or 1d")
+    supported_timeframes = {"1min", "5m", "15m", "1h", "2h", "4h", "1d", "120m", "240m"}
+    if timeframe not in supported_timeframes:
+        raise HTTPException(
+            status_code=422,
+            detail="timeframe must be 1min, 5m, 15m, 1h, 2h, 4h, 1d, 120m, or 240m",
+        )
     bars = repository.get_bars(
         datetime.combine(start, time.min, timezone.utc),
         datetime.combine(end + timedelta(days=1), time.min, timezone.utc),

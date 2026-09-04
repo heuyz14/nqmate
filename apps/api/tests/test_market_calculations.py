@@ -55,7 +55,16 @@ class MarketCalculationTests(unittest.TestCase):
 
     def test_aggregate_rejects_unknown_timeframe(self) -> None:
         with self.assertRaises(ValueError):
-            aggregate_bars([], "15m")
+            aggregate_bars([], "3m")
+
+    def test_aggregate_supports_required_candle_horizons(self) -> None:
+        start = datetime(2026, 9, 1, 13, 30, tzinfo=timezone.utc)
+        bars = [bar(start + timedelta(minutes=index), 100 + index) for index in range(16)]
+
+        for timeframe in ("5m", "15m", "1h", "2h", "4h", "1d", "120m", "240m"):
+            result = aggregate_bars(bars, timeframe)
+            self.assertTrue(result, timeframe)
+            self.assertTrue(all(item.timeframe == timeframe for item in result))
 
     def test_holiday_with_prior_day_bars_is_not_a_complete_session(self) -> None:
         bars = [bar(datetime(2025, 12, 31, 15, 0, tzinfo=timezone.utc), 100)]

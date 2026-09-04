@@ -124,12 +124,21 @@ class SupabaseMarketRepository:
         return self.get_session(date.fromisoformat(response.data[0]["session_date"]))
 
     def get_bars(self, start: datetime, end: datetime, symbol: str | None = None) -> Sequence[MarketBar]:
-        query = self.client.table("market_bars").select("*").gte(
-            "timestamp", _iso(start)
-        ).lt("timestamp", _iso(end)).order("timestamp")
-        if symbol:
-            query = query.eq("symbol", symbol)
-        response = query.execute()
+        rows: list[dict[str, Any]] = []
+        page_size = 1000
+        offset = 0
+        while True:
+            query = self.client.table("market_bars").select("*").gte(
+                "timestamp", _iso(start)
+            ).lt("timestamp", _iso(end)).order("timestamp").range(offset, offset + page_size - 1)
+            if symbol:
+                query = query.eq("symbol", symbol)
+            response = query.execute()
+            page = response.data or []
+            rows.extend(page)
+            if len(page) < page_size:
+                break
+            offset += page_size
         return [MarketBar(
             symbol=row["symbol"],
             timestamp=datetime.fromisoformat(row["timestamp"].replace("Z", "+00:00")),
@@ -138,4 +147,4 @@ class SupabaseMarketRepository:
             volume=float(row["volume"]), provider=row["provider"],
             ingested_at=datetime.fromisoformat(row["ingested_at"].replace("Z", "+00:00")),
             available_at=datetime.fromisoformat(row["available_at"].replace("Z", "+00:00")),
-        ) for row in (response.data or [])]
+        ) for row in rows]

@@ -45,6 +45,8 @@ The multi-window runner adds `jobs/evaluate_ml_windows.py`. It evaluates the sto
 
 The first multi-window report used 10-row test windows with training sizes 20, 40, and 60. scikit-learn Gradient Boosting led accuracy in every window (59.44%, 61.80%, and 63.92%), but its Brier scores (0.321, 0.296, and 0.270) were worse than the majority baseline (about 0.248). It therefore fails the calibration-aware promotion gate and remains inactive.
 
+The candle-horizon slice adds deterministic persistence for `5m`, `15m`, `1h`, `2h`, `4h`, and `1d` bars in `jobs/populate_market_timeframes.py`. It derives every requested candle only from stored `1min` bars, with `2h`/`4h` corresponding to the `120m`/`240m` ML horizons. The job is historical and resumable by date range; it does not add a live market feed.
+
 # Acceptance Criteria
 
 Models beat relevant simple baselines out of sample across multiple windows without leakage; calibrated probabilities and metrics are visible; artifacts are immutable and reproducible. The baseline slice is the prerequisite measurement layer and does not claim Phase 8 acceptance by itself.

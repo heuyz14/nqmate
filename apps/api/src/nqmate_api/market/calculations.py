@@ -11,7 +11,18 @@ EASTERN = ZoneInfo("America/New_York")
 OVERNIGHT_START = time(18, 0)
 REGULAR_START = time(9, 30)
 REGULAR_END = time(16, 0)
-DERIVED_TIMEFRAMES = {"1h": timedelta(hours=1), "4h": timedelta(hours=4), "1d": timedelta(days=1)}
+# Derived candles are persisted using these canonical names.  The 2h/4h
+# horizons correspond to the ML/strategy 120m/240m horizons.
+DERIVED_TIMEFRAMES = {
+    "5m": timedelta(minutes=5),
+    "15m": timedelta(minutes=15),
+    "1h": timedelta(hours=1),
+    "2h": timedelta(hours=2),
+    "4h": timedelta(hours=4),
+    "1d": timedelta(days=1),
+    "120m": timedelta(hours=2),
+    "240m": timedelta(hours=4),
+}
 
 
 def _local_timestamp(bar: MarketBar) -> datetime:

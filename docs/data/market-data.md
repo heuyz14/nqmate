@@ -28,7 +28,7 @@ NQ is contract-based. Implement `ContinuousContractResolver`; track product, act
 
 Start with minute bars; avoid every-tick storage. `market_bars` contains `id`, `symbol`, `timestamp`, `timeframe`, OHLC, `volume`, `provider`, and `ingested_at`, with uniqueness across `(symbol, timestamp, timeframe, provider)`. Build U.S. trading sessions from bars, including overnight open/high/low/close and regular-session OHLC. See [ARCHITECTURE.md](../ARCHITECTURE.md) for storage ownership.
 
-The 1-minute series is the canonical historical input. Once it is complete and validated, derive deterministic 1-hour, 4-hour, and daily candles from stored minute bars rather than requesting duplicate provider series. Weekly analysis should include an explicitly defined opening gap for each trading week, using point-in-time bars and preserving the relevant raw contract.
+The 1-minute series is the canonical historical input. The derived candle job persists deterministic 5-minute, 15-minute, 1-hour, 2-hour, 4-hour, and daily candles from stored minute bars rather than requesting duplicate provider series. The 2-hour and 4-hour candles represent the 120-minute and 240-minute horizons used by ML. The API also accepts `120m` and `240m` aliases when calculating or retrieving candles. Weekly analysis should include an explicitly defined opening gap for each trading week, using point-in-time bars and preserving the relevant raw contract.
 
 ## Required session fields
 
@@ -41,6 +41,7 @@ The 1-minute series is the canonical historical input. Once it is complete and v
 - Latest minute bars.
 - Contract rollover check.
 - Session construction.
+- Derived candle population for `5m`, `15m`, `1h`, `2h`, `4h`, and `1d` via `jobs/populate_market_timeframes.py`.
 
 Free-tier development may run manually or by cron. Do not treat the free provider as zero-latency trading data.
 
