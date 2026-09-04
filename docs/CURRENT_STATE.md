@@ -85,14 +85,15 @@ Phase 7 — Strategy Memory (foundation in progress; Phase 6 implementation comp
 - Phase 7 performance foundation added: deterministic statistics calculation covers sample size, win rate, return summaries, expectancy, optional MFE/MAE, and Sharpe-like ratio; unavailable fields remain unset.
 - Phase 7 outcome slice added: strategy outcome model/repository, migration `016_strategy_outcomes.sql`, and `GET /strategies/{id}/performance` are implemented; migration `016` is pending application.
 - Phase 7 strategy dashboard slice added: `/strategies` provides structured strategy creation, saved-strategy selection, rule detail, and outcome-backed performance metrics with explicit empty states; migration `016` is applied and the outcome table is reachable.
+- Live strategy memory now contains one active `PB Blake / ICT-style Intraday Setup` record with six required HTF/liquidity/LTF conditions, four optional confirmations, and explicit no-trade invalidations. The current detector fails closed on its unsupported conditions until full multi-timeframe logic is implemented.
 
 ## In Progress
 
-Phase 5 acceptance is complete. Phase 6 implementation is complete for the available source boundaries, semantic relationships, deterministic regime classification, bounded graph retrieval, and outcome/strategy traversal contracts. Phase 7 currently covers structured strategy CRUD, setup detection, performance calculation, outcome persistence, and the strategy dashboard; migrations `014`, `015`, and `016` are applied, and live read verification found 0 strategies. Setup/outcome data and graph relationships remain empty until a strategy is created and evaluated. The literal Phase 6 strategy-evidence query remains empty until strategy records and performance relationships exist. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
+Phase 5 acceptance is complete. Phase 6 implementation is complete for the available source boundaries, semantic relationships, deterministic regime classification, bounded graph retrieval, and outcome/strategy traversal contracts. Phase 7 currently covers structured strategy CRUD, setup detection, performance calculation, outcome persistence, and the strategy dashboard; migrations `014`, `015`, and `016` are applied, and live read verification found one active strategy. Setup/outcome data and graph relationships remain empty until the full PB Blake / ICT condition sequence is implemented and evaluated. The literal Phase 6 strategy-evidence query remains empty until strategy performance relationships exist. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The scheduled market updater initially found no bars for September 2–3; manual retries successfully stored September 1–2. September 3 remains incomplete/current until its session closes.
 
 ## Next
 
-1. Create a real strategy and run bounded setup detection
+1. Implement PB Blake / ICT multi-timeframe setup detection without forcing trades
 2. Recheck September market-session availability after the trading day closes
 
 ## Important Decisions
