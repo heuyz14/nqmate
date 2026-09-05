@@ -11,6 +11,7 @@ type DashboardData = {
   bars15: Bar[];
   bars4h: Bar[];
   bars1d: Bar[];
+  vwap: number | null;
   bias: { direction: string; confidence: number; recommendation: string; catalyst_risk: string | null; evidence?: string[] } | null;
   news: Array<{ headline?: string; title?: string; source?: string; published_at?: string; nq_relevance?: number }>;
 };
@@ -20,14 +21,14 @@ function number(value: number | null | undefined) { return value == null ? "—"
 function percent(value: number | null | undefined) { return value == null ? "—" : `${value >= 0 ? "+" : ""}${(value * 100).toFixed(2)}%`; }
 function move(bars: Bar[]) { const first = bars[0]?.close; const last = bars.at(-1)?.close; return first && last ? last / first - 1 : null; }
 
-function CandleChart({ bars, levels }: { bars: Bar[]; levels: DashboardData["levels"] }) {
+function CandleChart({ bars, levels, vwap }: { bars: Bar[]; levels: DashboardData["levels"]; vwap: number | null }) {
   const sample = bars.filter((_, index) => index % Math.max(1, Math.floor(bars.length / 80)) === 0).slice(-80);
   const values = sample.flatMap((bar) => [bar.high, bar.low]);
   const high = Math.max(...values, levels.pdh ?? -Infinity, levels.onh);
   const low = Math.min(...values, levels.pdl ?? Infinity, levels.onl);
   const y = (value: number) => 210 - ((value - low) / Math.max(high - low, 1)) * 190;
   const x = (index: number) => 10 + (index / Math.max(sample.length - 1, 1)) * 780;
-  return <div className="candle-chart" role="img" aria-label="Five minute NQ candles with previous day and overnight levels"><svg viewBox="0 0 800 230" preserveAspectRatio="none"><line className="chart-axis" x1="0" y1="215" x2="800" y2="215" />{sample.map((bar, index) => { const rising = bar.close >= bar.open; const cx = x(index); return <g key={bar.timestamp}><line className={rising ? "candle-up" : "candle-down"} x1={cx} x2={cx} y1={y(bar.high)} y2={y(bar.low)} /><rect className={rising ? "candle-up" : "candle-down"} x={cx - 2.5} y={Math.min(y(bar.open), y(bar.close))} width="5" height={Math.max(2, Math.abs(y(bar.open) - y(bar.close)))} /></g>; })}{levels.pdh != null && <line className="level-pdh" x1="0" x2="800" y1={y(levels.pdh)} y2={y(levels.pdh)} />}{levels.pdl != null && <line className="level-pdl" x1="0" x2="800" y1={y(levels.pdl)} y2={y(levels.pdl)} />}</svg><div className="chart-legend"><span><i className="legend-up" /> Up</span><span><i className="legend-down" /> Down</span><span>PDH / PDL</span></div></div>;
+  return <div className="candle-chart" role="img" aria-label="Five minute NQ candles with previous day, overnight, and VWAP levels"><svg viewBox="0 0 800 230" preserveAspectRatio="none"><line className="chart-axis" x1="0" y1="215" x2="800" y2="215" />{sample.map((bar, index) => { const rising = bar.close >= bar.open; const cx = x(index); return <g key={bar.timestamp}><line className={rising ? "candle-up" : "candle-down"} x1={cx} x2={cx} y1={y(bar.high)} y2={y(bar.low)} /><rect className={rising ? "candle-up" : "candle-down"} x={cx - 2.5} y={Math.min(y(bar.open), y(bar.close))} width="5" height={Math.max(2, Math.abs(y(bar.open) - y(bar.close)))} /></g>; })}{levels.pdh != null && <line className="level-pdh" x1="0" x2="800" y1={y(levels.pdh)} y2={y(levels.pdh)} />}{levels.pdl != null && <line className="level-pdl" x1="0" x2="800" y1={y(levels.pdl)} y2={y(levels.pdl)} />}{<line className="level-onh" x1="0" x2="800" y1={y(levels.onh)} y2={y(levels.onh)} />}{<line className="level-onl" x1="0" x2="800" y1={y(levels.onl)} y2={y(levels.onl)} />}{<line className="level-midpoint" x1="0" x2="800" y1={y(levels.overnight_midpoint)} y2={y(levels.overnight_midpoint)} />}{vwap != null && <line className="level-vwap" x1="0" x2="800" y1={y(vwap)} y2={y(vwap)} />}</svg><div className="chart-legend"><span><i className="legend-up" /> Up</span><span><i className="legend-down" /> Down</span><span>PDH / PDL</span><span>ONH / ONL</span><span>VWAP</span></div></div>;
 }
 
 export default function DashboardPage() {
@@ -36,18 +37,19 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [session, levels, bars, bars15, bars4h, bars1d, bias, news] = await Promise.all([
+        const [session, levels, bars, bars15, bars4h, bars1d, features, bias, news] = await Promise.all([
           fetch(`${apiBase}/market/nq/session/${dateForDashboard}`).then((r) => r.ok ? r.json() : null),
           fetch(`${apiBase}/market/nq/levels?session_date=${dateForDashboard}`).then((r) => r.ok ? r.json() : null),
           fetch(`${apiBase}/market/nq/bars?start=${dateForDashboard}&end=2026-09-03&timeframe=5m`).then((r) => r.ok ? r.json() : null),
           fetch(`${apiBase}/market/nq/bars?start=${dateForDashboard}&end=2026-09-03&timeframe=15m`).then((r) => r.ok ? r.json() : null),
           fetch(`${apiBase}/market/nq/bars?start=2026-01-01&end=2026-09-03&timeframe=4h`).then((r) => r.ok ? r.json() : null),
           fetch(`${apiBase}/market/nq/bars?start=2026-01-01&end=2026-09-03&timeframe=1d`).then((r) => r.ok ? r.json() : null),
+          fetch(`${apiBase}/market/nq/features?session_date=${dateForDashboard}`).then((r) => r.ok ? r.json() : null),
           fetch(`${apiBase}/bias/current`).then((r) => r.ok ? r.json() : null),
           fetch(`${apiBase}/news/high-impact?limit=5`).then((r) => r.ok ? r.json() : null),
         ]);
         if (!session || !levels || !bars) throw new Error("Required market data is unavailable");
-        setData({ session, levels, bars: bars.bars ?? [], bars15: bars15?.bars ?? [], bars4h: bars4h?.bars ?? [], bars1d: bars1d?.bars ?? [], bias, news: news?.events ?? [] });
+        setData({ session, levels, bars: bars.bars ?? [], bars15: bars15?.bars ?? [], bars4h: bars4h?.bars ?? [], bars1d: bars1d?.bars ?? [], vwap: features?.features?.vwap ?? null, bias, news: news?.events ?? [] });
       } catch (caught) { setError(caught instanceof Error ? caught.message : "Could not load dashboard"); }
     }
     void load();
@@ -59,7 +61,7 @@ export default function DashboardPage() {
     {data && <>
       <section className="dashboard-top"><div className="bias-card"><p className="eyebrow">DIRECTIONAL BIAS</p><div className="bias-direction">{data.bias?.direction ?? "NO PREDICTION"}</div><p>{data.bias ? `${number(data.bias.confidence * 100)}% confidence · ${data.bias.recommendation}` : "Generate a bias prediction to populate this panel."}</p><span className="badge">No automated execution</span></div><div className="metric-grid dashboard-metrics"><div><span>Last close</span><strong>{number(latest?.close ?? data.session.nq_close)}</strong></div><div><span>Session range</span><strong>{number(data.session.nq_high - data.session.nq_low)}</strong></div><div><span>Overnight return</span><strong>{percent(data.session.overnight_return)}</strong></div><div><span>ATR 14</span><strong>{number(data.session.atr_14)}</strong></div></div></section>
       <section className="query-panel timeframe-panel" aria-labelledby="timeframe-title"><div className="section-heading"><div><p className="eyebrow">MULTI-TIMEFRAME CONTEXT</p><h2 id="timeframe-title">Momentum read-through</h2></div><span className="badge">Stored candles</span></div><div className="timeframe-grid"><div><span>15m session momentum</span><strong>{percent(move(data.bars15))}</strong><small>{data.bars15.length} bars · entry context</small></div><div><span>4H recent momentum</span><strong>{percent(move(data.bars4h.slice(-10)))}</strong><small>{data.bars4h.length} bars · higher-timeframe context</small></div><div><span>Daily recent momentum</span><strong>{percent(move(data.bars1d.slice(-10)))}</strong><small>{data.bars1d.length} bars · directional context</small></div></div></section>
-      <div className="dashboard-grid"><section className="query-panel chart-panel" aria-labelledby="chart-title"><div className="section-heading"><div><p className="eyebrow">PRICE ACTION / 5M</p><h2 id="chart-title">NQ completed session</h2></div><span className="result-date">{data.session.contract.raw_contract_symbol}</span></div><CandleChart bars={data.bars} levels={data.levels} /></section><section className="query-panel" aria-labelledby="levels-title"><p className="eyebrow">LIQUIDITY MAP</p><h2 id="levels-title">Key levels</h2><div className="level-list">{[["PDH", data.levels.pdh], ["PDL", data.levels.pdl], ["ONH", data.levels.onh], ["ONL", data.levels.onl], ["ON midpoint", data.levels.overnight_midpoint]].map(([label, value]) => <div key={String(label)}><span>{label}</span><strong>{number(value as number | null)}</strong></div>)}</div><p className="footnote">Levels are calculated from stored completed-session bars. They are context, not trade signals.</p></section></div>
+      <div className="dashboard-grid"><section className="query-panel chart-panel" aria-labelledby="chart-title"><div className="section-heading"><div><p className="eyebrow">PRICE ACTION / 5M</p><h2 id="chart-title">NQ completed session</h2></div><span className="result-date">{data.session.contract.raw_contract_symbol}</span></div><CandleChart bars={data.bars} levels={data.levels} vwap={data.vwap} /></section><section className="query-panel" aria-labelledby="levels-title"><p className="eyebrow">LIQUIDITY MAP</p><h2 id="levels-title">Key levels</h2><div className="level-list">{[["PDH", data.levels.pdh], ["PDL", data.levels.pdl], ["ONH", data.levels.onh], ["ONL", data.levels.onl], ["ON midpoint", data.levels.overnight_midpoint], ["VWAP", data.vwap]].map(([label, value]) => <div key={String(label)}><span>{label}</span><strong>{number(value as number | null)}</strong></div>)}</div><p className="footnote">Levels are calculated from stored completed-session bars. They are context, not trade signals.</p></section></div>
       <div className="dashboard-grid"><section className="query-panel" aria-labelledby="evidence-title"><p className="eyebrow">EVIDENCE</p><h2 id="evidence-title">Bias context</h2>{data.bias?.evidence?.length ? <ul className="evidence-list">{data.bias.evidence.map((item) => <li key={item}>{item}</li>)}</ul> : <div className="state"><strong>No bias evidence stored.</strong><span>Use the bias API to create an evidence-backed prediction.</span></div>}</section><section className="query-panel" aria-labelledby="news-title"><p className="eyebrow">CATALYSTS</p><h2 id="news-title">High-impact news</h2>{data.news.length ? <ul className="news-list">{data.news.map((item, index) => <li key={`${item.published_at ?? "news"}-${index}`}><strong>{item.headline ?? item.title ?? "Untitled event"}</strong><small>{item.source ?? "Unknown source"}</small></li>)}</ul> : <div className="state"><strong>No recent high-impact items.</strong><span>News is read from the configured 14-day cache.</span></div>}</section></div>
     </>}
   </main>;
