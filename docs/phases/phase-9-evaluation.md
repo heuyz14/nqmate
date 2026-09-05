@@ -43,6 +43,8 @@ The automatic attachment slice adds migration `021_prediction_session_date.sql` 
 
 The daily attachment slice adds `jobs/attach_completed_prediction_outcomes_daily.py` and `ops/com.nqmate.prediction-outcomes-daily.plist`. When installed as a macOS LaunchAgent, it runs at 4:15 PM America/New_York after the daily market update and reuses the bounded, idempotent attachment job. Installation is an operator action; it does not create predictions or infer missing session dates. It is installed and loaded in the current local environment.
 
+The historical replay slice adds `jobs/generate_historical_bias_predictions.py`. It is evaluation-only: it maps stored pre-session overnight return and gap fields to bounded normalized inputs, keeps unavailable technical/relative-strength/macro/news context neutral, persists an explicit session date, and skips dates already represented in the bounded prediction history. It must not be used to replace production bias inputs without separate out-of-sample validation.
+
 The dashboard slice adds the responsive `/evaluation` page. It reads the evaluation, drift, registry, and champion/challenger APIs and presents coverage metrics, confidence calibration, drift statuses, and manual promotion state with loading, error, and empty states. The primary historical market desk is available at `/dashboard`; its visual contract is documented in [dashboard.md](../frontend/dashboard.md). It displays stored completed-session candles and deterministic levels only, with no live-feed or execution claim.
 
 # Acceptance Criteria

@@ -128,6 +128,7 @@ Phase 9 — Evaluation (Phase 8 implementation complete; no ML model promoted; B
 - Primary market dashboard slice added: `/dashboard` displays completed-session 5-minute candles with PDH/PDL overlays, ONH/ONL/midpoint liquidity levels, deterministic session metrics, stored bias evidence, and cached high-impact news; it is historical and has no execution controls.
 - Phase 9 attachment job rerun from `apps/api`: 5 realized outcomes are now attached idempotently. Directional calibration remains empty because the linked prediction is neutral, and neutral predictions are intentionally excluded from scored directional outcomes.
 - Phase 9 daily attachment automation added: `jobs/attach_completed_prediction_outcomes_daily.py` and `ops/com.nqmate.prediction-outcomes-daily.plist` schedule the existing idempotent outcome job for 4:15 PM Eastern; the LaunchAgent is installed and loaded on the current Mac.
+- Phase 9 evaluation replay added: `jobs/generate_historical_bias_predictions.py` creates explicit session-linked evaluation predictions from stored pre-session overnight/gap inputs while keeping unavailable context neutral; it is separate from production bias generation.
 
 ## In Progress
 
