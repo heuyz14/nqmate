@@ -8,6 +8,9 @@ type DashboardData = {
   session: { session_date: string; nq_open: number; nq_high: number; nq_low: number; nq_close: number; overnight_return: number | null; overnight_range: number; atr_14: number | null; contract: { raw_contract_symbol: string } };
   levels: { pdh: number | null; pdl: number | null; onh: number; onl: number; overnight_midpoint: number };
   bars: Bar[];
+  bars15: Bar[];
+  bars4h: Bar[];
+  bars1d: Bar[];
   bias: { direction: string; confidence: number; recommendation: string; catalyst_risk: string | null; evidence?: string[] } | null;
   news: Array<{ headline?: string; title?: string; source?: string; published_at?: string; nq_relevance?: number }>;
 };
@@ -15,6 +18,7 @@ type DashboardData = {
 const dateForDashboard = "2026-09-02";
 function number(value: number | null | undefined) { return value == null ? "—" : value.toLocaleString(undefined, { maximumFractionDigits: 2 }); }
 function percent(value: number | null | undefined) { return value == null ? "—" : `${value >= 0 ? "+" : ""}${(value * 100).toFixed(2)}%`; }
+function move(bars: Bar[]) { const first = bars[0]?.close; const last = bars.at(-1)?.close; return first && last ? last / first - 1 : null; }
 
 function CandleChart({ bars, levels }: { bars: Bar[]; levels: DashboardData["levels"] }) {
   const sample = bars.filter((_, index) => index % Math.max(1, Math.floor(bars.length / 80)) === 0).slice(-80);
@@ -32,15 +36,18 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [session, levels, bars, bias, news] = await Promise.all([
+        const [session, levels, bars, bars15, bars4h, bars1d, bias, news] = await Promise.all([
           fetch(`${apiBase}/market/nq/session/${dateForDashboard}`).then((r) => r.ok ? r.json() : null),
           fetch(`${apiBase}/market/nq/levels?session_date=${dateForDashboard}`).then((r) => r.ok ? r.json() : null),
           fetch(`${apiBase}/market/nq/bars?start=${dateForDashboard}&end=2026-09-03&timeframe=5m`).then((r) => r.ok ? r.json() : null),
+          fetch(`${apiBase}/market/nq/bars?start=${dateForDashboard}&end=2026-09-03&timeframe=15m`).then((r) => r.ok ? r.json() : null),
+          fetch(`${apiBase}/market/nq/bars?start=2026-01-01&end=2026-09-03&timeframe=4h`).then((r) => r.ok ? r.json() : null),
+          fetch(`${apiBase}/market/nq/bars?start=2026-01-01&end=2026-09-03&timeframe=1d`).then((r) => r.ok ? r.json() : null),
           fetch(`${apiBase}/bias/current`).then((r) => r.ok ? r.json() : null),
           fetch(`${apiBase}/news/high-impact?limit=5`).then((r) => r.ok ? r.json() : null),
         ]);
         if (!session || !levels || !bars) throw new Error("Required market data is unavailable");
-        setData({ session, levels, bars: bars.bars ?? [], bias, news: news?.events ?? [] });
+        setData({ session, levels, bars: bars.bars ?? [], bars15: bars15?.bars ?? [], bars4h: bars4h?.bars ?? [], bars1d: bars1d?.bars ?? [], bias, news: news?.events ?? [] });
       } catch (caught) { setError(caught instanceof Error ? caught.message : "Could not load dashboard"); }
     }
     void load();
@@ -51,6 +58,7 @@ export default function DashboardPage() {
     {!data && !error && <div className="state" role="status" aria-busy="true"><strong>Loading market context…</strong><span>Reading completed-session candles and evidence.</span></div>}
     {data && <>
       <section className="dashboard-top"><div className="bias-card"><p className="eyebrow">DIRECTIONAL BIAS</p><div className="bias-direction">{data.bias?.direction ?? "NO PREDICTION"}</div><p>{data.bias ? `${number(data.bias.confidence * 100)}% confidence · ${data.bias.recommendation}` : "Generate a bias prediction to populate this panel."}</p><span className="badge">No automated execution</span></div><div className="metric-grid dashboard-metrics"><div><span>Last close</span><strong>{number(latest?.close ?? data.session.nq_close)}</strong></div><div><span>Session range</span><strong>{number(data.session.nq_high - data.session.nq_low)}</strong></div><div><span>Overnight return</span><strong>{percent(data.session.overnight_return)}</strong></div><div><span>ATR 14</span><strong>{number(data.session.atr_14)}</strong></div></div></section>
+      <section className="query-panel timeframe-panel" aria-labelledby="timeframe-title"><div className="section-heading"><div><p className="eyebrow">MULTI-TIMEFRAME CONTEXT</p><h2 id="timeframe-title">Momentum read-through</h2></div><span className="badge">Stored candles</span></div><div className="timeframe-grid"><div><span>15m session momentum</span><strong>{percent(move(data.bars15))}</strong><small>{data.bars15.length} bars · entry context</small></div><div><span>4H recent momentum</span><strong>{percent(move(data.bars4h.slice(-10)))}</strong><small>{data.bars4h.length} bars · higher-timeframe context</small></div><div><span>Daily recent momentum</span><strong>{percent(move(data.bars1d.slice(-10)))}</strong><small>{data.bars1d.length} bars · directional context</small></div></div></section>
       <div className="dashboard-grid"><section className="query-panel chart-panel" aria-labelledby="chart-title"><div className="section-heading"><div><p className="eyebrow">PRICE ACTION / 5M</p><h2 id="chart-title">NQ completed session</h2></div><span className="result-date">{data.session.contract.raw_contract_symbol}</span></div><CandleChart bars={data.bars} levels={data.levels} /></section><section className="query-panel" aria-labelledby="levels-title"><p className="eyebrow">LIQUIDITY MAP</p><h2 id="levels-title">Key levels</h2><div className="level-list">{[["PDH", data.levels.pdh], ["PDL", data.levels.pdl], ["ONH", data.levels.onh], ["ONL", data.levels.onl], ["ON midpoint", data.levels.overnight_midpoint]].map(([label, value]) => <div key={String(label)}><span>{label}</span><strong>{number(value as number | null)}</strong></div>)}</div><p className="footnote">Levels are calculated from stored completed-session bars. They are context, not trade signals.</p></section></div>
       <div className="dashboard-grid"><section className="query-panel" aria-labelledby="evidence-title"><p className="eyebrow">EVIDENCE</p><h2 id="evidence-title">Bias context</h2>{data.bias?.evidence?.length ? <ul className="evidence-list">{data.bias.evidence.map((item) => <li key={item}>{item}</li>)}</ul> : <div className="state"><strong>No bias evidence stored.</strong><span>Use the bias API to create an evidence-backed prediction.</span></div>}</section><section className="query-panel" aria-labelledby="news-title"><p className="eyebrow">CATALYSTS</p><h2 id="news-title">High-impact news</h2>{data.news.length ? <ul className="news-list">{data.news.map((item, index) => <li key={`${item.published_at ?? "news"}-${index}`}><strong>{item.headline ?? item.title ?? "Untitled event"}</strong><small>{item.source ?? "Unknown source"}</small></li>)}</ul> : <div className="state"><strong>No recent high-impact items.</strong><span>News is read from the configured 14-day cache.</span></div>}</section></div>
     </>}
