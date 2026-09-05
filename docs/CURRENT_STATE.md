@@ -6,7 +6,7 @@ Always read this file at session start. It is the concise handoff for what exist
 
 ## Current Phase
 
-Phase 9 — Evaluation (Phase 8 implementation complete; no ML model promoted; BLS calendar live access remains network-dependent)
+Phase 9 — Evaluation (implementation complete; evidence collection continues; no ML model promoted)
 
 ## Completed
 
@@ -132,12 +132,12 @@ Phase 9 — Evaluation (Phase 8 implementation complete; no ML model promoted; B
 
 ## In Progress
 
-Phase 5 acceptance is complete. Phase 6 implementation is complete for the available source boundaries, semantic relationships, deterministic regime classification, bounded graph retrieval, and outcome/strategy traversal contracts. Phase 7 implementation is complete for structured strategy CRUD, setup detection, performance calculation, regime-conditioned best/worst statistics, outcome persistence, the strategy dashboard, historical FVG/inversion detection, and the PB assessment endpoint; migrations `014`–`017` are applied and live strategy read verification found one active strategy. Phase 8 implementation is complete with leakage-aware baselines, multi-horizon targets, boosting comparisons, calibration metrics, dataset/model metadata, historical candle horizons, and multi-window validation; no model passed the promotion gate. Phase 9 is now the active evaluation phase. Five outcomes are attached to the available session-linked prediction, but it is neutral so no directional outcomes are scored yet. The literal Phase 6 strategy-evidence query remains empty until strategy performance relationships exist. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The primary market dashboard is available at `/dashboard` for completed historical sessions; it is not a live chart. September 3 remains incomplete/current until its session closes.
+Phase 5 acceptance is complete. Phase 6 implementation is complete for the available source boundaries, semantic relationships, deterministic regime classification, bounded graph retrieval, and outcome/strategy traversal contracts. Phase 7 implementation is complete for structured strategy CRUD, setup detection, performance calculation, regime-conditioned best/worst statistics, outcome persistence, the strategy dashboard, historical FVG/inversion detection, and the PB assessment endpoint; migrations `014`–`017` are applied and live strategy read verification found one active strategy. Phase 8 implementation is complete with leakage-aware baselines, multi-horizon targets, boosting comparisons, calibration metrics, dataset/model metadata, historical candle horizons, and multi-window validation; no model passed the promotion gate. Phase 9 implementation is complete with reconstruction, attachment, scored outcomes, calibration, drift, registry/comparison reporting, observability, replay tooling, scheduled attachment, and evaluation UI. Current evidence is intentionally insufficient for model promotion: 10 scored outcomes show wide calibration gaps and drift in the replayed overnight/gap inputs. The literal Phase 6 strategy-evidence query remains empty until strategy performance relationships exist. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The primary market dashboard is available at `/dashboard` for completed historical sessions; it is not a live chart. September 3 remains incomplete/current until its session closes.
 
 ## Next
 
-1. Add scored prediction outcomes so evaluation calibration has usable historical samples
-2. Extend the historical dashboard with additional evidence only when backed by existing API data
+1. Collect more point-in-time predictions before interpreting calibration or drift
+2. Add dashboard HTF/15m/entry visuals only when backed by available deterministic API data
 
 ## Important Decisions
 
