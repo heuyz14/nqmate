@@ -79,6 +79,9 @@ h3 { font-size: 16px; margin: 0 0 20px; }
 .pb-summary strong { color: var(--accent); font-size: 18px; }
 .pb-summary span { color: var(--muted); font-size: 12px; }
 .pb-metrics { grid-template-columns: repeat(4, 1fr); margin-bottom: 0; }
+.horizon-panel { margin-bottom: 18px; }
+.horizon-grid { grid-template-columns: repeat(6, 1fr); margin-bottom: 0; }
+.horizon-grid small { color: var(--muted); display: block; font-size: 10px; margin-top: 6px; }
 .candle-chart { background: #0c131c; border: 1px solid var(--line); padding: 14px; }
 .candle-chart svg { display: block; height: 280px; width: 100%; }
 .chart-axis { stroke: var(--line); }
@@ -113,4 +116,5 @@ tbody tr:last-child td { border-bottom: 0; }
 @media (max-width: 760px) { .strategy-layout, .metric-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 760px) { .dashboard-top, .dashboard-grid { grid-template-columns: 1fr; } .header-links { align-items: flex-start; } .candle-chart svg { height: 220px; } }
 @media (max-width: 760px) { .timeframe-grid { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .horizon-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 420px) { .form-grid { grid-template-columns: 1fr; } .query-panel { padding: 18px; } }

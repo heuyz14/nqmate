@@ -10,6 +10,8 @@ The `/evaluation` page is the Phase 9 evaluation desk. It reads the bounded ML r
 
 The `/dashboard` page is the primary completed-session market desk. It displays a 5-minute SVG candle view with PDH/PDL/ONH/ONL/overnight midpoint/VWAP overlays, deterministic session metrics, stored bias evidence, cached high-impact news, and stored 15m/4H/daily momentum read-through. It is explicitly historical and does not imply live market data or automated execution.
 
+The `/evaluation` page exposes overall and per-horizon directional success rates from scored outcomes; small samples and calibration gaps remain visible rather than being presented as production performance.
+
 The completed-session date picker reloads the same bounded API views for another stored session. It does not query an in-progress session or infer missing data.
 
 The PB assessment panel calls `GET /strategies/{id}/assess-session` for the active strategy and selected session. The backend constructs point-in-time HTF context, ONH/ONL liquidity events, and post-liquidity LTF inversions from stored candles. It displays the deterministic status, entry/stop/targets, risk/reward, and missing evidence; it never forces a setup or submits an order.

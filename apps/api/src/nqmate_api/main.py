@@ -776,6 +776,7 @@ async def evaluate_bias_history(
     if limit < 1 or limit > 1000:
         raise HTTPException(status_code=422, detail="limit must be between 1 and 1000")
     records: list[dict[str, Any]] = []
+    all_outcomes: list[dict[str, Any]] = []
     attached_outcome_count = 0
     predictions = repository.history(limit)
     prediction_ids = [str(item["id"]) for item in predictions if item.get("id")]
@@ -788,11 +789,16 @@ async def evaluate_bias_history(
             continue
         for outcome in outcomes_by_prediction.get(str(prediction_id), ()):
             attached_outcome_count += 1
+            all_outcomes.append(outcome)
             if isinstance(outcome.get("correct"), bool):
                 records.append({"confidence": prediction.get("confidence"), "correct": outcome["correct"]})
+    summary = summarize_prediction_outcomes(all_outcomes)
+    summary["evaluated_size"] = float(len(records))
+    summary["accuracy"] = sum(bool(item["correct"]) for item in records) / len(records) if records else None
     return {"prediction_count": len(predictions), "outcome_count": attached_outcome_count,
             "scored_outcome_count": len(records),
-            "confidence_calibration": confidence_calibration(records)}
+            "accuracy": summary["accuracy"], "evaluated_size": summary["evaluated_size"],
+            "horizons": summary["horizons"], "confidence_calibration": confidence_calibration(records)}
 
 
 @app.get("/api/v1/bias/drift", tags=["bias"])
