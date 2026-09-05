@@ -98,6 +98,10 @@ class BiasApiTests(unittest.TestCase):
             app.dependency_overrides.clear()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["outcome_count"], 1)
+        self.assertEqual(response.json()["scored_outcome_count"], 1)
+        self.assertEqual(response.json()["accuracy"], 1.0)
+        self.assertEqual(response.json()["evaluated_size"], 1.0)
+        self.assertEqual(response.json()["horizons"]["return_5m"]["accuracy"], 1.0)
         self.assertEqual(response.json()["confidence_calibration"][0]["observed_accuracy"], 1.0)
 
     def test_evaluation_endpoint_returns_versioned_horizon_summary(self) -> None:
