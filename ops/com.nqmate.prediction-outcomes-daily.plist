@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.nqmate.prediction-outcomes-daily</string>
+    <key>WorkingDirectory</key>
+    <string>/Users/bubba/ProjectPort/nqmate</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/bubba/ProjectPort/nqmate/apps/api/.venv/bin/python</string>
+        <string>-m</string>
+        <string>jobs.attach_completed_prediction_outcomes_daily</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PYTHONPATH</key>
+        <string>/Users/bubba/ProjectPort/nqmate/apps/api/src</string>
+    </dict>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>16</integer>
+        <key>Minute</key>
+        <integer>15</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/Users/bubba/ProjectPort/nqmate/var/log/prediction-outcomes-daily.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/bubba/ProjectPort/nqmate/var/log/prediction-outcomes-daily.error.log</string>
+</dict>
+</plist>

@@ -127,6 +127,7 @@ Phase 9 — Evaluation (Phase 8 implementation complete; no ML model promoted; B
 - Phase 9 dashboard slice added: responsive `/evaluation` page displays coverage, calibration, drift, model registry, and gated promotion evidence with explicit loading/error/empty states; Next.js production build passes.
 - Primary market dashboard slice added: `/dashboard` displays completed-session 5-minute candles with PDH/PDL overlays, ONH/ONL/midpoint liquidity levels, deterministic session metrics, stored bias evidence, and cached high-impact news; it is historical and has no execution controls.
 - Phase 9 attachment job rerun from `apps/api`: 5 realized outcomes are now attached idempotently. Directional calibration remains empty because the linked prediction is neutral, and neutral predictions are intentionally excluded from scored directional outcomes.
+- Phase 9 daily attachment automation added: `jobs/attach_completed_prediction_outcomes_daily.py` and `ops/com.nqmate.prediction-outcomes-daily.plist` schedule the existing idempotent outcome job for 4:15 PM Eastern; LaunchAgent installation is not performed automatically.
 
 ## In Progress
 
