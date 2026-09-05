@@ -74,6 +74,11 @@ h3 { font-size: 16px; margin: 0 0 20px; }
 .timeframe-grid div { border-top: 1px solid var(--line); padding-top: 12px; }
 .timeframe-grid span, .timeframe-grid small { color: var(--muted); display: block; font-size: 11px; }
 .timeframe-grid strong { display: block; font-size: 22px; margin: 9px 0 6px; }
+.pb-panel { margin-bottom: 18px; }
+.pb-summary { align-items: baseline; border-top: 1px solid var(--line); display: flex; gap: 14px; padding-top: 14px; }
+.pb-summary strong { color: var(--accent); font-size: 18px; }
+.pb-summary span { color: var(--muted); font-size: 12px; }
+.pb-metrics { grid-template-columns: repeat(4, 1fr); margin-bottom: 0; }
 .candle-chart { background: #0c131c; border: 1px solid var(--line); padding: 14px; }
 .candle-chart svg { display: block; height: 280px; width: 100%; }
 .chart-axis { stroke: var(--line); }

@@ -32,6 +32,7 @@ from nqmate_api.strategies.performance import calculate_performance
 from nqmate_api.strategies.setups import SetupOccurrence
 from nqmate_api.strategies.setups_repository import SetupRepository, SupabaseSetupRepository
 from nqmate_api.strategies.pb_blake import HtfContext, Inversion, LiquidityEvent, assess_pb_setup
+from nqmate_api.strategies.pb_blake_historical import build_pb_inputs
 
 app = FastAPI(title="NQmate API", version="0.1.0")
 app.add_middleware(
@@ -590,6 +591,47 @@ async def assess_strategy(
         "targets": list(result.targets),
         "riskRewards": list(result.risk_rewards),
         "missing": list(result.missing),
+        "persistedSetup": persisted,
+    }
+
+
+@app.get("/api/v1/strategies/{strategy_id}/assess-session", tags=["strategies"])
+async def assess_historical_session(
+    strategy_id: str,
+    session_date: date,
+    analyzed_at: datetime | None = None,
+    strategy_repository: StrategyRepository = Depends(get_strategy_repository),
+    market_repository: MarketRepository = Depends(get_market_repository),
+    setup_repository: SetupRepository = Depends(get_setup_repository),
+) -> dict[str, object]:
+    """Build and assess PB evidence from stored candles at a historical timestamp."""
+    if strategy_repository.get(strategy_id) is None:
+        raise HTTPException(status_code=404, detail="Strategy not found")
+    session = market_repository.get_session(session_date)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Market session not found")
+    observed_at = analyzed_at or datetime.combine(session_date, REGULAR_END, EASTERN)
+    start = datetime.combine(session_date - timedelta(days=7), time(18), EASTERN)
+    bars = market_repository.get_bars(start.astimezone(timezone.utc), observed_at.astimezone(timezone.utc))
+    inputs = build_pb_inputs(session, bars, observed_at)
+    result = assess_pb_setup(
+        inputs["contexts"], inputs["liquidity"], inputs["inversions"],
+        inputs["entry"], inputs["stop"], inputs["targets"], observed_at,
+    )
+    persisted = None
+    if result.status == "VALID" and result.inversion_timeframe:
+        persisted = setup_repository.upsert(SetupOccurrence(
+            strategy_id, session_date.isoformat(), observed_at,
+            ("pb_blake_valid", f"inversion_{result.inversion_timeframe}"),
+        ))
+    return {
+        "strategyId": strategy_id, "sessionDate": session_date.isoformat(), "analyzedAt": observed_at.isoformat(),
+        "status": result.status, "direction": result.direction, "inversionTimeframe": result.inversion_timeframe,
+        "entry": result.entry, "stop": result.stop, "stopDistance": result.stop_distance,
+        "targets": list(result.targets), "riskRewards": list(result.risk_rewards), "missing": list(result.missing),
+        "contexts": [{"timeframe": item.timeframe, "direction": item.direction, "keyLevelValid": item.key_level_valid} for item in inputs["contexts"]],
+        "liquidityEvent": {"sweptLevel": inputs["liquidity"].swept_level, "price": inputs["liquidity"].price, "sweptAt": inputs["liquidity"].swept_at.isoformat()} if inputs["liquidity"] else None,
+        "inversions": [{"timeframe": item.timeframe, "direction": item.direction, "lower": item.lower, "upper": item.upper, "confirmedAt": item.confirmed_at.isoformat()} for item in inputs["inversions"]],
         "persistedSetup": persisted,
     }
 

@@ -12,6 +12,8 @@ The `/dashboard` page is the primary completed-session market desk. It displays 
 
 The completed-session date picker reloads the same bounded API views for another stored session. It does not query an in-progress session or infer missing data.
 
+The PB assessment panel calls `GET /strategies/{id}/assess-session` for the active strategy and selected session. The backend constructs point-in-time HTF context, ONH/ONL liquidity events, and post-liquidity LTF inversions from stored candles. It displays the deterministic status, entry/stop/targets, risk/reward, and missing evidence; it never forces a setup or submits an order.
+
 The page uses `NEXT_PUBLIC_API_BASE_URL` and falls back to `http://localhost:8000/api/v1` for local development. Loading, API error, no-outcome, no-snapshot, and no-model states are explicit. It must not display secrets or imply that an eligible challenger is active.
 
 ## Pages

@@ -1,8 +1,9 @@
 import unittest
+from datetime import date
 
 from fastapi.testclient import TestClient
 
-from nqmate_api.main import app, get_strategy_repository, get_outcome_repository, get_setup_repository
+from nqmate_api.main import app, get_strategy_repository, get_outcome_repository, get_setup_repository, get_market_repository
 
 
 class StrategyApiTests(unittest.TestCase):
@@ -91,3 +92,24 @@ class StrategyApiTests(unittest.TestCase):
         self.assertEqual(response.json()["status"], "VALID")
         self.assertEqual(response.json()["inversionTimeframe"], "5m")
         self.assertIsNotNone(setup_repository.saved)
+
+    def test_historical_pb_assessment_fails_closed_without_stored_liquidity(self) -> None:
+        class FakeStrategyRepository:
+            def get(self, strategy_id): return {"id": strategy_id, "active": True}
+
+        class FakeMarketRepository:
+            def get_session(self, session_date):
+                from nqmate_api.market.models import MarketContract, MarketSession
+                return MarketSession(session_date, 100, 105, 95, 102, 99, 101, 98, 100, 104, 96, 100, 0, 0, 0, 3, 2, MarketContract("NQ", "NQU6", "NQ_CONT", date(2026, 9, 18), None))
+            def get_bars(self, start, end, symbol=None): return []
+
+        app.dependency_overrides[get_strategy_repository] = lambda: FakeStrategyRepository()
+        app.dependency_overrides[get_market_repository] = lambda: FakeMarketRepository()
+        app.dependency_overrides[get_setup_repository] = lambda: object()
+        try:
+            response = TestClient(app).get("/api/v1/strategies/strategy-1/assess-session?session_date=2026-09-02")
+        finally:
+            app.dependency_overrides.clear()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["status"], "NO_SETUP")
+        self.assertIn("identifiable liquidity event", response.json()["missing"])

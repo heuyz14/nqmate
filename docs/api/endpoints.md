@@ -45,6 +45,8 @@ News reads return normalized event records backed by `news_articles` and `news_e
 
 `jobs/detect_setups.py` detects supported strategy conditions from stored session bars and upserts occurrences into `strategy_setups`. Apply migration `015_strategy_setups.sql` before running it; unsupported conditions fail closed. PB historical evidence can be assessed through `POST /strategies/{id}/assess`.
 
+`GET /strategies/{id}/assess-session?session_date=...` builds a point-in-time PB assessment from stored session and candle data. It derives available 4H/daily context, ONH/ONL liquidity attacks, and post-liquidity 1m/2m/3m/5m inversions; missing or contradictory evidence returns a conservative non-valid status. It does not execute trades.
+
 `strategy_outcomes` is the completed-outcome source for performance statistics. Migration `016_strategy_outcomes.sql` is required before outcome writes or live performance reads.
 
 `POST /bias/generate` also accepts optional `analogueBullRate`, `analogueAvg30mReturn`, `analogueAvg60mReturn`, and `analogueSampleSize` fields. These values enrich deterministic evidence and cases but do not alter the Phase 4 rules score or confidence calculation.
