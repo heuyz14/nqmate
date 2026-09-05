@@ -16,10 +16,10 @@ type DashboardData = {
   news: Array<{ headline?: string; title?: string; source?: string; published_at?: string; nq_relevance?: number }>;
 };
 
-const dateForDashboard = "2026-09-02";
 function number(value: number | null | undefined) { return value == null ? "—" : value.toLocaleString(undefined, { maximumFractionDigits: 2 }); }
 function percent(value: number | null | undefined) { return value == null ? "—" : `${value >= 0 ? "+" : ""}${(value * 100).toFixed(2)}%`; }
 function move(bars: Bar[]) { const first = bars[0]?.close; const last = bars.at(-1)?.close; return first && last ? last / first - 1 : null; }
+function followingDate(date: string) { const next = new Date(`${date}T12:00:00Z`); next.setUTCDate(next.getUTCDate() + 1); return next.toISOString().slice(0, 10); }
 
 function CandleChart({ bars, levels, vwap }: { bars: Bar[]; levels: DashboardData["levels"]; vwap: number | null }) {
   const sample = bars.filter((_, index) => index % Math.max(1, Math.floor(bars.length / 80)) === 0).slice(-80);
@@ -32,19 +32,23 @@ function CandleChart({ bars, levels, vwap }: { bars: Bar[]; levels: DashboardDat
 }
 
 export default function DashboardPage() {
+  const [selectedDate, setSelectedDate] = useState("2026-09-02");
   const [data, setData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     async function load() {
+      const endDate = followingDate(selectedDate);
+      setData(null);
+      setError(null);
       try {
         const [session, levels, bars, bars15, bars4h, bars1d, features, bias, news] = await Promise.all([
-          fetch(`${apiBase}/market/nq/session/${dateForDashboard}`).then((r) => r.ok ? r.json() : null),
-          fetch(`${apiBase}/market/nq/levels?session_date=${dateForDashboard}`).then((r) => r.ok ? r.json() : null),
-          fetch(`${apiBase}/market/nq/bars?start=${dateForDashboard}&end=2026-09-03&timeframe=5m`).then((r) => r.ok ? r.json() : null),
-          fetch(`${apiBase}/market/nq/bars?start=${dateForDashboard}&end=2026-09-03&timeframe=15m`).then((r) => r.ok ? r.json() : null),
-          fetch(`${apiBase}/market/nq/bars?start=2026-01-01&end=2026-09-03&timeframe=4h`).then((r) => r.ok ? r.json() : null),
-          fetch(`${apiBase}/market/nq/bars?start=2026-01-01&end=2026-09-03&timeframe=1d`).then((r) => r.ok ? r.json() : null),
-          fetch(`${apiBase}/market/nq/features?session_date=${dateForDashboard}`).then((r) => r.ok ? r.json() : null),
+          fetch(`${apiBase}/market/nq/session/${selectedDate}`).then((r) => r.ok ? r.json() : null),
+          fetch(`${apiBase}/market/nq/levels?session_date=${selectedDate}`).then((r) => r.ok ? r.json() : null),
+          fetch(`${apiBase}/market/nq/bars?start=${selectedDate}&end=${endDate}&timeframe=5m`).then((r) => r.ok ? r.json() : null),
+          fetch(`${apiBase}/market/nq/bars?start=${selectedDate}&end=${endDate}&timeframe=15m`).then((r) => r.ok ? r.json() : null),
+          fetch(`${apiBase}/market/nq/bars?start=2026-01-01&end=${endDate}&timeframe=4h`).then((r) => r.ok ? r.json() : null),
+          fetch(`${apiBase}/market/nq/bars?start=2026-01-01&end=${endDate}&timeframe=1d`).then((r) => r.ok ? r.json() : null),
+          fetch(`${apiBase}/market/nq/features?session_date=${selectedDate}`).then((r) => r.ok ? r.json() : null),
           fetch(`${apiBase}/bias/current`).then((r) => r.ok ? r.json() : null),
           fetch(`${apiBase}/news/high-impact?limit=5`).then((r) => r.ok ? r.json() : null),
         ]);
@@ -53,9 +57,9 @@ export default function DashboardPage() {
       } catch (caught) { setError(caught instanceof Error ? caught.message : "Could not load dashboard"); }
     }
     void load();
-  }, []);
+  }, [selectedDate]);
   const latest = useMemo(() => data?.bars.at(-1), [data]);
-  return <main className="shell"><header className="page-header"><div><p className="eyebrow">NQMATE / MARKET DESK</p><h1>NQ dashboard</h1><p className="subtitle">Completed-session market context, deterministic levels, and evidence-backed bias.</p></div><div className="header-links"><span className="badge">Historical / {dateForDashboard}</span><a className="quiet-link" href="/">Back to overview</a></div></header>
+  return <main className="shell"><header className="page-header"><div><p className="eyebrow">NQMATE / MARKET DESK</p><h1>NQ dashboard</h1><p className="subtitle">Completed-session market context, deterministic levels, and evidence-backed bias.</p></div><div className="header-links"><label className="date-picker">Completed session<input type="date" value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} /></label><span className="badge">Historical / {selectedDate}</span><a className="quiet-link" href="/">Back to overview</a></div></header>
     {error && <div className="state error" role="alert"><strong>Dashboard data unavailable.</strong><span>{error}. Check that FastAPI is running and the session is populated.</span></div>}
     {!data && !error && <div className="state" role="status" aria-busy="true"><strong>Loading market context…</strong><span>Reading completed-session candles and evidence.</span></div>}
     {data && <>

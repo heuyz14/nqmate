@@ -10,6 +10,8 @@ The `/evaluation` page is the Phase 9 evaluation desk. It reads the bounded ML r
 
 The `/dashboard` page is the primary completed-session market desk. It displays a 5-minute SVG candle view with PDH/PDL/ONH/ONL/overnight midpoint/VWAP overlays, deterministic session metrics, stored bias evidence, cached high-impact news, and stored 15m/4H/daily momentum read-through. It is explicitly historical and does not imply live market data or automated execution.
 
+The completed-session date picker reloads the same bounded API views for another stored session. It does not query an in-progress session or infer missing data.
+
 The page uses `NEXT_PUBLIC_API_BASE_URL` and falls back to `http://localhost:8000/api/v1` for local development. Loading, API error, no-outcome, no-snapshot, and no-model states are explicit. It must not display secrets or imply that an eligible challenger is active.
 
 ## Pages
