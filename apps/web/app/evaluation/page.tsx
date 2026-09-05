@@ -24,8 +24,8 @@ export default function EvaluationPage() {
       try {
         const [models, evaluation, drift, comparisons] = await Promise.all([
           fetch(`${apiBase}/ml/models`).then((response) => response.json()),
-          fetch(`${apiBase}/bias/evaluation`).then((response) => response.json()),
-          fetch(`${apiBase}/bias/drift?limit=100`).then((response) => response.json()),
+          fetch(`${apiBase}/bias/evaluation?limit=1000`).then((response) => response.json()),
+          fetch(`${apiBase}/bias/drift?limit=1000`).then((response) => response.json()),
           fetch(`${apiBase}/ml/models/comparison`).then((response) => response.json()),
         ]);
         setData({ models: models.models ?? [], evaluation, drift, comparisons: comparisons.comparisons ?? {} });

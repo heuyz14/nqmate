@@ -39,6 +39,8 @@ News reads return normalized event records backed by `news_articles` and `news_e
 
 `GET /knowledge/regimes` accepts optional independent ontology filters (`overnight_direction`, `overnight_volatility`, `gap`, `location`, `yield_regime`, and `catalyst_regime`) plus a bounded limit, and returns graph-backed semantic sessions. It does not read raw candles.
 
+Phase 9 evaluation and drift reads accept a bounded `limit` up to 1,000 so historical reports can cover the complete stored replay sample without becoming unbounded queries.
+
 `GET /knowledge/strategy-evidence` uses the same filters to traverse `Strategy-[:PERFORMS_WELL_IN]->MarketRegime` and returns bounded strategy statistics. It returns an empty list until Phase 7 strategy memory creates strategy records.
 
 `POST /strategies` validates and stores structured strategy rules. `GET /strategies` returns saved strategies and accepts an optional `active` filter. `GET /strategies/{id}` reads one strategy, `PATCH /strategies/{id}` replaces its structured rules, and `DELETE /strategies/{id}` safely deactivates it without deleting history. `POST /strategies/{id}/assess` evaluates an explicit historical PB Blake / ICT evidence packet and persists only `VALID` setup occurrences; `DEVELOPING` and `NO_SETUP` results are returned without creating setups. `GET /strategies/{id}/performance` returns deterministic statistics from completed strategy outcomes. Migrations `014_strategies.sql`, `015_strategy_setups.sql`, and `016_strategy_outcomes.sql` are applied.

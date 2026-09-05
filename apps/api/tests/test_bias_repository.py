@@ -24,3 +24,15 @@ class BiasRepositoryTests(unittest.TestCase):
         repository.create(BiasSnapshot(0, 0, 0, 0, 0, 0, None), BiasResult("NEUTRAL", 0, 0.5, "WAIT", None), date(2026, 9, 2))
         payload = client.table.return_value.insert.call_args.args[0]
         self.assertEqual(payload["session_date"], "2026-09-02")
+
+    def test_list_outcomes_for_predictions_batches_and_groups_rows(self) -> None:
+        client = MagicMock()
+        client.table.return_value.select.return_value.in_.return_value.order.return_value.order.return_value.execute.return_value.data = [
+            {"prediction_id": "p1", "horizon": "return_5m"},
+            {"prediction_id": "p2", "horizon": "return_5m"},
+        ]
+
+        result = SupabaseBiasRepository(client).list_outcomes_for_predictions(["p1", "p2"])
+
+        self.assertEqual(result["p1"][0]["horizon"], "return_5m")
+        client.table.return_value.select.return_value.in_.assert_called_once_with("prediction_id", ["p1", "p2"])

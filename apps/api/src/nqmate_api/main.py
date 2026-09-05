@@ -757,11 +757,14 @@ async def get_bias_observability(
     limit: int = 100,
     repository: BiasRepository = Depends(get_bias_repository),
 ) -> dict[str, Any]:
-    if limit < 1 or limit > 100:
-        raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
+    if limit < 1 or limit > 1000:
+        raise HTTPException(status_code=422, detail="limit must be between 1 and 1000")
     predictions = list(repository.history(limit))
-    outcome_counts = {str(item["id"]): len(repository.list_outcomes(str(item["id"])))
-                      for item in predictions if item.get("id")}
+    prediction_ids = [str(item["id"]) for item in predictions if item.get("id")]
+    outcomes_by_prediction = repository.list_outcomes_for_predictions(prediction_ids) if hasattr(repository, "list_outcomes_for_predictions") else {
+        prediction_id: repository.list_outcomes(prediction_id) for prediction_id in prediction_ids
+    }
+    outcome_counts = {prediction_id: len(outcomes) for prediction_id, outcomes in outcomes_by_prediction.items()}
     return observability_summary(predictions, outcome_counts)
 
 
@@ -770,16 +773,20 @@ async def evaluate_bias_history(
     limit: int = 100,
     repository: BiasRepository = Depends(get_bias_repository),
 ) -> dict[str, Any]:
-    if limit < 1 or limit > 100:
-        raise HTTPException(status_code=422, detail="limit must be between 1 and 100")
+    if limit < 1 or limit > 1000:
+        raise HTTPException(status_code=422, detail="limit must be between 1 and 1000")
     records: list[dict[str, Any]] = []
     attached_outcome_count = 0
     predictions = repository.history(limit)
+    prediction_ids = [str(item["id"]) for item in predictions if item.get("id")]
+    outcomes_by_prediction = repository.list_outcomes_for_predictions(prediction_ids) if hasattr(repository, "list_outcomes_for_predictions") else {
+        prediction_id: repository.list_outcomes(prediction_id) for prediction_id in prediction_ids
+    }
     for prediction in predictions:
         prediction_id = prediction.get("id")
         if not prediction_id:
             continue
-        for outcome in repository.list_outcomes(str(prediction_id)):
+        for outcome in outcomes_by_prediction.get(str(prediction_id), ()):
             attached_outcome_count += 1
             if isinstance(outcome.get("correct"), bool):
                 records.append({"confidence": prediction.get("confidence"), "correct": outcome["correct"]})
@@ -793,8 +800,8 @@ async def get_bias_drift(
     limit: int = 100,
     repository: BiasRepository = Depends(get_bias_repository),
 ) -> dict[str, Any]:
-    if limit < 4 or limit > 100:
-        raise HTTPException(status_code=422, detail="limit must be between 4 and 100")
+    if limit < 4 or limit > 1000:
+        raise HTTPException(status_code=422, detail="limit must be between 4 and 1000")
     predictions = list(repository.history(limit))
     ordered = list(reversed(predictions))
     midpoint = len(ordered) // 2

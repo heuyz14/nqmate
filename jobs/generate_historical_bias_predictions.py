@@ -38,7 +38,7 @@ async def replay(start: date, end: date, limit: int = 100) -> int:
     settings = Settings()
     analogue = SupabaseAnalogueRepository.from_settings(settings)
     bias = SupabaseBiasRepository.from_settings(settings)
-    existing = {str(item.get("session_date")) for item in bias.history(100)}
+    existing = {str(item.get("session_date")) for item in bias.history(1000)}
     created = 0
     for session in sorted(analogue.list(limit), key=lambda item: item.session_date):
         if not start.isoformat() <= session.session_date <= end.isoformat() or session.session_date in existing:

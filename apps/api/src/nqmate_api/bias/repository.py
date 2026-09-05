@@ -20,6 +20,7 @@ class BiasRepository(Protocol):
     def create_explanation(self, prediction_id: str, explanation: BiasExplanation) -> dict[str, Any]: ...
     def create_outcome(self, outcome: PredictionOutcome) -> dict[str, Any]: ...
     def list_outcomes(self, prediction_id: str) -> Sequence[dict[str, Any]]: ...
+    def list_outcomes_for_predictions(self, prediction_ids: Sequence[str]) -> dict[str, Sequence[dict[str, Any]]]: ...
 
 
 class SupabaseBiasRepository:
@@ -53,7 +54,7 @@ class SupabaseBiasRepository:
     def history(self, limit: int = 50) -> Sequence[dict[str, Any]]:
         return self.client.table("bias_predictions").select("*").order(
             "created_at", desc=True
-        ).limit(min(limit, 100)).execute().data or []
+        ).limit(min(limit, 1000)).execute().data or []
 
     def get(self, prediction_id: str) -> dict[str, Any] | None:
         response = self.client.table("bias_predictions").select("*").eq("id", prediction_id).maybe_single().execute()
@@ -84,3 +85,14 @@ class SupabaseBiasRepository:
         return self.client.table("bias_prediction_outcomes").select("*").eq(
             "prediction_id", prediction_id
         ).order("horizon").execute().data or []
+
+    def list_outcomes_for_predictions(self, prediction_ids: Sequence[str]) -> dict[str, Sequence[dict[str, Any]]]:
+        if not prediction_ids:
+            return {}
+        rows = self.client.table("bias_prediction_outcomes").select("*").in_(
+            "prediction_id", list(prediction_ids)
+        ).order("prediction_id").order("horizon").execute().data or []
+        grouped: dict[str, list[dict[str, Any]]] = {}
+        for row in rows:
+            grouped.setdefault(str(row["prediction_id"]), []).append(row)
+        return grouped
