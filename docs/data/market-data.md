@@ -103,6 +103,9 @@ Point-in-time snapshot construction is defined in
 09:25, 09:30, 10:00, and 12:00 Eastern. Only closed one-minute bars strictly
 before the snapshot timestamp and available by that timestamp are passed to the
 feature function; empty inputs are omitted rather than imputed.
+The supplied `market_feature_function` derives the existing deterministic NQ
+technical feature family and computes 5-minute NQ-vs-ES relative strength from
+bars visible at the same timestamp; nullable warm-up features remain null.
 
 Migration `023_session_feature_snapshots.sql` adds server-only persistence for
 these records. `SupabaseMlRepository.create_snapshot` uses insert semantics;
