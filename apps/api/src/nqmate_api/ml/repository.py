@@ -40,6 +40,7 @@ class SupabaseMlRepository:
             "symbol": record.symbol, "contract": record.contract,
             "feature_version": record.feature_version, "features": record.features,
             "available_at": record.available_at.isoformat(),
+            "availability_policy": record.availability_policy,
         }).execute()
         return (response.data or [{}])[0]
 

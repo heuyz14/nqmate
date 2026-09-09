@@ -24,6 +24,7 @@ class SessionFeatureSnapshot:
     feature_version: str
     features: dict[str, float]
     available_at: datetime
+    availability_policy: str = "strict"
 
 
 @dataclass(frozen=True)

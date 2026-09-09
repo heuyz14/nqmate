@@ -112,6 +112,12 @@ these records. `SupabaseMlRepository.create_snapshot` uses insert semantics;
 the composite uniqueness key rejects conflicting rewrites of the same snapshot.
 Apply the migration before running a snapshot persistence job.
 
+Migration `024_snapshot_availability_policy.sql` records whether a snapshot is
+`strict` (provider availability proves it was known at the time) or
+`event_time_reconstructed` (the bar is treated as available one minute after its
+event timestamp for historical research). Reconstructed records never rewrite
+raw bar availability and must not be described as live-captured data.
+
 `GET /api/v1/market/nq/supporting-context?session_date=YYYY-MM-DD` returns NQ as
 primary, ES as supporting, and completed-session return differences. Missing ES
 stays null. These full-session values must not enter historical prediction-time

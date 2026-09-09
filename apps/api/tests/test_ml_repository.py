@@ -19,6 +19,7 @@ class MlRepositoryTests(unittest.TestCase):
         self.assertEqual(payload["session_date"], "2026-09-08")
         self.assertEqual(payload["features"], {"gap": 1.25})
         self.assertEqual(payload["available_at"], "2026-09-08T13:29:00+00:00")
+        self.assertEqual(payload["availability_policy"], "strict")
 
     def test_dataset_upsert_preserves_version_metadata(self) -> None:
         client = MagicMock()

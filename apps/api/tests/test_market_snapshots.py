@@ -39,3 +39,14 @@ def test_market_features_preserve_missing_values_and_add_point_in_time_es_streng
     assert features["return_5m"] == (129 / 124) - 1
     assert features["nq_es_relative_strength"] == ((129 / 124) - 1) - ((258 / 248) - 1)
     assert features["ema_50"] is None
+
+
+def test_reconstructed_policy_uses_closed_event_time_and_labels_snapshot():
+    timestamp = datetime(2026, 9, 8, 13, 29, tzinfo=timezone.utc)
+    bars = [make_bar(timestamp, 100, available_at=timestamp + timedelta(days=30))]
+    snapshots = build_point_in_time_snapshots(
+        bars, date(2026, 9, 8), "NQU6", "f-v1", availability_policy="event_time_reconstructed"
+    )
+    snapshot = next(item for item in snapshots if item.snapshot_timestamp.hour == 9 and item.snapshot_timestamp.minute == 30)
+    assert snapshot.availability_policy == "event_time_reconstructed"
+    assert snapshot.available_at == datetime(2026, 9, 8, 13, 30, tzinfo=timezone.utc)
