@@ -1,0 +1,19 @@
+{
+  "manifest_version": "research-v2-freeze-v1",
+  "created_at": "2026-09-09T18:35:14.549917+00:00",
+  "start_date": "2025-01-01",
+  "end_date": "2026-09-08",
+  "products": [
+    "ES",
+    "NQ"
+  ],
+  "session_count": 880,
+  "eligible_sessions": 744,
+  "schedule_adjusted_sessions": 21,
+  "closure_sessions": 8,
+  "quarantined_sessions": 107,
+  "certified": false,
+  "source_hash": "58bd2738069695502de55f40acc81a2a862546b38218eb2d23500299e558e704",
+  "git_commit": "259e2e1f3d0c3ddf076806e8803eb80db6e3067b",
+  "quality_scope": "Coverage certification only; point-in-time and rollover certification remain separate."
+}
