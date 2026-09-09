@@ -106,6 +106,8 @@ feature function; empty inputs are omitted rather than imputed.
 The supplied `market_feature_function` derives the existing deterministic NQ
 technical feature family and computes 5-minute NQ-vs-ES relative strength from
 bars visible at the same timestamp; nullable warm-up features remain null.
+The population job records this contract as feature version
+`market-features-v2.1`.
 
 Migration `023_session_feature_snapshots.sql` adds server-only persistence for
 these records. `SupabaseMlRepository.create_snapshot` uses insert semantics;

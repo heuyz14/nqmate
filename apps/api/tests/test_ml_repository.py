@@ -1,6 +1,7 @@
 import unittest
 from datetime import date, datetime, timezone
 from unittest.mock import MagicMock
+from postgrest.exceptions import APIError
 
 from nqmate_api.ml.models import DatasetRecord, ModelRecord, SessionFeatureSnapshot
 from nqmate_api.ml.repository import SupabaseMlRepository
@@ -20,6 +21,25 @@ class MlRepositoryTests(unittest.TestCase):
         self.assertEqual(payload["features"], {"gap": 1.25})
         self.assertEqual(payload["available_at"], "2026-09-08T13:29:00+00:00")
         self.assertEqual(payload["availability_policy"], "strict")
+
+    def test_identical_snapshot_retry_is_idempotent(self) -> None:
+        client = MagicMock()
+        snapshot = SessionFeatureSnapshot(
+            date(2026, 9, 8), datetime(2026, 9, 8, 13, 30, tzinfo=timezone.utc),
+            "NQU6", "NQU6", "features-v2", {"gap": 1.25},
+            datetime(2026, 9, 8, 13, 29, tzinfo=timezone.utc),
+        )
+        table = client.table.return_value
+        table.insert.return_value.execute.side_effect = APIError({"code": "23505"})
+        query = table.select.return_value
+        query.eq.return_value = query
+        query.maybe_single.return_value.execute.return_value.data = {
+            "session_date": "2026-09-08", "snapshot_timestamp": "2026-09-08T08:30:00-05:00",
+            "symbol": "NQU6", "contract": "NQU6", "feature_version": "features-v2",
+            "features": {"gap": 1.25}, "available_at": "2026-09-08T13:29:00+00:00",
+            "availability_policy": "strict",
+        }
+        assert SupabaseMlRepository(client).create_snapshot(snapshot)["session_date"] == "2026-09-08"
 
     def test_dataset_upsert_preserves_version_metadata(self) -> None:
         client = MagicMock()

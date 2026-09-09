@@ -1,6 +1,8 @@
 from datetime import date, datetime, timedelta, timezone
 
 from nqmate_api.market.models import MarketBar
+from nqmate_api.market.models import MarketContract
+from jobs.populate_feature_snapshots import build_session_snapshots
 from nqmate_api.market.snapshots import SNAPSHOT_TIMES_ET, build_point_in_time_snapshots, market_feature_function
 
 
@@ -50,3 +52,15 @@ def test_reconstructed_policy_uses_closed_event_time_and_labels_snapshot():
     snapshot = next(item for item in snapshots if item.snapshot_timestamp.hour == 9 and item.snapshot_timestamp.minute == 30)
     assert snapshot.availability_policy == "event_time_reconstructed"
     assert snapshot.available_at == datetime(2026, 9, 8, 13, 30, tzinfo=timezone.utc)
+
+
+def test_session_snapshot_rows_use_nq_primary_and_es_supporting_context():
+    base = datetime(2026, 9, 8, 0, 0, tzinfo=timezone.utc)
+    nq = [make_bar(base + timedelta(minutes=i), 100 + i) for i in range(1000)]
+    es = [make_bar(base + timedelta(minutes=i), 200 + i) for i in range(1000)]
+    rows = build_session_snapshots(
+        nq, es, date(2026, 9, 8), MarketContract("NQ", "NQU6", "NQ_CONT"), "event_time_reconstructed"
+    )
+    assert len(rows) == 6
+    assert all(row.symbol == "NQU6" and row.contract == "NQU6" for row in rows)
+    assert all(row.availability_policy == "event_time_reconstructed" for row in rows)
