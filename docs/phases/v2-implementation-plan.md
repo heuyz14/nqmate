@@ -52,6 +52,8 @@ of the dataset build. Each task ends with focused tests and a handoff update.
    A report-only CME schedule classification accepts only exact closure/early-close
    patterns; the initial inventory has 107 unexplained product/session quarantines
    and therefore is not yet a certified training dataset.
+   Snapshot construction has now started with a tested pure contract for the six
+   required Eastern timestamps and strict availability filtering.
    Complete NQ sessions are persisted; ES stays raw context. Prior-contract
    prices are excluded from gap inputs. Short-session schedules and broader
    rollover validation remain pending, so quarantine is intentionally strict.

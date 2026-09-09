@@ -98,6 +98,12 @@ or training eligibility. The first 2025–2026 output is
 `var/log/market-session-certification-through-2026-09-08.json` and is not a
 point-in-time or rollover certification.
 
+Point-in-time snapshot construction is defined in
+`nqmate_api.market.snapshots`. It emits immutable records at 08:30, 09:00,
+09:25, 09:30, 10:00, and 12:00 Eastern. Only closed one-minute bars strictly
+before the snapshot timestamp and available by that timestamp are passed to the
+feature function; empty inputs are omitted rather than imputed.
+
 `GET /api/v1/market/nq/supporting-context?session_date=YYYY-MM-DD` returns NQ as
 primary, ES as supporting, and completed-session return differences. Missing ES
 stays null. These full-session values must not enter historical prediction-time
