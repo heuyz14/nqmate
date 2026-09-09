@@ -104,6 +104,11 @@ Point-in-time snapshot construction is defined in
 before the snapshot timestamp and available by that timestamp are passed to the
 feature function; empty inputs are omitted rather than imputed.
 
+Migration `023_session_feature_snapshots.sql` adds server-only persistence for
+these records. `SupabaseMlRepository.create_snapshot` uses insert semantics;
+the composite uniqueness key rejects conflicting rewrites of the same snapshot.
+Apply the migration before running a snapshot persistence job.
+
 `GET /api/v1/market/nq/supporting-context?session_date=YYYY-MM-DD` returns NQ as
 primary, ES as supporting, and completed-session return differences. Missing ES
 stays null. These full-session values must not enter historical prediction-time

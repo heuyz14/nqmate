@@ -5,11 +5,12 @@ from typing import Any, Protocol, Sequence
 from supabase import Client, create_client
 
 from nqmate_api.config import Settings
-from nqmate_api.ml.models import DatasetRecord, ModelRecord
+from nqmate_api.ml.models import DatasetRecord, ModelRecord, SessionFeatureSnapshot
 
 
 class MlRepository(Protocol):
     def upsert_dataset(self, record: DatasetRecord) -> dict[str, Any]: ...
+    def create_snapshot(self, record: SessionFeatureSnapshot) -> dict[str, Any]: ...
     def create_model(self, record: ModelRecord) -> dict[str, Any]: ...
     def list_models(self, target: str | None = None) -> Sequence[dict[str, Any]]: ...
 
@@ -30,6 +31,16 @@ class SupabaseMlRepository:
             "feature_version": record.feature_version, "row_count": record.row_count,
             "start_date": record.start_date, "end_date": record.end_date,
         }, on_conflict="version").execute()
+        return (response.data or [{}])[0]
+
+    def create_snapshot(self, record: SessionFeatureSnapshot) -> dict[str, Any]:
+        response = self.client.table("session_feature_snapshots").insert({
+            "session_date": record.session_date.isoformat(),
+            "snapshot_timestamp": record.snapshot_timestamp.isoformat(),
+            "symbol": record.symbol, "contract": record.contract,
+            "feature_version": record.feature_version, "features": record.features,
+            "available_at": record.available_at.isoformat(),
+        }).execute()
         return (response.data or [{}])[0]
 
     def create_model(self, record: ModelRecord) -> dict[str, Any]:

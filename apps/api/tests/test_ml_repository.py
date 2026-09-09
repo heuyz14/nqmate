@@ -1,11 +1,25 @@
 import unittest
+from datetime import date, datetime, timezone
 from unittest.mock import MagicMock
 
-from nqmate_api.ml.models import DatasetRecord, ModelRecord
+from nqmate_api.ml.models import DatasetRecord, ModelRecord, SessionFeatureSnapshot
 from nqmate_api.ml.repository import SupabaseMlRepository
 
 
 class MlRepositoryTests(unittest.TestCase):
+    def test_snapshot_insert_preserves_point_in_time_metadata(self) -> None:
+        client = MagicMock()
+        snapshot = SessionFeatureSnapshot(
+            date(2026, 9, 8), datetime(2026, 9, 8, 13, 30, tzinfo=timezone.utc),
+            "NQU6", "NQU6", "features-v2", {"gap": 1.25},
+            datetime(2026, 9, 8, 13, 29, tzinfo=timezone.utc),
+        )
+        SupabaseMlRepository(client).create_snapshot(snapshot)
+        payload = client.table.return_value.insert.call_args.args[0]
+        self.assertEqual(payload["session_date"], "2026-09-08")
+        self.assertEqual(payload["features"], {"gap": 1.25})
+        self.assertEqual(payload["available_at"], "2026-09-08T13:29:00+00:00")
+
     def test_dataset_upsert_preserves_version_metadata(self) -> None:
         client = MagicMock()
         SupabaseMlRepository(client).upsert_dataset(DatasetRecord("dataset-v1", "direction_30m", "features-v1", 42, "2026-01-01", "2026-03-01"))
