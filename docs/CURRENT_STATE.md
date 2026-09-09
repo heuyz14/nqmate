@@ -6,10 +6,22 @@ Always read this file at session start. It is the concise handoff for what exist
 
 ## Current Phase
 
-Phase 9 — Evaluation (implementation complete; evidence collection continues; no ML model promoted)
+Phase 10 — Historical Research Dataset V2 (2025 backfill complete; exclusion analysis and dataset validation in progress)
 
 ## Completed
 
+- 2026 extension recovery complete through September 8: the original raw job stopped after June 14 on a transient API error; idempotent per-day API retries were added and the resumed June 15–September 7 run completed without another API error. The September 7 NQ/ES records remain quarantined under strict coverage. ES reconstruction initially lagged the raw backfill from May 11–June 12; all 24 eligible ESM6 sessions were rebuilt from stored canonical minutes. Supabase readback: 389 NQ sessions, 369 ES supporting sessions, 357 paired stored dates through September 8. Combined coverage report: `var/log/research-coverage-through-2026-09-08.json`; ES gap repair: `var/log/es-session-gap-repair-20260909.jsonl`.
+- Initial schedule-aware coverage classification is complete and is deliberately report-only: 744 full sessions, 21 exact early-close sessions, 8 full closures, and 107 quarantined product/session records. The exception calendar does not excuse partial or misaligned gaps. Evidence: `var/log/market-session-certification-through-2026-09-08.json`; implementation: `jobs/certify_market_sessions.py`.
+- Bounded repair retry for NQ 2025-01-03 reproduced the same missing minute (`04:29 UTC`) while the paired ES session passed; this is retained as provider-gap evidence in `var/log/research-repair-2025-01-03-20260909-escalated.jsonl`, not silently promoted.
+- Backfill now retries an idempotent paired date up to two times after `APIError`, retaining product-contract state only after a full day succeeds. Regression coverage added; 216 tests pass. The successful resumed run is `var/log/research-backfill-2026-resume-20260909.jsonl`.
+- Dual session support is live: migration 022 is applied and table read/write reachability is verified. Existing NQ table/default readers remain unchanged; ES is completed-session supporting context, not a new primary prediction instrument.
+- Rebuilt March 24, June 23 and December 22 from validated stored minutes after expiration recovery; prior-close/gap fields now use the recovered Friday of the same contract. Supabase readback verifies 213 stored 2025 NQ sessions. September 22 remains quarantined for its missing minute.
+- Expiration-day recovery complete: March 21, June 20, September 19 and December 19 now pass NQ/ES coverage with later contracts. Updated 2025 totals: 213 NQ sessions, 206 eligible ES dates, 194 paired dates, 48 NQ exclusions. Full-session selection excludes contracts expiring that day and refreshes cached contracts on expiration day; policy is recorded in recovery reports. Session-based chart/features/analogue/strategy reads select the reconstructed raw contract to prevent mixing retained expired bars. Full backend suite: 210 passed. Evidence: `var/log/research-expiry-recovery-2025-20260908.jsonl`; combined latest-attempt summary: `var/log/research-coverage-2025.json`.
+- 2025 backfill completed all 53 weekly batches through December 31 with no logged failures: 261 weekday candidates per product, 209 reconstructed NQ sessions, 202 coverage-eligible ES dates, and 190 dates eligible for both. NQ exclusions: 52 dates (31 overnight-only gaps, 21 with regular-session gaps); these are not yet exchange-calendar-adjusted counts. Added tested `jobs/report_research_coverage.py` to summarize saved reports by independent product/date and classify missing minutes in Eastern time. Output: `var/log/research-coverage-2025.json`.
+- Live 2025 ingestion: January 2 NQH5 and ESH5 each passed all 1,320 expected minutes and were stored. Fixed the historical contract query: Massive's `type` field is absent before 2025-03-12, so earlier queries must omit `type=single`; regression test added. The paired job now supports `--reconstruct-nq-sessions`, gated on complete coverage, and excludes prior-contract prices from session gaps. Backend suite: 203 passed.
+- January–December 2025 paired backfill completed; Supabase readback on 2026-09-08 confirms 209 sessions through `2025-12-31`. Full batch evidence is at `var/log/research-backfill-2025-20260907.jsonl`. Exceptions are logged by type only to avoid credential-bearing HTTP URLs.
+- V2 paired backfill added at `jobs/backfill_research_market.py`: one provider across weekly NQ/ES batches, per-product rollover continuity and preceding-weekday resolution on resume, per-batch JSON quality reports, opt-in NQ reconstruction, and no model training. Market repository reads default to NQ; explicit ES raw-contract reads remain supported, and non-NQ session writes are rejected. Live paired ingestion is verified.
+- V2 work is broken into dependency-ordered slices in `docs/phases/v2-implementation-plan.md`. The first slice adds `market/quality.py` and the read-only `jobs/audit_historical_market.py` JSON report: exact minute coverage, duplicate/invalid-bar checks, raw-contract checks, timezone/availability validation, and report-only quarantine. Nineteen new tests cover quality and audit behavior. This is not full dataset certification; live audit/backfill has not run.
 - Documentation architecture created.
 - Phase 0 repository skeleton created.
 - Python 3.12 virtual environment and API dependencies installed.
@@ -139,12 +151,14 @@ Phase 9 — Evaluation (implementation complete; evidence collection continues; 
 
 ## In Progress
 
-Phase 5 acceptance is complete. Phase 6 implementation is complete for the available source boundaries, semantic relationships, deterministic regime classification, bounded graph retrieval, and outcome/strategy traversal contracts. Phase 7 implementation is complete for structured strategy CRUD, setup detection, performance calculation, regime-conditioned best/worst statistics, outcome persistence, the strategy dashboard, historical FVG/inversion detection, and the PB assessment endpoint; migrations `014`–`017` are applied and live strategy read verification found one active strategy. Phase 8 implementation is complete with leakage-aware baselines, multi-horizon targets, boosting comparisons, calibration metrics, dataset/model metadata, historical candle horizons, and multi-window validation; no model passed the promotion gate. Phase 9 implementation is complete with reconstruction, attachment, scored outcomes, calibration, drift, registry/comparison reporting, observability, replay tooling, scheduled attachment, and evaluation UI. Current replay evidence contains 172 predictions, 521 attached outcomes, and 361 scored directional outcomes; overall directional accuracy is 43.8%, and calibration remains weak, so no model is promoted. The literal Phase 6 strategy-evidence query remains empty until strategy performance relationships exist. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The primary market dashboard is available at `/dashboard` for completed historical sessions; it is not a live chart. September 3 remains incomplete/current until its session closes.
+Phase 5 acceptance is complete. Phase 6 implementation is complete for the available source boundaries, semantic relationships, deterministic regime classification, bounded graph retrieval, and outcome/strategy traversal contracts. Phase 7 implementation is complete for structured strategy CRUD, setup detection, performance calculation, regime-conditioned best/worst statistics, outcome persistence, the strategy dashboard, historical FVG/inversion detection, and the PB assessment endpoint; migrations `014`–`017` are applied and live strategy read verification found one active strategy. Phase 8 implementation is complete with leakage-aware baselines, multi-horizon targets, boosting comparisons, calibration metrics, dataset/model metadata, historical candle horizons, and multi-window validation; no model passed the promotion gate. Phase 9 implementation is complete with reconstruction, attachment, scored outcomes, calibration, drift, registry/comparison reporting, observability, replay tooling, scheduled attachment, and evaluation UI. Current replay evidence contains 172 predictions, 521 attached outcomes, and 361 scored directional outcomes; overall directional accuracy is 43.8%, and calibration remains weak, so no model is promoted. The literal Phase 6 strategy-evidence query remains empty until strategy performance relationships exist. The BLS calendar feed requires a network change or manual official-feed retrieval before scheduled release ingestion can run live. The primary market dashboard is available at `/dashboard` for completed historical sessions; it is not a live chart. The historical extension is complete through September 8; strict quarantines still require review before dataset certification.
 
 ## Next
 
-1. Collect more point-in-time predictions before interpreting calibration or drift
-2. Add dashboard HTF/15m/entry visuals only when backed by available deterministic API data
+1. Investigate the 107 remaining product/session quarantines, prioritizing single-minute gaps and the anomalous Good Friday/Thanksgiving patterns. Do not treat the current backfill as a validated training dataset until this review and point-in-time/rollover certification are complete.
+2. Investigate the remaining 2025 NQ exclusions: distinguish verified holidays/short sessions from unexplained missing bars. Four expiration dates are recovered; retain strict coverage gates.
+2. Add exchange schedule and rollover-aware reconstruction, then immutable dataset/snapshot storage and explicit historical availability semantics.
+3. Generate point-in-time features and separate complete-horizon/path targets, validate the rebuilt dataset, then resume evaluation work. Do not retrain/promote models during backfill.
 
 ## Important Decisions
 
@@ -161,8 +175,10 @@ Phase 5 acceptance is complete. Phase 6 implementation is complete for the avail
 
 ## Blockers
 
-None.
+None for ES population: migration 022 is applied and live read/write verified.
+Raw backfill, initial ES reconstruction, and queued catch-up are still running;
+check logs and persisted counts before declaring date-range coverage complete.
 
 ## Last Updated
 
-2026-09-05
+2026-09-09

@@ -19,15 +19,23 @@ class MarketRepository(Protocol):
 
     def upsert_session(self, session: MarketSession) -> None: ...
 
-    def get_session(self, session_date: date) -> MarketSession | None: ...
+    def get_session(self, session_date: date, product: str = "NQ") -> MarketSession | None: ...
 
-    def get_previous_session(self, session_date: date) -> MarketSession | None: ...
+    def get_previous_session(self, session_date: date, product: str = "NQ") -> MarketSession | None: ...
 
-    def get_bars(self, start: datetime, end: datetime, symbol: str | None = None) -> Sequence[MarketBar]: ...
+    def get_bars(self, start: datetime, end: datetime, symbol: str | None = None) -> Sequence[MarketBar]:
+        """Read NQ bars by default, or one explicit raw contract symbol."""
+        ...
 
 
 def _iso(value: datetime | date | None) -> str | None:
     return value.isoformat() if value else None
+
+
+def session_table(product: str) -> str:
+    if product not in ("NQ", "ES"):
+        raise ValueError("Supported session products are NQ and ES")
+    return "market_sessions" if product == "NQ" else "market_supporting_sessions"
 
 
 class SupabaseMarketRepository:
@@ -84,27 +92,33 @@ class SupabaseMarketRepository:
         }, on_conflict="product,from_contract,to_contract").execute()
 
     def upsert_session(self, session: MarketSession) -> None:
+        table = session_table(session.contract.product)
         self.upsert_contract(session.contract)
         contract = self.client.table("market_contracts").select("id").eq(
             "product", session.contract.product
         ).eq("raw_contract_symbol", session.contract.raw_contract_symbol).single().execute()
         contract_id = contract.data["id"]
-        payload = asdict(session)
+        payload = asdict(session) if session.contract.product == "NQ" else session.supporting_payload()
         payload.pop("contract")
         payload["session_date"] = _iso(session.session_date)
         payload["contract_id"] = contract_id
-        self.client.table("market_sessions").upsert(payload, on_conflict="session_date").execute()
+        conflict = "session_date" if session.contract.product == "NQ" else "product,session_date"
+        self.client.table(table).upsert(payload, on_conflict=conflict).execute()
 
-    def get_session(self, session_date: date) -> MarketSession | None:
-        response = self.client.table("market_sessions").select(
+    def get_session(self, session_date: date, product: str = "NQ") -> MarketSession | None:
+        response = self.client.table(session_table(product)).select(
             "*, market_contracts(*)"
         ).eq("session_date", _iso(session_date)).maybe_single().execute()
         if response is None or not response.data:
             return None
-        row: dict[str, Any] = response.data
-        contract_row = row.pop("market_contracts")
+        row: dict[str, Any] = dict(response.data)
+        contract_row = dict(row.pop("market_contracts"))
         row.pop("contract_id", None)
         row.pop("created_at", None)
+        if product == "ES":
+            row.pop("product", None)
+            for field in ("open", "high", "low", "close"):
+                row[f"nq_{field}"] = row.pop(f"regular_{field}")
         row["session_date"] = date.fromisoformat(row["session_date"])
         contract_row.pop("id", None)
         contract_row.pop("created_at", None)
@@ -115,13 +129,13 @@ class SupabaseMarketRepository:
         row["contract"] = MarketContract(**contract_row)
         return MarketSession(**row)
 
-    def get_previous_session(self, session_date: date) -> MarketSession | None:
-        response = self.client.table("market_sessions").select("session_date").lt(
+    def get_previous_session(self, session_date: date, product: str = "NQ") -> MarketSession | None:
+        response = self.client.table(session_table(product)).select("session_date").lt(
             "session_date", _iso(session_date)
         ).order("session_date", desc=True).limit(1).execute()
         if not response.data:
             return None
-        return self.get_session(date.fromisoformat(response.data[0]["session_date"]))
+        return self.get_session(date.fromisoformat(response.data[0]["session_date"]), product)
 
     def get_bars(self, start: datetime, end: datetime, symbol: str | None = None) -> Sequence[MarketBar]:
         rows: list[dict[str, Any]] = []
@@ -133,6 +147,8 @@ class SupabaseMarketRepository:
             ).lt("timestamp", _iso(end)).order("timestamp").range(offset, offset + page_size - 1)
             if symbol:
                 query = query.eq("symbol", symbol)
+            else:
+                query = query.like("symbol", "NQ%")
             response = query.execute()
             page = response.data or []
             rows.extend(page)

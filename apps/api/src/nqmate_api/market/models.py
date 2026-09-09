@@ -49,6 +49,9 @@ class WeeklyOpeningGap:
 
 @dataclass(frozen=True)
 class MarketSession:
+    """Shared calculation record. Legacy nq_* fields are serialized as regular_*
+    for supporting instruments; contract.product identifies the instrument.
+    """
     session_date: date
     nq_open: float
     nq_high: float
@@ -67,3 +70,11 @@ class MarketSession:
     overnight_range: float
     atr_14: Optional[float]
     contract: MarketContract
+
+    def supporting_payload(self) -> dict:
+        from dataclasses import asdict
+        payload = asdict(self)
+        for field in ("open", "high", "low", "close"):
+            payload[f"regular_{field}"] = payload.pop(f"nq_{field}")
+        payload["product"] = self.contract.product
+        return payload

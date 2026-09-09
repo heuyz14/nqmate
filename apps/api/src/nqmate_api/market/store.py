@@ -11,7 +11,7 @@ class MarketBarStore:
 
     def __init__(self) -> None:
         self._bars: dict[tuple[str, datetime, str, str], MarketBar] = {}
-        self._sessions: dict[date, MarketSession] = {}
+        self._sessions: dict[tuple[str, date], MarketSession] = {}
         self._rollovers: dict[tuple[str, str, str], ContractRollover] = {}
 
     def add_bars(self, bars: Iterable[MarketBar]) -> int:
@@ -30,10 +30,13 @@ class MarketBarStore:
         )
 
     def get_bars(self, start: datetime, end: datetime, symbol: str | None = None) -> list[MarketBar]:
-        return self.bars_between(start, end, symbol)
+        bars = self.bars_between(start, end, symbol)
+        return bars if symbol else [bar for bar in bars if bar.symbol.startswith("NQ")]
 
     def save_session(self, session: MarketSession) -> None:
-        self._sessions[session.session_date] = session
+        from nqmate_api.market.repository import session_table
+        session_table(session.contract.product)
+        self._sessions[session.contract.product, session.session_date] = session
 
     def upsert_bars(self, bars: Iterable[MarketBar]) -> int:
         return self.add_bars(bars)
@@ -47,9 +50,13 @@ class MarketBarStore:
     def upsert_session(self, session: MarketSession) -> None:
         self.save_session(session)
 
-    def get_session(self, session_date: date) -> MarketSession | None:
-        return self._sessions.get(session_date)
+    def get_session(self, session_date: date, product: str = "NQ") -> MarketSession | None:
+        from nqmate_api.market.repository import session_table
+        session_table(product)
+        return self._sessions.get((product, session_date))
 
-    def get_previous_session(self, session_date: date) -> MarketSession | None:
-        prior_dates = [item for item in self._sessions if item < session_date]
-        return self._sessions[max(prior_dates)] if prior_dates else None
+    def get_previous_session(self, session_date: date, product: str = "NQ") -> MarketSession | None:
+        from nqmate_api.market.repository import session_table
+        session_table(product)
+        prior_dates = [day for p, day in self._sessions if p == product and day < session_date]
+        return self._sessions[product, max(prior_dates)] if prior_dates else None

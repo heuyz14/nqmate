@@ -113,7 +113,8 @@ class MassiveMarketDataProvider:
                     "product_code": product,
                     "date": as_of.isoformat(),
                     "active": "true",
-                    "type": "single",
+                    # Massive did not populate type before 2025-03-12.
+                    **({"type": "single"} if as_of >= date(2025, 3, 12) else {}),
                     "limit": 1000,
                     "apiKey": self.api_key,
                 },
@@ -121,6 +122,11 @@ class MassiveMarketDataProvider:
             )
             response.raise_for_status()
             rows = response.json().get("results", [])
+            if product in ("NQ", "ES"):
+                # Quarterly equity contracts stop at the RTH open on expiration
+                # day. Historical full-session research needs a later contract.
+                rows = [row for row in rows if row.get("last_trade_date")
+                        and date.fromisoformat(row["last_trade_date"]) > as_of]
             if not rows:
                 raise LookupError(f"No active {product} contract for {as_of}")
             row = sorted(rows, key=lambda item: item.get("last_trade_date") or "9999-12-31")[0]

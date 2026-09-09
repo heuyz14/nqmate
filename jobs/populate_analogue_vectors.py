@@ -25,6 +25,7 @@ async def populate(start: date, end: date) -> int:
             bars = market.get_bars(
                 datetime.combine(day - timedelta(days=1), time(18), ZoneInfo("America/New_York")).astimezone(timezone.utc),
                 datetime.combine(day, time(16), ZoneInfo("America/New_York")).astimezone(timezone.utc),
+                symbol=session.contract.raw_contract_symbol,
             )
             analogue.upsert(HistoricalSession(day.isoformat(), session_features(session), available_at, session_outcomes(session, bars)))
             count += 1

@@ -33,6 +33,7 @@ async def detect_setups(start: date, end: date) -> int:
                 bars = market.get_bars(
                     datetime.combine(day - timedelta(days=1), time(18), eastern).astimezone(timezone.utc),
                     datetime.combine(day, time(16), eastern).astimezone(timezone.utc),
+                    symbol=session.contract.raw_contract_symbol,
                 )
                 occurrence = detect_setup(str(row["id"]), strategy, session, bars)
                 if occurrence is not None:

@@ -22,7 +22,9 @@ async def ingest_session(
     if not has_complete_session_bars(bars, session_date):
         return None
     repository.upsert_bars(bars)
-    prior_session = repository.get_previous_session(session_date)
+    prior_session = repository.get_previous_session(session_date, contract.product)
+    if prior_session and prior_session.contract.raw_contract_symbol != contract.raw_contract_symbol:
+        prior_session = None
     session = build_market_session(bars, session_date, contract, prior_session)
     repository.upsert_session(session)
     return session

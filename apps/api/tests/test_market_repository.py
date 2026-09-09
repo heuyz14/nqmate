@@ -7,6 +7,27 @@ from nqmate_api.market.repository import SupabaseMarketRepository
 
 
 class MarketRepositoryTests(unittest.TestCase):
+    def test_default_bar_reads_are_nq_scoped(self) -> None:
+        client = MagicMock()
+        query = client.table.return_value
+        for method in ("select", "gte", "lt", "order", "range", "like", "eq"):
+            getattr(query, method).return_value = query
+        query.execute.return_value.data = []
+        now = datetime(2026, 9, 1, tzinfo=timezone.utc)
+        SupabaseMarketRepository(client).get_bars(now, now)
+        query.like.assert_called_once_with("symbol", "NQ%")
+
+    def test_explicit_es_contract_read_does_not_apply_nq_filter(self) -> None:
+        client = MagicMock()
+        query = client.table.return_value
+        for method in ("select", "gte", "lt", "order", "range", "like", "eq"):
+            getattr(query, method).return_value = query
+        query.execute.return_value.data = []
+        now = datetime(2026, 9, 1, tzinfo=timezone.utc)
+        SupabaseMarketRepository(client).get_bars(now, now, symbol="ESU6")
+        query.eq.assert_called_once_with("symbol", "ESU6")
+        query.like.assert_not_called()
+
     def test_upsert_bars_uses_provider_identity_conflict_key(self) -> None:
         client = MagicMock()
         repository = SupabaseMarketRepository(client)

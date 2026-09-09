@@ -178,6 +178,19 @@ async def get_nq_bars(
         datetime.combine(start, time.min, timezone.utc),
         datetime.combine(end + timedelta(days=1), time.min, timezone.utc),
     )
+    # Retain raw history, but render only the selected contract where a
+    # reconstructed session exists (including its preceding overnight).
+    selected_contracts = {}
+    selected_bars = []
+    for bar in bars:
+        local = bar.timestamp.astimezone(EASTERN)
+        day = local.date() + (timedelta(days=1) if local.time() >= time(18) else timedelta())
+        if day not in selected_contracts:
+            session = repository.get_session(day)
+            selected_contracts[day] = session.contract.raw_contract_symbol if session else None
+        if selected_contracts[day] is None or bar.symbol == selected_contracts[day]:
+            selected_bars.append(bar)
+    bars = selected_bars
     minute_bars = [bar for bar in bars if bar.timeframe == "1min"]
     if timeframe == "1min":
         output_bars = minute_bars
@@ -256,10 +269,33 @@ async def get_nq_features(
     bars = repository.get_bars(
         datetime.combine(session_date, REGULAR_START, EASTERN).astimezone(timezone.utc),
         datetime.combine(session_date, REGULAR_END, EASTERN).astimezone(timezone.utc),
+        symbol=session.contract.raw_contract_symbol,
     )
     return {"session_date": session_date.isoformat(), "features": technical_features(
-        bars, session.prior_day_high, session.prior_day_low,
+        [bar for bar in bars if bar.timeframe == "1min"], session.prior_day_high, session.prior_day_low,
     )}
+
+
+@app.get("/api/v1/market/nq/supporting-context", tags=["market"])
+async def get_nq_supporting_context(
+    session_date: date,
+    repository: MarketRepository = Depends(get_market_repository),
+) -> dict[str, object]:
+    """Completed-session comparison; never a point-in-time prediction feature."""
+    nq = repository.get_session(session_date)
+    if nq is None:
+        raise HTTPException(status_code=404, detail="NQ market session not found")
+    es = repository.get_session(session_date, "ES")
+    nq_return = nq.nq_close / nq.nq_open - 1 if nq.nq_open else None
+    es_return = es.nq_close / es.nq_open - 1 if es and es.nq_open else None
+    return {
+        "session_date": session_date.isoformat(), "primary_symbol": "NQ",
+        "supporting_symbol": "ES", "context_type": "completed_session",
+        "status": "available" if es else "missing_es_session",
+        "es_session": es.supporting_payload() if es else None,
+        "nq_regular_return": nq_return, "es_regular_return": es_return,
+        "nq_es_relative_strength": nq_return - es_return if nq_return is not None and es_return is not None else None,
+    }
 
 
 @app.get("/api/v1/market/nq/analogue-features", tags=["market"])
@@ -612,7 +648,8 @@ async def assess_historical_session(
         raise HTTPException(status_code=404, detail="Market session not found")
     observed_at = analyzed_at or datetime.combine(session_date, REGULAR_END, EASTERN)
     start = datetime.combine(session_date - timedelta(days=7), time(18), EASTERN)
-    bars = market_repository.get_bars(start.astimezone(timezone.utc), observed_at.astimezone(timezone.utc))
+    bars = market_repository.get_bars(start.astimezone(timezone.utc), observed_at.astimezone(timezone.utc),
+                                      symbol=session.contract.raw_contract_symbol)
     inputs = build_pb_inputs(session, bars, observed_at)
     result = assess_pb_setup(
         inputs["contexts"], inputs["liquidity"], inputs["inversions"],

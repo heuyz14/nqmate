@@ -23,4 +23,3 @@ At close calculate open-to-close return, high/low after open, morning/afternoon 
 ## Prediction records
 
 Every immutable `BiasPrediction` stores creation time, session date, seven-state direction (`STRONG_BEARISH` through `STRONG_BULLISH`), confidence, bull/bear scores, catalyst risk, evidence IDs, counter-evidence IDs, invalidations, model, prompt version, and feature version. Never overwrite predictions; attach realized outcomes later.
-

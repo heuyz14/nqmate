@@ -40,6 +40,24 @@ class StoreTests(unittest.TestCase):
 
 
 class MassiveProviderTests(unittest.IsolatedAsyncioTestCase):
+    async def test_expiration_day_selects_contract_that_survives_regular_session(self) -> None:
+        rows = [{"ticker": "NQH5", "last_trade_date": "2025-03-21"},
+                {"ticker": "NQM5", "last_trade_date": "2025-06-20"}]
+        async with httpx.AsyncClient(transport=httpx.MockTransport(
+            lambda request: httpx.Response(200, json={"results": rows})
+        )) as client:
+            result = await MassiveMarketDataProvider("test", client=client).get_contract("NQ", date(2025, 3, 21))
+        self.assertEqual(result.raw_contract_symbol, "NQM5")
+
+    async def test_early_2025_contracts_do_not_filter_missing_type(self) -> None:
+        def respond(request):
+            rows = [] if "type" in request.url.params else [{"ticker": "NQH5", "last_trade_date": "2025-03-21"}]
+            return httpx.Response(200, json={"results": rows})
+        async with httpx.AsyncClient(transport=httpx.MockTransport(respond)) as client:
+            provider = MassiveMarketDataProvider("test-key", client=client)
+            contract = await provider.get_contract("NQ", date(2025, 1, 2))
+        self.assertEqual(contract.raw_contract_symbol, "NQH5")
+
     async def test_provider_maps_massive_response_to_market_bars(self) -> None:
         response = httpx.Response(
             200,
